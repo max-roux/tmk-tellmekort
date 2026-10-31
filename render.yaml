@@ -1,0 +1,46 @@
+# Render Blueprint: all resources in Frankfurt (SPEC.md §3, §16).
+# Cron jobs (weekly ingest, hourly send) are added in milestones 8–9.
+databases:
+  - name: maxfac-db
+    region: frankfurt
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    databaseName: maxfac
+    user: maxfac
+    ipAllowList: []
+
+services:
+  - type: web
+    name: maxfac-web
+    runtime: python
+    region: frankfurt
+    plan: starter
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    preDeployCommand: uv run --no-sync alembic upgrade head
+    startCommand: uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.13"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maxfac-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: BASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: NCBI_API_KEY
+        sync: false
+      - key: NCBI_EMAIL
+        sync: false
+      - key: POSTMARK_SERVER_TOKEN
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
