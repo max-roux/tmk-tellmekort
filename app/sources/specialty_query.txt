@@ -1,0 +1,33 @@
+# PubMed specialty query (SPEC.md §6.1). Lines starting with # are ignored;
+# whitespace is collapsed. The entrez-date window is added by the client.
+# Tune with the surgeon; this is the starting point.
+(
+  "Surgery, Oral"[Mesh]
+  OR "Orthognathic Surgery"[Mesh]
+  OR "Orthognathic Surgical Procedures"[Mesh]
+  OR "Maxillofacial Injuries"[Mesh]
+  OR "Mandibular Fractures"[Mesh]
+  OR "Temporomandibular Joint Disorders"[Mesh]
+  OR "Cleft Lip"[Mesh]
+  OR "Cleft Palate"[Mesh]
+  OR "Mouth Neoplasms"[Mesh]
+  OR "Jaw Neoplasms"[Mesh]
+  OR "Dental Implants"[Mesh]
+  OR "Bisphosphonate-Associated Osteonecrosis of the Jaw"[Mesh]
+  OR "J Oral Maxillofac Surg"[ta]
+  OR "Int J Oral Maxillofac Surg"[ta]
+  OR "J Craniomaxillofac Surg"[ta]
+  OR "Br J Oral Maxillofac Surg"[ta]
+  OR "Oral Surg Oral Med Oral Pathol Oral Radiol"[ta]
+  OR "Oral Maxillofac Surg"[ta]
+  OR "Head Face Med"[ta]
+  OR "J Oral Maxillofac Surg Med Pathol"[ta]
+  OR "Craniomaxillofac Trauma Reconstr"[ta]
+)
+NOT (
+  Comment[pt]
+  OR Editorial[pt]
+  OR Erratum[pt]
+  OR "Retraction of Publication"[pt]
+  OR Letter[pt]
+)
