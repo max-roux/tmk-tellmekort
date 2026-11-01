@@ -59,3 +59,8 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["db: needs a running Postgres with pgvector (DATABASE_URL)"]
+
+[tool.mutmut]
+# Mutation-test the pure domain logic and the feed built on it.
+source_paths = ["app/domain/", "app/feed/"]
+also_copy = ["alembic.ini", "app/", "tools/", "tests/"]

@@ -25,7 +25,7 @@ class ProfileCoefficients:
 def _mean(vectors: Vectors) -> np.ndarray | None:
     if not vectors:
         return None
-    return np.asarray(vectors, dtype=np.float64).mean(axis=0)
+    return np.mean(vectors, axis=0)
 
 
 def profile_vector(
