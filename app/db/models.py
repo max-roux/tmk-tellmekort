@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any
 
@@ -15,6 +15,7 @@ from sqlalchemy import (
     Numeric,
     SmallInteger,
     Text,
+    Time,
     UniqueConstraint,
     func,
 )
@@ -22,7 +23,7 @@ from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
-from app.domain.criteria import INTRINSIC_CRITERIA
+from app.domain.criteria import ALL_CRITERIA, INTRINSIC_CRITERIA
 
 
 class Paper(Base):
@@ -148,3 +149,114 @@ class Candidate(Base):
     week_of: Mapped[date] = mapped_column(Date, primary_key=True, index=True)
     narrow_score: Mapped[float] = mapped_column(Float)
     selected_for_grading: Mapped[bool] = mapped_column(Boolean)
+
+
+class User(Base):
+    """A surgeon. No self-serve sign-up: accounts are added with `cli.py users add`."""
+
+    __tablename__ = "users"
+    __table_args__ = (CheckConstraint("send_weekday BETWEEN 0 AND 6", name="send_weekday"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    email: Mapped[str] = mapped_column(Text, unique=True)  # stored lower-cased
+    name: Mapped[str] = mapped_column(Text, server_default="")
+    timezone: Mapped[str] = mapped_column(Text, server_default="Europe/Copenhagen")
+    send_weekday: Mapped[int] = mapped_column(SmallInteger, server_default="0")  # Monday
+    send_local_time: Mapped[time] = mapped_column(Time, server_default="06:30")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    is_admin: Mapped[bool] = mapped_column(Boolean, server_default="false")
+
+
+class MagicLink(Base):
+    """A sign-in link. Only the SHA-256 of the token is stored (SPEC.md §16)."""
+
+    __tablename__ = "magic_links"
+
+    token_hash: Mapped[str] = mapped_column(Text, primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class LoginAttempt(Base):
+    """One /login request, for rate limiting by email and by IP (IP stored as a keyed hash)."""
+
+    __tablename__ = "login_attempts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    email: Mapped[str] = mapped_column(Text, index=True)
+    ip_hash: Mapped[str] = mapped_column(Text, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+
+
+class Topic(Base):
+    """A topic chip. `description` (PubMed vocabulary) is what gets embedded."""
+
+    __tablename__ = "topics"
+    __table_args__ = (CheckConstraint("source IN ('onboarding', 'manual')", name="source"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    label: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIM))
+    embedding_model: Mapped[str | None] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SeedPaper(Base):
+    __tablename__ = "seed_papers"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    pmid: Mapped[str] = mapped_column(
+        ForeignKey("papers.pmid", ondelete="CASCADE"), primary_key=True
+    )
+
+
+class CriterionSettings(Base):
+    """Per-user weights (0-5), minimums (1-5 or none) and hard filters (SPEC.md §5, §8)."""
+
+    __tablename__ = "criterion_settings"
+    __table_args__ = (
+        *(CheckConstraint(f"w_{c} BETWEEN 0 AND 5", name=f"w_{c}_range") for c in ALL_CRITERIA),
+        *(CheckConstraint(f"min_{c} BETWEEN 1 AND 5", name=f"min_{c}_range") for c in ALL_CRITERIA),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    w_pertinence: Mapped[float] = mapped_column(Float, server_default="1")
+    w_proof_strength: Mapped[float] = mapped_column(Float, server_default="1")
+    w_novelty: Mapped[float] = mapped_column(Float, server_default="1")
+    w_depth: Mapped[float] = mapped_column(Float, server_default="1")
+    w_practical_usefulness: Mapped[float] = mapped_column(Float, server_default="1")
+    min_pertinence: Mapped[int | None] = mapped_column(SmallInteger)
+    min_proof_strength: Mapped[int | None] = mapped_column(SmallInteger)
+    min_novelty: Mapped[int | None] = mapped_column(SmallInteger)
+    min_depth: Mapped[int | None] = mapped_column(SmallInteger)
+    min_practical_usefulness: Mapped[int | None] = mapped_column(SmallInteger)
+    hide_case_reports: Mapped[bool] = mapped_column(Boolean, server_default="true")
+    study_types: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
+
+
+class ProfileVector(Base):
+    """Cached profile vector (SPEC.md §8.1); recomputed on any topic, seed or feedback change."""
+
+    __tablename__ = "profile_vectors"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    model: Mapped[str] = mapped_column(Text)
+    vector: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIM))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
