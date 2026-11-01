@@ -25,6 +25,14 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def prune(session: Session, now: datetime) -> None:
+    """Delete expired sign-in links and sign-in requests older than the rate window, so
+    neither outlives its purpose even when nobody signs in (run hourly). Commits."""
+    session.execute(delete(MagicLink).where(MagicLink.expires_at < now))
+    session.execute(delete(LoginAttempt).where(LoginAttempt.created_at <= now - RATE_WINDOW))
+    session.commit()
+
+
 def issue(session: Session, user: User, now: datetime) -> str:
     """A new sign-in token for `user`, pruning long-expired ones. Commits."""
     token = secrets.token_urlsafe(32)

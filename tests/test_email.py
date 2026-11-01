@@ -154,3 +154,36 @@ def test_smtp_errors_raise_without_the_password() -> None:
     with pytest.raises(MailerError, match="smtp") as err:
         smtp_mailer(password="wrong").send(message())
     assert "wrong" not in str(err.value)
+
+
+def test_mail_errors_never_carry_the_recipient_address() -> None:
+    class Refused(FakeSmtp):
+        def send_message(self, msg: email.message.EmailMessage) -> None:
+            raise smtplib.SMTPRecipientsRefused({"surgeon@example.com": (550, b"no such user")})
+
+    mailer = SmtpMailer(
+        host="smtp.gmail.com",
+        port=587,
+        username="u",
+        password="app-pass",
+        sender="tmkpapers@gmail.com",
+        smtp=Refused,
+        smtp_ssl=Refused,
+    )
+    with pytest.raises(MailerError) as err:
+        mailer.send(message())
+    assert "SMTPRecipientsRefused" in str(err.value) and "@" not in str(err.value)
+
+    def invalid_to(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            422, json={"ErrorCode": 300, "Message": "Invalid 'To' address: 'surgeon@example.com'."}
+        )
+
+    with pytest.raises(MailerError, match="300") as err:
+        mailer_pm = PostmarkMailer(
+            server_token="pm-test",
+            sender="papers@mail.example.com",
+            http=httpx.Client(base_url=POSTMARK_BASE, transport=httpx.MockTransport(invalid_to)),
+        )
+        mailer_pm.send(message())
+    assert "surgeon@example.com" not in str(err.value)

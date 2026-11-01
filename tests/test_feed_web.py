@@ -130,6 +130,9 @@ def test_paper_page_shows_all_justifications_and_takes_disputes(
     assert (row.criterion, row.user_score, row.comment) == ("novelty", 2, "Done before")
     bad = client.post(f"/paper/{TOP}/dispute", data={"criterion": "novelty", "user_score": "9"})
     assert bad.status_code == 422
+    injected = client.post(f"/paper/{TOP}/dispute", data={"criterion": "<img src=x>"})
+    assert injected.status_code == 422
+    assert "<img" not in injected.text and "&lt;img" in injected.text
 
 
 def test_unknown_or_ungraded_paper_is_404(client: TestClient) -> None:

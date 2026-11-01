@@ -14,7 +14,7 @@ from starlette.requests import Request
 from app.accounts import magic_links
 from app.accounts.users import add_user
 from app.config import Settings, get_settings
-from app.db.models import CriterionSettings, MagicLink
+from app.db.models import CriterionSettings, LoginAttempt, MagicLink
 from app.db.session import get_session
 from app.email.base import EmailMessage, MailerError
 from app.main import create_app
@@ -209,3 +209,13 @@ def test_session_cookie_roundtrip() -> None:
     assert sessions.session_user_id(SETTINGS, Request(scope)) == user.id
     other = Settings(_env_file=None, secret_key="other")  # type: ignore[call-arg]
     assert sessions.session_user_id(other, Request(scope)) is None
+
+
+def test_old_sign_in_records_are_pruned(db_session: Session) -> None:
+    user = add_user(db_session, "surgeon@example.com")
+    then = datetime(2026, 11, 1, 12, tzinfo=UTC)
+    assert magic_links.allow_attempt(db_session, user.email, then)
+    magic_links.issue(db_session, user, then)
+    magic_links.prune(db_session, then + timedelta(hours=1, seconds=1))
+    assert db_session.scalars(select(LoginAttempt)).all() == []
+    assert db_session.scalars(select(MagicLink)).all() == []  # expired 45 minutes ago

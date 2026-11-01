@@ -382,8 +382,10 @@ def send_due_cmd() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     _production_ready()
     settings = get_settings()
+    now = datetime.now(UTC)
     with Session(get_engine()) as session:
-        stats = send_due(session, settings, mailer_for(settings), datetime.now(UTC))
+        magic_links.prune(session, now)
+        stats = send_due(session, settings, mailer_for(settings), now)
     typer.echo(f"Sent {stats.sent} ({stats.quiet} quiet weeks), failed {stats.failed}.")
     if stats.failed:
         raise typer.Exit(1)

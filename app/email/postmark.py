@@ -51,6 +51,7 @@ class PostmarkMailer:
         except ValidationError:
             raise MailerError(f"postmark: HTTP {resp.status_code}") from None
         if resp.is_error or body.ErrorCode != 0:
-            # Postmark's message names the problem (bad sender, inactive recipient...).
-            raise MailerError(f"postmark: error {body.ErrorCode}: {body.Message}")
+            # The code names the problem (postmarkapp.com/developer/api/overview#error-codes);
+            # the message is left out because it can quote the recipient's address.
+            raise MailerError(f"postmark: error {body.ErrorCode} (HTTP {resp.status_code})")
         return body.MessageID

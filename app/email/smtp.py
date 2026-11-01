@@ -53,6 +53,8 @@ class SmtpMailer:
                 conn.login(self._username, self._password)
                 conn.send_message(mime)
         except (smtplib.SMTPException, OSError) as e:
-            # The exception text is the server's reply; it never contains the password.
-            raise MailerError(f"smtp: {type(e).__name__}: {e}") from e
+            # Type and reply code only: the server's text can name the recipient, and these
+            # errors are logged (no personal data in logs).
+            code = getattr(e, "smtp_code", None) or getattr(e, "errno", None)
+            raise MailerError(f"smtp: {type(e).__name__}" + (f" {code}" if code else "")) from e
         return str(mime["Message-ID"])

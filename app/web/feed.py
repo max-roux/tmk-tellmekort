@@ -1,5 +1,6 @@
 """Feed, paper, library and history pages, and in-app feedback (SPEC.md §9, §11)."""
 
+import html
 from datetime import UTC, date, datetime
 from typing import Annotated
 from zoneinfo import ZoneInfo
@@ -134,7 +135,7 @@ def dispute(
     except LookupError:
         return _not_found(request, user)
     except ValueError as e:
-        return HTMLResponse(f"Not saved: {e}.", status_code=422)
+        return HTMLResponse(f"Not saved: {html.escape(str(e))}.", status_code=422)
     return RedirectResponse(f"/paper/{pmid}?noted={criterion}#scores", status_code=303)
 
 
