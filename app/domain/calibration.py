@@ -146,15 +146,34 @@ def _scores(raw: Mapping[str, object]) -> dict[str, int] | None:
     return out
 
 
-def build_report(
+Scored = list[tuple[str, dict[str, int], dict[str, int]]]
+
+
+def _scored_by_both(
     items: Sequence[tuple[str, Mapping[str, object], Mapping[str, object]]],
-) -> CalibrationReport:
-    """Agreement per criterion over items scored by both. `items` is (pmid, surgeon, model)."""
-    both: list[tuple[str, dict[str, int], dict[str, int]]] = []
+) -> Scored:
+    both: Scored = []
     for pmid, raw_s, raw_m in items:
         s, m = _scores(raw_s), _scores(raw_m)
         if s is not None and m is not None:
             both.append((pmid, s, m))
+    return both
+
+
+def _disagreements(both: Scored) -> list[Disagreement]:
+    """Per paper, model minus surgeon per criterion; biggest total gap first."""
+    out = []
+    for pmid, s, m in both:
+        gaps = {c: m[c] - s[c] for c in INTRINSIC_CRITERIA}
+        out.append(Disagreement(pmid, sum(abs(g) for g in gaps.values()), gaps))
+    return sorted(out, key=lambda d: (-d.total_gap, d.pmid))
+
+
+def build_report(
+    items: Sequence[tuple[str, Mapping[str, object], Mapping[str, object]]],
+) -> CalibrationReport:
+    """Agreement per criterion over items scored by both. `items` is (pmid, surgeon, model)."""
+    both = _scored_by_both(items)
 
     criteria = [
         CriterionAgreement(
@@ -167,9 +186,4 @@ def build_report(
         for c in INTRINSIC_CRITERIA
         if (pairs := [(s[c], m[c]) for _, s, m in both])
     ]
-    disagreements = []
-    for pmid, s, m in both:
-        gaps = {c: m[c] - s[c] for c in INTRINSIC_CRITERIA}
-        disagreements.append(Disagreement(pmid, sum(abs(g) for g in gaps.values()), gaps))
-    disagreements.sort(key=lambda d: (-d.total_gap, d.pmid))
-    return CalibrationReport(n=len(both), criteria=criteria, disagreements=disagreements)
+    return CalibrationReport(n=len(both), criteria=criteria, disagreements=_disagreements(both))

@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from starlette.datastructures import FormData
 
 from app.db.models import CalibrationItem, Paper, User
 from app.db.session import get_session
@@ -104,6 +105,22 @@ def item_page(
     return _render_item(request, session, items, item, item.surgeon_scores or {})
 
 
+def _form_scores(form: FormData) -> tuple[dict[str, int], str]:
+    """Scores given (unanswered criteria left out) and the comment."""
+    values = {k: v for k, v in form.items() if isinstance(v, str)}
+    scores = {c: int(values[c]) for c in INTRINSIC_CRITERIA if values.get(c, "").isdigit()}
+    return scores, values.get("comment", "")
+
+
+def _incomplete(
+    request: Request, session: Session, item_id: uuid.UUID, entered: dict[str, object]
+) -> HTMLResponse:
+    """The item again, keeping what was entered, with the error shown."""
+    items = current_items(session)
+    item = next(i for i in items if i.id == item_id)
+    return _render_item(request, session, items, item, entered, "Pick a score for every criterion.")
+
+
 @router.post("/{item_id}")
 async def save_item(
     request: Request,
@@ -113,25 +130,13 @@ async def save_item(
 ) -> Response:
     if refused := _gate(request, user):
         return refused
-    form = await request.form()
-    scores: dict[str, int] = {}
-    for c in INTRINSIC_CRITERIA:
-        raw = form.get(c)
-        if isinstance(raw, str) and raw.isdigit():
-            scores[c] = int(raw)
-    comment = form.get("comment")
-    comment = comment if isinstance(comment, str) else ""
+    scores, comment = _form_scores(await request.form())
     try:
         save_surgeon_scores(session, item_id, scores, comment)
     except LookupError:
         return RedirectResponse("/admin/calibrate", status_code=303)
     except ValueError:
-        items = current_items(session)
-        item = next(i for i in items if i.id == item_id)
-        scores_shown: dict[str, object] = {**scores, "comment": comment}
-        return _render_item(
-            request, session, items, item, scores_shown, "Pick a score for every criterion."
-        )
+        return _incomplete(request, session, item_id, {**scores, "comment": comment})
     return RedirectResponse(
         _next_ungraded(current_items(session), after=item_id) or "/admin/calibrate",
         status_code=303,

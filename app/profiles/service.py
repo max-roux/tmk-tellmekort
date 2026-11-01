@@ -113,27 +113,45 @@ def seed_papers(session: Session, user_id: uuid.UUID) -> list[Paper]:
     )
 
 
+def _resolve_dois(pubmed: PubMedClient, dois: list[str]) -> tuple[list[str], list[str]]:
+    """(PMIDs found, DOIs PubMed does not know)."""
+    found: list[str] = []
+    unknown: list[str] = []
+    for doi in dois:
+        pmids = pubmed.find(f'"{doi}"[doi]', retmax=1)
+        if pmids:
+            found.append(pmids[0])
+        else:
+            unknown.append(doi)
+    return found, unknown
+
+
+def _store_missing(
+    session: Session, pubmed: PubMedClient, pmids: list[str]
+) -> tuple[set[str], list[str]]:
+    """Fetch papers not yet stored. Returns (PMIDs now stored, PMIDs without abstract)."""
+    known = set(session.scalars(select(Paper.pmid).where(Paper.pmid.in_(pmids))))
+    missing = [p for p in pmids if p not in known]
+    if not missing:
+        return known, []
+    fetched = pubmed.fetch(missing)
+    store_papers(session, fetched.papers)
+    skipped = set(fetched.skipped_no_abstract)
+    return known | {p.pmid for p in fetched.papers}, [p for p in missing if p in skipped]
+
+
 def add_seeds(
     session: Session, user_id: uuid.UUID, refs: SeedRefs, pubmed: PubMedClient
 ) -> SeedResult:
     """Resolve PMIDs and DOIs through PubMed, store the papers and link them. Commits."""
-    result = SeedResult()
-    pmids = list(refs.pmids)
-    for doi in refs.dois:
-        found = pubmed.find(f'"{doi}"[doi]', retmax=1)
-        if found:
-            pmids.append(found[0])
-        else:
-            result.not_found.append(doi)
-    pmids = list(dict.fromkeys(pmids))
-    known = set(session.scalars(select(Paper.pmid).where(Paper.pmid.in_(pmids))))
-    if missing := [p for p in pmids if p not in known]:
-        fetched = pubmed.fetch(missing)
-        store_papers(session, fetched.papers)
-        known |= {p.pmid for p in fetched.papers}
-        result.no_abstract = [p for p in missing if p in set(fetched.skipped_no_abstract)]
-    result.not_found += [p for p in pmids if p not in known and p not in result.no_abstract]
-    result.added = [p for p in pmids if p in known]
+    from_dois, unknown_dois = _resolve_dois(pubmed, refs.dois)
+    pmids = list(dict.fromkeys([*refs.pmids, *from_dois]))
+    known, no_abstract = _store_missing(session, pubmed, pmids)
+    result = SeedResult(
+        added=[p for p in pmids if p in known],
+        not_found=unknown_dois + [p for p in pmids if p not in known and p not in no_abstract],
+        no_abstract=no_abstract,
+    )
     if result.added:
         stmt = insert(SeedPaper).values([{"user_id": user_id, "pmid": p} for p in result.added])
         session.execute(stmt.on_conflict_do_nothing())

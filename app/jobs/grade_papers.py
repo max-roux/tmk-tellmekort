@@ -122,6 +122,35 @@ def grade_sync(
     return stats
 
 
+def _wait(grader: Grader, batch: GradingBatch, poll: Polling) -> None:
+    deadline = poll.clock() + poll.timeout
+    while not grader.batch_ended(batch.id):
+        if poll.clock() >= deadline:
+            raise BatchTimeoutError(f"batch {batch.id} not finished after {poll.timeout:.0f}s")
+        poll.sleep(poll.interval)
+
+
+def _as_sent(batch: GradingBatch, items: dict[str, GradeInput]) -> dict[str, GradeInput]:
+    """Label results with what was actually sent, even when resuming without the text."""
+    return {
+        pmid: GradeInput(
+            i.paper,
+            i.full_text,
+            source="full_text" if batch.input_sources.get(pmid) == "full_text" else "abstract",
+        )
+        for pmid, i in items.items()
+    }
+
+
+def _to_retry(
+    batch: GradingBatch, results: list[GradeResult], items: dict[str, GradeInput]
+) -> list[str]:
+    """Failed or invalid items, and items the batch never returned."""
+    returned = {r.pmid for r in results}
+    failed = [r.pmid for r in results if isinstance(r, GradeFailure)]
+    return failed + [p for p in batch.pmids if p not in returned and p in items]
+
+
 def _collect(
     session: Session,
     grader: Grader,
@@ -131,34 +160,17 @@ def _collect(
     poll: Polling,
     full_texts: Mapping[str, str] | None,
 ) -> None:
-    deadline = poll.clock() + poll.timeout
-    while not grader.batch_ended(batch.id):
-        if poll.clock() >= deadline:
-            raise BatchTimeoutError(f"batch {batch.id} not finished after {poll.timeout:.0f}s")
-        poll.sleep(poll.interval)
-
+    _wait(grader, batch, poll)
     items = _inputs(session, batch.pmids, full_texts)
-    # Label results with what was actually sent, even when resuming without the text.
-    sent = {
-        pmid: GradeInput(
-            i.paper,
-            i.full_text,
-            source="full_text" if batch.input_sources.get(pmid) == "full_text" else "abstract",
-        )
-        for pmid, i in items.items()
-    }
-    results = grader.batch_results(batch.id, sent)
+    results = grader.batch_results(batch.id, _as_sent(batch, items))
     for r in results:
         _apply(session, r, today, stats)
     batch.status = "collected"
     batch.ended_at = datetime.now(UTC)
     session.commit()
 
-    # Failed or invalid items are retried once individually, then logged and skipped.
-    returned = {r.pmid for r in results}
-    retry = [r.pmid for r in results if isinstance(r, GradeFailure)]
-    retry += [p for p in batch.pmids if p not in returned and p in items]
-    for pmid in retry:
+    # Retried once individually, then logged and skipped.
+    for pmid in _to_retry(batch, results, items):
         log.warning("PMID %s failed in batch %s; retrying individually", pmid, batch.id)
         stats.retried += 1
         _grade_with_retry(session, grader, items[pmid], today, stats, tries=1)

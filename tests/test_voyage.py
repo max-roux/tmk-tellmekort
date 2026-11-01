@@ -74,3 +74,30 @@ def test_client_error_and_missing_items_raise() -> None:
         make(lambda r: httpx.Response(200, json=response(1))).embed(["a", "b"], "query")
     with pytest.raises(VoyageError, match="unexpected response"):
         make(lambda r: httpx.Response(200, json={"oops": 1})).embed(["a"], "query")
+
+
+def test_network_errors_are_retried_then_give_up() -> None:
+    calls = {"n": 0}
+
+    def flaky(request: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise httpx.ConnectError("reset", request=request)
+        return httpx.Response(200, json=response(1))
+
+    sleeps: list[float] = []
+    assert len(make(flaky, sleeps).embed(["a"], "query").vectors) == 1
+    assert sleeps == [1]
+
+    def down(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("unreachable", request=request)
+
+    with pytest.raises(VoyageError, match="unreachable"):
+        make(down).embed(["a"], "query")
+
+
+def test_persistent_server_errors_give_up_after_max_attempts() -> None:
+    sleeps: list[float] = []
+    with pytest.raises(VoyageError, match="HTTP 503 after retries"):
+        make(lambda r: httpx.Response(503), sleeps).embed(["a"], "query")
+    assert sleeps == [1, 2, 4, 8, 16]  # 6 attempts, 5 waits

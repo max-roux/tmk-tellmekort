@@ -169,8 +169,8 @@ def _article_id(pubmed_data: ET.Element | None, id_type: str) -> str | None:
     return el.text.strip() if el is not None and el.text else None
 
 
-def _parse_article(node: ET.Element) -> ParsedPaper | str:
-    """Return a ParsedPaper, or the PMID if the record has no abstract."""
+def _citation(node: ET.Element) -> tuple[ET.Element, str, ET.Element]:
+    """(MedlineCitation, PMID, Article), or PubMedError for a malformed record."""
     citation = node.find("MedlineCitation")
     if citation is None:
         raise PubMedError("PubmedArticle without MedlineCitation")
@@ -178,6 +178,25 @@ def _parse_article(node: ET.Element) -> ParsedPaper | str:
     article = citation.find("Article")
     if not pmid or article is None:
         raise PubMedError(f"Malformed PubmedArticle (pmid={pmid!r})")
+    return citation, pmid, article
+
+
+def _doi(article: ET.Element, pubmed_data: ET.Element | None) -> str | None:
+    """From the article ID list, else the electronic location."""
+    doi = _article_id(pubmed_data, "doi")
+    if doi is not None:
+        return doi
+    eloc = article.find("ELocationID[@EIdType='doi']")
+    return eloc.text.strip() if eloc is not None and eloc.text else None
+
+
+def _first_text(article: ET.Element, *paths: str) -> str:
+    return next((t for p in paths if (t := _text(article.find(p)))), "")
+
+
+def _parse_article(node: ET.Element) -> ParsedPaper | str:
+    """Return a ParsedPaper, or the PMID if the record has no abstract."""
+    citation, pmid, article = _citation(node)
 
     abstract = _parse_abstract(article)
     if not abstract:
@@ -188,19 +207,13 @@ def _parse_article(node: ET.Element) -> ParsedPaper | str:
     if entrez is None:
         raise PubMedError(f"PMID {pmid}: no entrez date")
 
-    doi = _article_id(pubmed_data, "doi")
-    if doi is None:
-        eloc = article.find("ELocationID[@EIdType='doi']")
-        doi = eloc.text.strip() if eloc is not None and eloc.text else None
-
     return ParsedPaper(
         pmid=pmid,
-        title=_text(article.find("ArticleTitle")) or _text(article.find("VernacularTitle")),
+        title=_first_text(article, "ArticleTitle", "VernacularTitle"),
         abstract=abstract,
-        journal=_text(article.find("Journal/Title"))
-        or _text(article.find("Journal/ISOAbbreviation")),
+        journal=_first_text(article, "Journal/Title", "Journal/ISOAbbreviation"),
         entrez_date=entrez,
-        doi=doi,
+        doi=_doi(article, pubmed_data),
         pmcid=_article_id(pubmed_data, "pmc"),
         pub_date=_parse_pub_date(article),
         pub_types=[_text(pt) for pt in article.findall("PublicationTypeList/PublicationType")],

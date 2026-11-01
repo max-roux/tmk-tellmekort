@@ -54,6 +54,22 @@ def _batches(texts: list[str]) -> list[list[str]]:
     return batches
 
 
+def _parse(resp: httpx.Response) -> _Response:
+    if resp.is_error:
+        # The body explains bad requests; it never contains the key.
+        raise VoyageError(f"embeddings: HTTP {resp.status_code}: {resp.text[:300]}")
+    try:
+        return _Response.model_validate_json(resp.content)
+    except ValidationError as e:
+        raise VoyageError(f"embeddings: unexpected response: {e}") from e
+
+
+def _delay(resp: httpx.Response | None, attempt: int) -> float:
+    """Retry-After when the server sends one, else exponential backoff."""
+    retry_after = resp.headers.get("retry-after", "") if resp is not None else ""
+    return float(retry_after) if retry_after.isdigit() else 2 ** (attempt - 1)
+
+
 class VoyageEmbedder:
     def __init__(
         self,
@@ -77,27 +93,24 @@ class VoyageEmbedder:
     def close(self) -> None:
         self._http.close()
 
+    def _send(self, payload: dict[str, object], *, last: bool) -> httpx.Response | None:
+        """The response, or None after a network error worth retrying."""
+        try:
+            return self._http.post("/embeddings", json=payload, headers=self._headers)
+        except httpx.TransportError as e:
+            if last:
+                raise VoyageError(f"embeddings: {e}") from e
+            return None
+
     def _post(self, payload: dict[str, object]) -> _Response:
         for attempt in range(1, self._max_attempts + 1):
-            try:
-                resp = self._http.post("/embeddings", json=payload, headers=self._headers)
-            except httpx.TransportError as e:
-                if attempt == self._max_attempts:
-                    raise VoyageError(f"embeddings: {e}") from e
-                self._sleep(2 ** (attempt - 1))
-                continue
-            if resp.status_code not in _RETRY_STATUS:
-                if resp.is_error:
-                    # The body explains bad requests; it never contains the key.
-                    raise VoyageError(f"embeddings: HTTP {resp.status_code}: {resp.text[:300]}")
-                try:
-                    return _Response.model_validate_json(resp.content)
-                except ValidationError as e:
-                    raise VoyageError(f"embeddings: unexpected response: {e}") from e
-            if attempt == self._max_attempts:
+            last = attempt == self._max_attempts
+            resp = self._send(payload, last=last)
+            if resp is not None and resp.status_code not in _RETRY_STATUS:
+                return _parse(resp)
+            if resp is not None and last:
                 raise VoyageError(f"embeddings: HTTP {resp.status_code} after retries")
-            retry_after = resp.headers.get("retry-after", "")
-            self._sleep(float(retry_after) if retry_after.isdigit() else 2 ** (attempt - 1))
+            self._sleep(_delay(resp, attempt))
         raise AssertionError("unreachable")
 
     def embed(self, texts: list[str], input_type: InputType) -> Embeddings:

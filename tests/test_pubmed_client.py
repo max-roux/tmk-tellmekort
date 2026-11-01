@@ -142,3 +142,22 @@ def test_client_error_not_retried() -> None:
     with pytest.raises(PubMedError, match="HTTP 400"):
         client.fetch(["1"])
     assert calls == 1
+
+
+def test_find_looks_up_a_term_without_dates() -> None:
+    seen: list[dict[str, str]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(form(request))
+        return httpx.Response(200, json={"esearchresult": {"count": "1", "idlist": ["42958619"]}})
+
+    client, _ = make_client(handler)
+    assert client.find('"10.1111/cid.70192"[doi]', retmax=1) == ["42958619"]
+    assert seen[0]["term"] == '"10.1111/cid.70192"[doi]' and seen[0]["retmax"] == "1"
+    assert "mindate" not in seen[0] and "datetype" not in seen[0]
+
+    error, _ = make_client(
+        lambda r: httpx.Response(200, json={"esearchresult": {"ERROR": "bad term"}})
+    )
+    with pytest.raises(PubMedError, match="bad term"):
+        error.find("((")

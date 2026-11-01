@@ -106,33 +106,41 @@ def _is_open_access(article: ET.Element) -> bool:
     return False
 
 
-def body_text(body: ET.Element, max_tokens: int) -> str:
-    """Body prose grouped by section kind, Methods and Results first, within the budget."""
+def _grouped(body: ET.Element) -> dict[str, list[str]]:
+    """Paragraphs by section kind; loose paragraphs outside sections go first in Other."""
     groups: dict[str, list[str]] = {k: [] for k in _ORDER}
     loose: list[str] = []
     for child in body:
-        if child.tag == "sec":
-            if (kind := _kind(child)) is not None:
-                groups[kind].extend(_paragraphs(child))
+        if child.tag == "sec" and (kind := _kind(child)) is not None:
+            groups[kind].extend(_paragraphs(child))
         elif child.tag == "p" and (text := _text(child)):
             loose.append(text)
     groups["Other"] = loose + groups["Other"]
+    return groups
 
+
+def _blocks(groups: dict[str, list[str]]) -> Iterator[str]:
+    """A heading then its paragraphs, for each non-empty kind in priority order."""
+    for kind in _ORDER:
+        if groups[kind]:
+            yield f"## {kind}"
+            yield from groups[kind]
+
+
+def body_text(body: ET.Element, max_tokens: int) -> str:
+    """Body prose grouped by section kind, Methods and Results first, within the budget."""
     budget = max_tokens * CHARS_PER_TOKEN
     parts: list[str] = []
     used = 0
-    for kind in _ORDER:
-        if not groups[kind]:
-            continue
-        for block in [f"## {kind}", *groups[kind]]:
-            if used + len(block) > budget:
-                room = budget - used
-                if room > 200:
-                    parts.append(block[:room].rsplit(" ", 1)[0] + " …")
-                parts.append("[truncated]")
-                return "\n\n".join(parts)
-            parts.append(block)
-            used += len(block) + 2
+    for block in _blocks(_grouped(body)):
+        if used + len(block) > budget:
+            room = budget - used
+            if room > 200:
+                parts.append(block[:room].rsplit(" ", 1)[0] + " …")
+            parts.append("[truncated]")
+            break
+        parts.append(block)
+        used += len(block) + 2
     return "\n\n".join(parts)
 
 
