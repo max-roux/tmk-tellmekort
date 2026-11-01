@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.db.session import get_session
-from app.web import actions, admin, auth, calibrate, feed, onboarding
+from app.web import actions, admin, auth, calibrate, feed, onboarding, theme
 from app.web import settings as settings_page
 from app.web.sessions import LoginRequiredError
 from app.web.templating import STATIC_DIR
@@ -28,6 +28,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(feed.router)
     app.include_router(actions.router)
     app.include_router(settings_page.router)
+    app.include_router(theme.router)
 
     @app.exception_handler(LoginRequiredError)
     def _login_required(request: Request, exc: LoginRequiredError) -> Response:

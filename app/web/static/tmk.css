@@ -676,6 +676,23 @@ th { font-family: var(--font-label); font-size: 0.6875rem; font-weight: 600; let
   color: var(--ink-soft);
 }
 
+/* The edition switch in the colophon. */
+.editions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.25rem; margin: 0.4rem 0 0; }
+.editions-label { margin-right: 0.35rem; }
+.editions button {
+  min-height: var(--tap);
+  padding: 0 0.6rem;
+  background: none;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.editions button:hover { color: var(--ink); }
+.editions button[aria-pressed="true"] { color: var(--ink); font-weight: 700; text-decoration: underline 2px var(--accent); text-underline-offset: 0.55em; }
+
 @media (prefers-reduced-motion: no-preference) {
   .button, .small-button, .sections a { transition: background-color 120ms ease-out, color 120ms ease-out; }
 }
