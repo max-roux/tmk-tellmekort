@@ -313,6 +313,17 @@ class PubMedClient:
             )
         return [str(p) for p in result.get("idlist", [])]
 
+    def find(self, term: str, retmax: int = 20) -> list[str]:
+        """PMIDs matching `term` with no date limit, e.g. `"10.1000/xyz"[doi]`."""
+        resp = self._request(
+            "esearch.fcgi",
+            {"db": "pubmed", "term": term, "retmax": str(retmax), "retmode": "json"},
+        )
+        result = resp.json().get("esearchresult", {})
+        if "ERROR" in result:
+            raise PubMedError(f"esearch: {result['ERROR']}")
+        return [str(p) for p in result.get("idlist", [])]
+
     def fetch(self, pmids: list[str]) -> ParseResult:
         """Fetch and parse records, in batches of EFETCH_BATCH_SIZE."""
         papers: list[ParsedPaper] = []

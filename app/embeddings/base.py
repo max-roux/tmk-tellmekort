@@ -12,6 +12,10 @@ class Embeddings:
     tokens: int
 
 
+class EmbeddingError(Exception):
+    """The provider failed; callers may carry on and embed later (`cli.py embed`)."""
+
+
 class Embedder(Protocol):
     @property
     def model(self) -> str: ...

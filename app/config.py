@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     pertinence_gate: float = 0.30
     email_min_weighted: float = 3.5
     active_window_days: int = 90
+    # Profile vector coefficients (SPEC.md §8.1); the not-for-me term is subtracted.
+    profile_coef_topics: float = 1.0
+    profile_coef_seeds: float = 1.0
+    profile_coef_liked: float = 0.5
+    profile_coef_not_for_me: float = 0.3
 
     @field_validator("database_url")
     @classmethod

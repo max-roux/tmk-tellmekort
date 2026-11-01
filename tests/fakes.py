@@ -11,6 +11,7 @@ from anthropic.types.beta import BetaMessage
 from anthropic.types.messages import MessageBatch, MessageBatchIndividualResponse
 
 from app.embeddings.base import Embeddings
+from app.sources.pubmed import ParseResult, PubMedError, parse_pubmed_xml
 from tests.conftest import FIXTURES
 
 ANTHROPIC = FIXTURES / "anthropic"
@@ -151,3 +152,26 @@ class FakeMessages:
 class FakeMessagesClient:
     def __init__(self, responses: list[dict[str, Any] | Exception]) -> None:
         self.messages = FakeMessages(responses)
+
+
+PUBMED_SAMPLE = parse_pubmed_xml((FIXTURES / "pubmed" / "efetch_sample.xml").read_bytes())
+
+
+class FakePubMed:
+    def __init__(self, fail: bool = False) -> None:
+        self.fail = fail
+        self.fetched: list[list[str]] = []
+
+    def find(self, term: str, retmax: int = 20) -> list[str]:
+        if self.fail:
+            raise PubMedError("down")
+        return [p.pmid for p in PUBMED_SAMPLE.papers if p.doi and f'"{p.doi}"' in term][:retmax]
+
+    def fetch(self, pmids: list[str]) -> ParseResult:
+        if self.fail:
+            raise PubMedError("down")
+        self.fetched.append(pmids)
+        return ParseResult(
+            papers=[p for p in PUBMED_SAMPLE.papers if p.pmid in pmids],
+            skipped_no_abstract=[p for p in PUBMED_SAMPLE.skipped_no_abstract if p in pmids],
+        )

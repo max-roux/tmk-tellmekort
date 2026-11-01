@@ -10,7 +10,7 @@ from collections.abc import Callable
 import httpx
 from pydantic import BaseModel, ValidationError
 
-from app.embeddings.base import Embeddings, InputType
+from app.embeddings.base import EmbeddingError, Embeddings, InputType
 
 VOYAGE_BASE = "https://api.voyageai.com/v1"
 MAX_TEXTS_PER_REQUEST = 128
@@ -19,7 +19,7 @@ MAX_CHARS_PER_REQUEST = 400_000  # ~100K tokens at ~4 chars/token
 _RETRY_STATUS = {429, 500, 502, 503, 504}
 
 
-class VoyageError(Exception):
+class VoyageError(EmbeddingError):
     pass
 
 
