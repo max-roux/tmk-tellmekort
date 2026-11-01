@@ -63,9 +63,9 @@ def test_smtp_alone_is_enough_for_production() -> None:
         values = {
             "base_url": "https://papers.example.com",
             "secret_key": "a-long-random-value",
-            "email_from": "maxfacpapers@gmail.com",
+            "email_from": "tmkpapers@gmail.com",
             "smtp_host": "smtp.gmail.com",
-            "smtp_username": "maxfacpapers@gmail.com",
+            "smtp_username": "tmkpapers@gmail.com",
             "smtp_password": "app-pass",
         } | overrides
         return Settings(_env_file=None, **values)  # type: ignore[call-arg, arg-type]
@@ -80,7 +80,7 @@ def test_mailer_prefers_postmark_then_smtp_then_outbox() -> None:
     from app.email.postmark import PostmarkMailer
     from app.email.smtp import SmtpMailer
 
-    base = {"email_from": "maxfacpapers@gmail.com"}
+    base = {"email_from": "tmkpapers@gmail.com"}
     smtp = {"smtp_host": "smtp.gmail.com", "smtp_username": "u", "smtp_password": "p"}
     both = Settings(_env_file=None, postmark_server_token="pm", **base, **smtp)  # type: ignore[call-arg, arg-type]
     only_smtp = Settings(_env_file=None, **base, **smtp)  # type: ignore[call-arg, arg-type]

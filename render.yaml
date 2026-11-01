@@ -1,16 +1,16 @@
 # Render Blueprint: all resources in Frankfurt (SPEC.md §3, §16).
 databases:
-  - name: maxfac-db
+  - name: tmk-db
     region: frankfurt
     plan: basic-256mb
     postgresMajorVersion: "16"
-    databaseName: maxfac
-    user: maxfac
+    databaseName: tmk
+    user: tmk
     ipAllowList: []
 
 services:
   - type: web
-    name: maxfac-web
+    name: tmk-web
     runtime: python
     region: frankfurt
     plan: starter
@@ -23,7 +23,7 @@ services:
         value: "3.12.13"
       - key: DATABASE_URL
         fromDatabase:
-          name: maxfac-db
+          name: tmk-db
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
@@ -54,7 +54,7 @@ services:
 
   # Hourly: send each user's weekly email once their local slot has passed (SPEC.md §10.1).
   - type: cron
-    name: maxfac-send
+    name: tmk-send
     runtime: python
     region: frankfurt
     plan: starter
@@ -66,13 +66,13 @@ services:
         value: "3.12.13"
       - key: DATABASE_URL
         fromDatabase:
-          name: maxfac-db
+          name: tmk-db
           property: connectionString
       # Must equal the web service's key: email buttons are signed with it.
       - key: SECRET_KEY
         fromService:
           type: web
-          name: maxfac-web
+          name: tmk-web
           envVarKey: SECRET_KEY
       - key: BASE_URL
         sync: false
@@ -94,7 +94,7 @@ services:
   # Weekly pipeline: Sunday 01:00 UTC = 02:00 Copenhagen in winter, 03:00 in summer (SPEC.md §6).
   # Render stops a run after 12 h; the job waits at most 10 h for the grading batch.
   - type: cron
-    name: maxfac-weekly
+    name: tmk-weekly
     runtime: python
     region: frankfurt
     plan: starter
@@ -106,12 +106,12 @@ services:
         value: "3.12.13"
       - key: DATABASE_URL
         fromDatabase:
-          name: maxfac-db
+          name: tmk-db
           property: connectionString
       - key: SECRET_KEY
         fromService:
           type: web
-          name: maxfac-web
+          name: tmk-web
           envVarKey: SECRET_KEY
       - key: BASE_URL
         sync: false

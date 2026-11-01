@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Maxfac Paper Recommender: weekly LLM-graded research-paper recommendations for a maxillofacial surgeon.
+Tell Me Kort (TMK): weekly LLM-graded research-paper recommendations for a maxillofacial surgeon.
 
 **Read `SPEC.md` first.** It is the source of truth for scope, data model, grading rubric, ranking and build order. If an implementation choice contradicts SPEC.md, stop and ask, or update SPEC.md in the same change after the user agrees.
 

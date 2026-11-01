@@ -1,7 +1,7 @@
 # Launch checklist
 
 Steps to take the app from this repo to the pilot surgeon's inbox, in order. Commands
-marked **(Render shell)** run in the `maxfac-web` service's Shell tab on Render, with
+marked **(Render shell)** run in the `tmk-web` service's Shell tab on Render, with
 `uv run --no-sync python cli.py …`; locally, use `uv run python cli.py …`.
 
 ## 1. Accounts and keys
@@ -28,7 +28,7 @@ marked **(Render shell)** run in the `maxfac-web` service's Shell tab on Render,
 ## 3. Deploy on Render
 
 - [ ] New → Blueprint → this repository. It creates the database, the web service and two
-      cron jobs (`maxfac-send` hourly, `maxfac-weekly` on Sundays), all in Frankfurt.
+      cron jobs (`tmk-send` hourly, `tmk-weekly` on Sundays), all in Frankfurt.
 - [ ] Fill in the variables Render asks for, on each service that lists them:
       `BASE_URL` (the https address of the web service), `ANTHROPIC_API_KEY`,
       `VOYAGE_API_KEY`, `NCBI_API_KEY`, `NCBI_EMAIL`, `SMTP_USERNAME`, `SMTP_PASSWORD`

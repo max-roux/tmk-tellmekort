@@ -1,5 +1,5 @@
 [project]
-name = "maxfac-recommender"
+name = "tmk-recommender"
 version = "0.1.0"
 description = "Weekly LLM-graded research-paper recommendations for a maxillofacial surgeon."
 requires-python = ">=3.12,<3.13"

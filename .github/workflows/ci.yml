@@ -12,16 +12,16 @@ jobs:
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_USER: maxfac
-          POSTGRES_PASSWORD: maxfac
-          POSTGRES_DB: maxfac
+          POSTGRES_USER: tmk
+          POSTGRES_PASSWORD: tmk
+          POSTGRES_DB: tmk
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U maxfac"
+          --health-cmd "pg_isready -U tmk"
           --health-interval 2s
           --health-retries 15
     env:
-      DATABASE_URL: postgresql+psycopg://maxfac:maxfac@localhost:5432/maxfac
+      DATABASE_URL: postgresql+psycopg://tmk:tmk@localhost:5432/tmk
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5

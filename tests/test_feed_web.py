@@ -34,7 +34,7 @@ def client(db_session: Session, user: User, monkeypatch: pytest.MonkeyPatch) -> 
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_settings] = lambda: SETTINGS
-    c = TestClient(app, base_url="https://maxfac.test")
+    c = TestClient(app, base_url="https://tmk.test")
     c.post("/auth", data={"t": magic_links.issue(db_session, user, datetime.now(UTC))})
     return c
 
@@ -140,7 +140,7 @@ def test_unknown_or_ungraded_paper_is_404(client: TestClient) -> None:
 def test_pages_need_sign_in(db_session: Session) -> None:
     app = create_app()
     app.dependency_overrides[get_session] = lambda: db_session
-    c = TestClient(app, base_url="https://maxfac.test")
+    c = TestClient(app, base_url="https://tmk.test")
     for path in ("/library", "/history", f"/paper/{TOP}"):
         assert c.get(path, follow_redirects=False).headers["location"] == "/login"
     assert "Sign in" in c.get("/").text

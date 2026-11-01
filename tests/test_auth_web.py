@@ -23,7 +23,7 @@ from app.web.deps import get_mailer
 
 pytestmark = pytest.mark.db
 
-SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://maxfac.test")  # type: ignore[call-arg]
+SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://tmk.test")  # type: ignore[call-arg]
 EMAIL = "Surgeon@Example.com"
 
 
@@ -56,11 +56,11 @@ def client(db_session: Session, mailer: CapturingMailer) -> TestClient:
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_settings] = lambda: SETTINGS
     app.dependency_overrides[get_mailer] = lambda: mailer
-    return TestClient(app, base_url="https://maxfac.test")
+    return TestClient(app, base_url="https://tmk.test")
 
 
 def token_from(message: EmailMessage) -> str:
-    m = re.search(r"https://maxfac\.test/auth#([\w-]+)", message.text)
+    m = re.search(r"https://tmk\.test/auth#([\w-]+)", message.text)
     assert m, message.text
     return m.group(1)
 

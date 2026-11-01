@@ -220,7 +220,7 @@ except (smtplib.SMTPException, OSError) as e:
 
 TOTAL_STAGES=3
 
-banner "Maxfac Papers: Voyage and email setup"
+banner "Tell Me Kort: Voyage and email setup"
 
 # ── 1 ─────────────────────────────────────────────────────────────────────
 stage "Voyage AI: API key"
@@ -251,7 +251,7 @@ open_url "https://myaccount.google.com/apppasswords"
 step "Sign in with your Gmail if asked."
 step "If Google says app passwords aren't available, turn on 2-Step Verification first:"
 say  "  myaccount.google.com → Security → 2-Step Verification, then reopen the link above."
-step "Type the name 'Maxfac Papers' → Create → copy the 16-letter password (shown once)."
+step "Type the name 'Tell Me Kort' → Create → copy the 16-letter password (shown once)."
 ask SMTP_USERNAME "The Gmail address:"
 SMTP_USERNAME=$(printf %s "$SMTP_USERNAME" | tr -d ' ' | tr '[:upper:]' '[:lower:]')
 while true; do
@@ -292,7 +292,7 @@ from app.config import get_settings
 from app.email import mailer_for
 from app.email.base import EmailMessage
 s = get_settings()
-mailer_for(s).send(EmailMessage(to=s.admin_email, subject="Maxfac Papers: test email",
+mailer_for(s).send(EmailMessage(to=s.admin_email, subject="Tell Me Kort: test email",
     text="If you can read this, the app can send email.",
     html="<p>If you can read this, the app can send email.</p>"))
 '; then

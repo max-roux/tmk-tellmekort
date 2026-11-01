@@ -13,7 +13,7 @@ from app.email.outbox import OutboxMailer
 from app.email.postmark import POSTMARK_BASE, PostmarkMailer
 from app.email.smtp import SmtpMailer
 
-LINK = "https://maxfac.test/auth#tok-123"
+LINK = "https://tmk.test/auth#tok-123"
 
 
 def message() -> EmailMessage:
@@ -121,9 +121,9 @@ def smtp_mailer(port: int = 587, password: str = "app-pass") -> SmtpMailer:
     return SmtpMailer(
         host="smtp.gmail.com",
         port=port,
-        username="maxfacpapers@gmail.com",
+        username="tmkpapers@gmail.com",
         password=password,
-        sender="maxfacpapers@gmail.com",
+        sender="tmkpapers@gmail.com",
         smtp=FakeSmtp,
         smtp_ssl=FakeSmtp,
     )
@@ -133,9 +133,9 @@ def test_smtp_sends_text_and_html_over_starttls() -> None:
     message_id = smtp_mailer().send(message())
     conn = FakeSmtp.instances[0]
     assert conn.address == ("smtp.gmail.com", 587)
-    assert conn.calls == ["starttls", "login maxfacpapers@gmail.com", "send", "quit"]
+    assert conn.calls == ["starttls", "login tmkpapers@gmail.com", "send", "quit"]
     sent = conn.sent[0]
-    assert sent["From"] == "Tell Me Kort <maxfacpapers@gmail.com>"
+    assert sent["From"] == "Tell Me Kort <tmkpapers@gmail.com>"
     assert sent["To"] == "surgeon@example.com"
     assert sent["Subject"] == "Sign in"
     assert sent["Message-ID"] == message_id
@@ -147,7 +147,7 @@ def test_smtp_sends_text_and_html_over_starttls() -> None:
 
 def test_smtp_port_465_uses_implicit_tls() -> None:
     smtp_mailer(port=465).send(message())
-    assert FakeSmtp.instances[0].calls[0] == "login maxfacpapers@gmail.com"
+    assert FakeSmtp.instances[0].calls[0] == "login tmkpapers@gmail.com"
 
 
 def test_smtp_errors_raise_without_the_password() -> None:

@@ -1,6 +1,6 @@
 # SPEC — Tell Me Kort (MVP)
 
-Tell Me Kort (team name TMK; formerly the Maxfac Paper Recommender) is a web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
+Tell Me Kort (team name TMK) is a web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
 Status: milestones 1-10 built (see §18); launch steps are in LAUNCH.md. This file is the source of truth; update it when decisions change.
 

@@ -18,7 +18,7 @@ from tests.fakes import FakeEmbedder, FakeMessagesClient, FakePubMed, message
 
 pytestmark = pytest.mark.db
 
-SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://maxfac.test")  # type: ignore[call-arg]
+SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://tmk.test")  # type: ignore[call-arg]
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ def build_client(
     app.dependency_overrides[get_embedder] = lambda: embedder
     app.dependency_overrides[get_pubmed] = lambda: pubmed
     app.dependency_overrides[get_topic_proposer] = lambda: proposer
-    client = TestClient(app, base_url="https://maxfac.test")
+    client = TestClient(app, base_url="https://tmk.test")
     client.post("/auth", data={"t": magic_links.issue(db_session, user, datetime.now(UTC))})
     return client
 

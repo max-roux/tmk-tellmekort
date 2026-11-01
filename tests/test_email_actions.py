@@ -16,7 +16,7 @@ from tests.feed_setup import TODAY, grade, user
 pytestmark = pytest.mark.db
 __all__ = ["user"]  # pytest fixture
 
-SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://maxfac.test")  # type: ignore[call-arg]
+SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://tmk.test")  # type: ignore[call-arg]
 PMID = "42963182"
 
 
@@ -38,7 +38,7 @@ def client(db_session: Session) -> TestClient:
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_settings] = lambda: SETTINGS
-    return TestClient(app, base_url="https://maxfac.test")  # not signed in
+    return TestClient(app, base_url="https://tmk.test")  # not signed in
 
 
 def token(user: User, send: EmailSend, action: str = "like") -> str:
@@ -47,7 +47,7 @@ def token(user: User, send: EmailSend, action: str = "like") -> str:
 
 def test_link_puts_token_in_fragment(user: User, send: EmailSend) -> None:
     link = actions.action_link(SETTINGS, user.id, PMID, "read", send.id)
-    assert link.startswith("https://maxfac.test/a/read#") and "?" not in link
+    assert link.startswith("https://tmk.test/a/read#") and "?" not in link
 
 
 def test_token_roundtrip_and_rejections(user: User, send: EmailSend) -> None:

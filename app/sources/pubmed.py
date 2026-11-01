@@ -253,7 +253,7 @@ class PubMedClient:
         *,
         api_key: str = "",
         email: str = "",
-        tool: str = "maxfac-recommender",
+        tool: str = "tmk-recommender",
         http: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,

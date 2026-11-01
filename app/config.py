@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://maxfac:maxfac@localhost:5432/maxfac"
+    database_url: str = "postgresql+psycopg://tmk:tmk@localhost:5432/tmk"
     secret_key: str = DEV_SECRET_KEY
     base_url: str = "http://localhost:8000"
 
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     embedding_model: str = "voyage-4"
     ncbi_api_key: str = ""
     ncbi_email: str = ""
-    ncbi_tool: str = "maxfac-recommender"
+    ncbi_tool: str = "tmk-recommender"
     postmark_server_token: str = ""
     # SMTP fallback when there is no Postmark token, e.g. Gmail with an app password.
     smtp_host: str = ""

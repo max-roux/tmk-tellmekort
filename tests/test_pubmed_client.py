@@ -51,7 +51,7 @@ def test_search_sends_identity_and_date_window() -> None:
     params = seen[0]
     assert params["api_key"] == "k"
     assert params["email"] == "ops@example.com"
-    assert params["tool"] == "maxfac-recommender"
+    assert params["tool"] == "tmk-recommender"
     assert (params["datetype"], params["mindate"], params["maxdate"]) == (
         "edat",
         "2026/10/25",

@@ -16,7 +16,7 @@ pytestmark = pytest.mark.db
 __all__ = ["user"]  # pytest fixture
 
 SETTINGS = Settings(  # type: ignore[call-arg]
-    _env_file=None, base_url="https://maxfac.test", admin_email="admin@example.com"
+    _env_file=None, base_url="https://tmk.test", admin_email="admin@example.com"
 )
 SUNDAY = datetime(2026, 11, 1, 12, 0, tzinfo=UTC)  # Monday 06:30 slot of this week has passed
 MONDAY_EARLY = datetime(2026, 11, 2, 5, 0, tzinfo=UTC)  # 06:00 Copenhagen, before the slot
@@ -49,9 +49,9 @@ def test_due_user_gets_fresh_and_missed_once_per_week(db_session: Session, user:
     assert msg.subject.startswith("Tell Me Kort: ")
     assert "Fresh this week" in msg.text and "You may have missed" in msg.text
     assert msg.text.index("Fresh this week") < msg.text.index("You may have missed")
-    links = re.findall(r"https://maxfac\.test/a/\w+#[\w.-]+", msg.html)
+    links = re.findall(r"https://tmk\.test/a/\w+#[\w.-]+", msg.html)
     assert len(links) == 6  # like, read, not for me for each of 2 papers
-    assert "https://maxfac.test/paper/42963307" in msg.html
+    assert "https://tmk.test/paper/42963307" in msg.html
     row = db_session.scalars(select(EmailSend)).one()
     assert (row.fresh_pmid, row.missed_pmid) == ("42963307", "42949936")
     assert row.postmark_message_id == "pm-1"
@@ -84,7 +84,7 @@ def test_quiet_week_tells_the_user_and_alerts_the_admin(db_session: Session, use
     stats = send_due(db_session, SETTINGS, mailer, SUNDAY)
     assert (stats.sent, stats.quiet) == (1, 1)
     (msg,) = to_user(mailer, user)
-    assert "quiet week" in msg.text.lower() and "https://maxfac.test/" in msg.text
+    assert "quiet week" in msg.text.lower() and "https://tmk.test/" in msg.text
     assert msg.subject == "Tell Me Kort: a quiet week"
     (alert,) = [m for m in mailer.sent if m.to == "admin@example.com"]
     assert alert.subject.startswith("[TMK] ")

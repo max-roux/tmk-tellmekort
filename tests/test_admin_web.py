@@ -22,7 +22,7 @@ pytestmark = pytest.mark.db
 __all__ = ["user"]  # pytest fixture
 
 SETTINGS = Settings(  # type: ignore[call-arg]
-    _env_file=None, secret_key="test-secret", base_url="https://maxfac.test", llm_monthly_cap_usd=30
+    _env_file=None, secret_key="test-secret", base_url="https://tmk.test", llm_monthly_cap_usd=30
 )
 
 
@@ -51,7 +51,7 @@ def app_client(db_session: Session, mailer: Mailer, monkeypatch: pytest.MonkeyPa
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_settings] = lambda: SETTINGS
     app.dependency_overrides[get_mailer] = lambda: mailer
-    return TestClient(app, base_url="https://maxfac.test")
+    return TestClient(app, base_url="https://tmk.test")
 
 
 def sign_in(client: TestClient, session: Session, u: User) -> None:

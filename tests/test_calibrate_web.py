@@ -21,7 +21,7 @@ from tests.fakes import FakeAnthropic, message
 
 pytestmark = pytest.mark.db
 
-SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://maxfac.test")  # type: ignore[call-arg]
+SETTINGS = Settings(_env_file=None, secret_key="test-secret", base_url="https://tmk.test")  # type: ignore[call-arg]
 SAMPLE = parse_pubmed_xml((FIXTURES / "pubmed" / "efetch_sample.xml").read_bytes()).papers
 SCORES = {"proof_strength": "3", "novelty": "2", "depth": "4", "practical_usefulness": "3"}
 MODEL_JUSTIFICATION = "Directly informs graft choice"
@@ -45,7 +45,7 @@ def client(session: Session) -> TestClient:
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_settings] = lambda: SETTINGS
-    return TestClient(app, base_url="https://maxfac.test")
+    return TestClient(app, base_url="https://tmk.test")
 
 
 def enter(client: TestClient, session: Session, **flags: bool) -> None:

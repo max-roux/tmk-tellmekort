@@ -9,7 +9,7 @@ from app.main import create_app
 def client() -> TestClient:
     app = create_app()
     app.dependency_overrides[get_session] = lambda: MagicMock()
-    return TestClient(app, base_url="https://maxfac.test")
+    return TestClient(app, base_url="https://tmk.test")
 
 
 def test_pages_follow_the_device_until_an_edition_is_chosen() -> None:
@@ -44,5 +44,5 @@ def test_bad_values_are_refused_or_ignored() -> None:
         "/theme", data={"theme": "light", "next": "//evil.example.com/"}, follow_redirects=False
     )
     assert resp.headers["location"] == "/"
-    c.cookies.set("theme", '"><script>', domain="maxfac.test")
+    c.cookies.set("theme", '"><script>', domain="tmk.test")
     assert "data-theme" not in c.get("/login").text
