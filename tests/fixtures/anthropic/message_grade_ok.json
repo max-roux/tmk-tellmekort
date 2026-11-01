@@ -1,0 +1,26 @@
+{
+  "id": "msg_01FixtureGrade",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5-5",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "sig-fixture"
+    },
+    {
+      "type": "text",
+      "text": "{\"study_design\": \"RCT\", \"sample_size\": 40, \"proof_strength\": {\"score\": 4, \"justification\": \"Single-centre RCT, 40 patients, adequate randomisation and blinded outcome assessment.\"}, \"novelty\": {\"score\": 3, \"justification\": \"Head-to-head comparison of two established grafting techniques for small dehiscences.\"}, \"depth\": {\"score\": 5, \"justification\": \"Clear methods and 12-month follow-up with volumetric outcomes.\"}, \"practical_usefulness\": {\"score\": 4, \"justification\": \"Directly informs graft choice for buccal dehiscence at implant placement.\"}, \"summary\": \"Forty patients with small buccal dehiscence defects were randomised to connective tissue graft or collagen matrix. Both gained soft-tissue thickness at 12 months, with no significant difference.\", \"why_it_matters\": \"A collagen matrix may spare a palatal donor site for small defects.\"}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "stop_details": null,
+  "usage": {
+    "input_tokens": 2310,
+    "output_tokens": 612,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 1180
+  }
+}

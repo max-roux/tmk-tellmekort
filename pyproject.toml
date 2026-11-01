@@ -5,6 +5,7 @@ description = "Weekly LLM-graded research-paper recommendations for a maxillofac
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "alembic>=1.13",
+    "anthropic>=2.3.0",
     "fastapi>=0.115",
     "httpx>=0.27",
     "itsdangerous>=2.2",
