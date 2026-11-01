@@ -9,12 +9,14 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_session
+from app.web import calibrate
 
 TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "web" / "templates")
 
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Maxfac Paper Recommender")
+    app.include_router(calibrate.router)
 
     @app.get("/", response_class=HTMLResponse)
     def home(request: Request) -> HTMLResponse:

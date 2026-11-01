@@ -337,9 +337,9 @@ The free text goes to Sonnet (normal API, not batch) with a tool `propose_topics
 ## 12. Calibration (before launch)
 
 1. `cli.py calibrate sample --n 20` picks 20 recent candidates stratified by study design.
-2. The surgeon grades them blind on `/admin/calibrate` against the rubric text (model scores hidden).
+2. The surgeon grades them blind on `/admin/calibrate` against the rubric text (model scores hidden). Until admin login exists (milestone 6), access is a signed link from `cli.py calibrate link` (30-day expiry, token in the URL fragment so it never reaches server logs, then an httpOnly cookie). `cli.py calibrate grade` grades the set and snapshots the model's scores into `calibration_items`.
 3. `cli.py calibrate report` shows, per criterion: exact agreement, agreement within ±1, quadratic-weighted kappa, and the papers with the biggest disagreements alongside the model's justifications.
-4. Revise the rubric wording, bump `RUBRIC_VERSION`, rerun on the same 20.
+4. Revise the rubric wording, bump `RUBRIC_VERSION`, rerun on the same 20 (`calibrate grade` creates rows for the new version and carries the surgeon's scores forward).
 5. **Launch bar**: within-±1 agreement ≥ 80% on every criterion, and ≥ 90% on proof strength.
 
 Later, disputes (§9) feed periodic recalibration.

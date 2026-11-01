@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>{% block title %}Maxfac Papers{% endblock %}</title>
+  <style>
+    :root {
+      --bg: #f7f5f0; --surface: #ffffff; --ink: #1d2026; --muted: #5c6370;
+      --line: #dcd8cf; --accent: #1f5f8b; --accent-ink: #ffffff; --accent-soft: #e4eef5;
+      --ok: #2f6b3a; --warn: #9a3b26;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #15171b; --surface: #1e2127; --ink: #e8e6e1; --muted: #a2a8b3;
+        --line: #343841; --accent: #7fb3d9; --accent-ink: #10202c; --accent-soft: #22323f;
+        --ok: #8fc79a; --warn: #e79a85;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    h1, h2, h3 { line-height: 1.25; margin: 0 0 .5rem; }
+    h1 { font-size: 1.5rem; } h2 { font-size: 1.2rem; } h3 { font-size: 1.05rem; }
+    a { color: var(--accent); }
+    .muted { color: var(--muted); }
+    .small { font-size: .875rem; }
+    .eyebrow { font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0 0 .25rem; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; margin: 0 0 1rem; }
+    .button {
+      display: inline-block; background: var(--accent); color: var(--accent-ink); border: 0;
+      border-radius: 8px; padding: .7rem 1.2rem; font: inherit; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+    }
+    .error { color: var(--warn); font-weight: 600; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
