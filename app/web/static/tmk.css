@@ -27,7 +27,7 @@ p { margin: 0 0 0.85rem; }
 p:last-child { margin-bottom: 0; }
 
 .skip { position: absolute; left: -999px; top: 0; }
-.skip:focus { left: 1rem; top: 1rem; background: var(--paper); padding: 0.5rem 0.75rem; z-index: 2; }
+.skip:focus { left: 1rem; top: 1rem; background: var(--paper); padding: 0 0.75rem; min-height: var(--tap); display: inline-flex; align-items: center; z-index: 2; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ---------- Page frame ---------- */
@@ -470,6 +470,8 @@ input[type=checkbox], input[type=radio], input[type=range] { accent-color: var(-
 input[type=checkbox] { width: 1.25rem; height: 1.25rem; margin: 0; }
 
 .stack > * + * { margin-top: 0.75rem; }
+.form-sheet { margin-top: 1.75rem; }
+.form-sheet input { padding-top: 0.2rem; }
 
 .notice, .error {
   border-top: var(--hair) solid var(--accent);
@@ -506,6 +508,7 @@ p.error:not(.notice) { border: 0; padding: 0; }
   padding: 2rem 0;
 }
 .empty h2 { font-size: 1.75rem; margin-bottom: 0.75rem; }
+.front-main > .empty { margin-top: 0; border-top: 0; padding-top: 0.5rem; }
 
 /* ---------- One-tap confirm pages ---------- */
 
