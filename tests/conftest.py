@@ -49,7 +49,7 @@ def db_session(migrated_url: str) -> Iterator[Session]:
     """A session on a migrated test database with all tables emptied first."""
     engine = create_engine(migrated_url)
     with engine.begin() as conn:
-        conn.execute(text("TRUNCATE papers"))
+        conn.execute(text("TRUNCATE papers, grades, llm_spend, grading_batches"))
     with Session(engine) as session:
         yield session
     engine.dispose()
