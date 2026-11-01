@@ -85,14 +85,13 @@ def test_login_rate_limited_per_email(client: TestClient, db_session: Session) -
     assert codes == [200] * 5 + [429]
 
 
-def test_rate_limit_per_ip_and_window(db_session: Session) -> None:
+def test_global_rate_limit_and_window(db_session: Session) -> None:
     now = datetime(2026, 11, 1, 12, tzinfo=UTC)
-    for i in range(5):
-        assert magic_links.allow_attempt(db_session, f"u{i}@x.com", "ip-a", now)
-    assert not magic_links.allow_attempt(db_session, "u9@x.com", "ip-a", now)
-    assert magic_links.allow_attempt(db_session, "u9@x.com", "ip-b", now)
+    for i in range(magic_links.GLOBAL_RATE_LIMIT):
+        assert magic_links.allow_attempt(db_session, f"u{i}@x.com", now)
+    assert not magic_links.allow_attempt(db_session, "new@x.com", now)
     later = now + timedelta(hours=1, seconds=1)
-    assert magic_links.allow_attempt(db_session, "u9@x.com", "ip-a", later)
+    assert magic_links.allow_attempt(db_session, "new@x.com", later)
 
 
 def test_opening_link_does_not_consume_it_and_post_signs_in(

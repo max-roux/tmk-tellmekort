@@ -181,13 +181,12 @@ class MagicLink(Base):
 
 
 class LoginAttempt(Base):
-    """One /login request, for rate limiting by email and by IP (IP stored as a keyed hash)."""
+    """One /login request, for rate limiting per email and overall."""
 
     __tablename__ = "login_attempts"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(Text, index=True)
-    ip_hash: Mapped[str] = mapped_column(Text, index=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True
     )

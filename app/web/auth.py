@@ -32,11 +32,6 @@ def login_link(settings: Settings, token: str) -> str:
     return f"{settings.base_url.rstrip('/')}/auth#{token}"
 
 
-def _client_ip(request: Request) -> str:
-    # Behind Render's proxy, uvicorn --proxy-headers puts the real client here.
-    return request.client.host if request.client else "unknown"
-
-
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request, user: CurrentUser) -> Response:
     if user is not None:
@@ -61,8 +56,7 @@ def login(
             status_code=422,
         )
     now = datetime.now(UTC)
-    ip_hash = magic_links.hash_ip(settings.secret_key, _client_ip(request))
-    if not magic_links.allow_attempt(session, email, ip_hash, now):
+    if not magic_links.allow_attempt(session, email, now):
         return TEMPLATES.TemplateResponse(
             request,
             "auth/login.html",

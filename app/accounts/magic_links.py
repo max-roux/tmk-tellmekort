@@ -1,11 +1,11 @@
 """Magic-link sign-in (SPEC.md §3, §16): random, single-use, 15-minute tokens.
 
-Only a SHA-256 of each token is stored. Rate limit: 5 requests per hour per email and
-per IP (the IP is stored as a keyed hash, never in clear).
+Only a SHA-256 of each token is stored. Rate limit: 5 requests per hour per email, and
+50 per hour across all emails (a ceiling on the sign-in email we can be made to send).
+There is no per-IP limit: behind Render's proxy the client address is not trustworthy.
 """
 
 import hashlib
-import hmac
 import secrets
 from datetime import datetime, timedelta
 
@@ -17,14 +17,11 @@ from app.db.models import LoginAttempt, MagicLink, User
 LINK_TTL = timedelta(minutes=15)
 RATE_WINDOW = timedelta(hours=1)
 RATE_LIMIT = 5
+GLOBAL_RATE_LIMIT = 50
 
 
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
-
-
-def hash_ip(secret_key: str, ip: str) -> str:
-    return hmac.new(secret_key.encode(), ip.encode(), hashlib.sha256).hexdigest()
 
 
 def issue(session: Session, user: User, now: datetime) -> str:
@@ -56,8 +53,8 @@ def consume(session: Session, token: str, now: datetime) -> User | None:
     return session.get(User, user_id) if user_id else None
 
 
-def allow_attempt(session: Session, email: str, ip_hash: str, now: datetime) -> bool:
-    """Record a /login request; False when the email or IP is over the limit. Commits.
+def allow_attempt(session: Session, email: str, now: datetime) -> bool:
+    """Record a /login request; False when the email or everyone is over the limit. Commits.
 
     Attempts older than the window are pruned. Over-limit requests are not recorded, so
     a blocked client is let back in once its earlier requests age out of the window.
@@ -66,10 +63,10 @@ def allow_attempt(session: Session, email: str, ip_hash: str, now: datetime) -> 
     session.execute(delete(LoginAttempt).where(LoginAttempt.created_at <= since))
     recent = select(func.count()).select_from(LoginAttempt).where(LoginAttempt.created_at > since)
     by_email = session.scalar(recent.where(LoginAttempt.email == email)) or 0
-    by_ip = session.scalar(recent.where(LoginAttempt.ip_hash == ip_hash)) or 0
-    if by_email >= RATE_LIMIT or by_ip >= RATE_LIMIT:
+    total = session.scalar(recent) or 0
+    if by_email >= RATE_LIMIT or total >= GLOBAL_RATE_LIMIT:
         session.commit()
         return False
-    session.add(LoginAttempt(email=email, ip_hash=ip_hash, created_at=now))
+    session.add(LoginAttempt(email=email, created_at=now))
     session.commit()
     return True

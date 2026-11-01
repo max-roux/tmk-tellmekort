@@ -138,7 +138,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **magic_links**: `token_hash`, `user_id`, `expires_at`, `used_at`.
 
-**login_attempts**: `id`, `email`, `ip_hash` (HMAC of the IP with `SECRET_KEY`), `created_at`. For the `/login` rate limit; rows older than an hour are pruned.
+**login_attempts**: `id`, `email`, `created_at`. For the `/login` rate limit; rows older than an hour are pruned.
 
 **calibration_items**: `id`, `pmid`, `rubric_version`, `surgeon_scores` (jsonb), `model_scores` (jsonb), `created_at`.
 
@@ -385,7 +385,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 - Account deletion endpoint: `/settings` → delete removes all of the user's rows.
 - Magic links and action tokens are single-purpose, signed and expiring; only their hashes are stored.
 - When `BASE_URL` is `https://`, the web app refuses to start with a missing or placeholder `SECRET_KEY`, or without `POSTMARK_SERVER_TOKEN` and `EMAIL_FROM`, rather than run with forgeable sessions or silently unsent sign-in emails.
-- Rate-limit `/login` (5 per hour per email and per IP).
+- Rate-limit `/login`: 5 per hour per email and 50 per hour overall. No per-IP limit: behind Render's proxy the client address comes from a header the client can forge, and IPs are personal data we would rather not keep.
 
 ---
 
