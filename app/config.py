@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     # Pertinence cosine needed for scores 2, 3, 4 and 5 (SPEC.md §8.2); ascending.
     # Set from the first real run: graded papers' cosines span ~0.55-0.71 (10th-90th pct).
     pertinence_thresholds: tuple[float, float, float, float] = (0.50, 0.58, 0.65, 0.72)
-    email_min_weighted: float = 3.5
+    email_min_weighted: float = 3.2
     active_window_days: int = 90
     # Profile vector coefficients (SPEC.md §8.1); the not-for-me term is subtracted.
     profile_coef_topics: float = 1.0

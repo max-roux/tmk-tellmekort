@@ -296,7 +296,7 @@ An hourly cron job (`cli.py send-due`) finds onboarded users whose local send sl
 ### 10.2 Pick selection (`app/domain/picks.py`)
 1. **Fresh pick**: the top eligible paper by weighted score with `entrez_date` in the last 7 days and never sent to this user.
 2. **Missed pick**: the top eligible paper from the active window (90 days), excluding the fresh pick and anything previously sent.
-3. **Quality cutoff**: a pick is sent only if `weighted ≥ EMAIL_MIN_WEIGHTED` (default 3.5).
+3. **Quality cutoff**: a pick is sent only if `weighted ≥ EMAIL_MIN_WEIGHTED` (default 3.2). Lowered from 3.5 once pertinence thresholds were tuned (§8.2): on the first real run, 13 of 102 eligible papers clear 3.2 (about the top 13%) against 2 at 3.5, so the fresh slot would otherwise be empty most weeks. Recheck after the surgeon's first weeks.
 4. **Never zero**: if neither pick clears the cutoff, send the single best eligible unsent paper anyway, labelled fresh or missed by its date. If nothing at all is eligible, send a short "quiet week" email with a link to the feed and alert the admin (that means the profile or query needs attention).
 5. The email therefore contains 1 or 2 papers.
 
@@ -394,7 +394,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.50, 0.58, 0.65, 0.72]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.50, 0.58, 0.65, 0.72]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.2`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
 
 ---
 

@@ -22,7 +22,7 @@ def test_spec_defaults() -> None:
     assert s.grade_limit_per_week == 100
     assert s.pertinence_gate == 0.30
     assert s.pertinence_thresholds == (0.50, 0.58, 0.65, 0.72)
-    assert s.email_min_weighted == 3.5
+    assert s.email_min_weighted == 3.2
     assert s.active_window_days == 90
 
 
