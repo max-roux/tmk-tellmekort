@@ -1,36 +1,38 @@
-"""Blind calibration grading for the surgeon (SPEC.md §12 step 2). Model scores are never shown."""
+"""Blind calibration grading for the surgeon (SPEC.md §12 step 2). Model scores are never shown.
+
+Open to signed-in admins and users marked `can_calibrate` (`cli.py users add --calibrator`).
+"""
 
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import Settings, get_settings
 from app.db.models import CalibrationItem, Paper, User
 from app.db.session import get_session
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.grading.rubric import criterion_guides
 from app.jobs.calibration import current_items, save_surgeon_scores
-from app.web import access
 from app.web.sessions import CurrentUser
 from app.web.templating import TEMPLATES
 
 router = APIRouter(prefix="/admin/calibrate")
 
 SessionDep = Annotated[Session, Depends(get_session)]
-SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
-def _allowed(settings: Settings, request: Request, user: User | None) -> bool:
-    """Admins signed in, or anyone holding the signed calibration link."""
-    return (user is not None and user.is_admin) or access.has_access(settings, request)
-
-
-def _denied(request: Request) -> HTMLResponse:
-    return TEMPLATES.TemplateResponse(request, "calibrate/denied.html", status_code=403)
+def _gate(request: Request, user: User | None) -> Response | None:
+    """A response refusing access, or None when the user may calibrate."""
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+    if not (user.is_admin or user.can_calibrate):
+        return TEMPLATES.TemplateResponse(
+            request, "calibrate/denied.html", {"user": user}, status_code=403
+        )
+    return None
 
 
 def _render_item(
@@ -67,26 +69,10 @@ def _next_ungraded(items: list[CalibrationItem], after: uuid.UUID | None = None)
     return None
 
 
-@router.get("/enter", response_class=HTMLResponse)
-def enter_page(request: Request) -> HTMLResponse:
-    return TEMPLATES.TemplateResponse(request, "calibrate/enter.html")
-
-
-@router.post("/enter")
-def enter(request: Request, settings: SettingsDep, t: Annotated[str, Form()] = "") -> Response:
-    if not access.token_valid(settings, t):
-        return _denied(request)
-    response = RedirectResponse("/admin/calibrate", status_code=303)
-    access.grant(settings, response, t)
-    return response
-
-
 @router.get("", response_class=HTMLResponse)
-def overview(
-    request: Request, session: SessionDep, settings: SettingsDep, user: CurrentUser
-) -> Response:
-    if not _allowed(settings, request, user):
-        return _denied(request)
+def overview(request: Request, session: SessionDep, user: CurrentUser) -> Response:
+    if refused := _gate(request, user):
+        return refused
     items = current_items(session)
     pmids = [i.pmid for i in items]
     papers = {p.pmid: p for p in session.scalars(select(Paper).where(Paper.pmid.in_(pmids)))}
@@ -94,6 +80,7 @@ def overview(
         request,
         "calibrate/overview.html",
         {
+            "user": user,
             "rows": [(i, papers[i.pmid]) for i in items],
             "done": sum(i.surgeon_scores is not None for i in items),
             "next_url": _next_ungraded(items),
@@ -106,11 +93,10 @@ def item_page(
     request: Request,
     item_id: uuid.UUID,
     session: SessionDep,
-    settings: SettingsDep,
     user: CurrentUser,
 ) -> Response:
-    if not _allowed(settings, request, user):
-        return _denied(request)
+    if refused := _gate(request, user):
+        return refused
     items = current_items(session)
     item = next((i for i in items if i.id == item_id), None)
     if item is None:
@@ -123,11 +109,10 @@ async def save_item(
     request: Request,
     item_id: uuid.UUID,
     session: SessionDep,
-    settings: SettingsDep,
     user: CurrentUser,
 ) -> Response:
-    if not _allowed(settings, request, user):
-        return _denied(request)
+    if refused := _gate(request, user):
+        return refused
     form = await request.form()
     scores: dict[str, int] = {}
     for c in INTRINSIC_CRITERIA:

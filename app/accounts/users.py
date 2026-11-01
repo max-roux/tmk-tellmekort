@@ -14,18 +14,29 @@ def get_by_email(session: Session, email: str) -> User | None:
     return session.scalar(select(User).where(User.email == normalise_email(email)))
 
 
-def add_user(session: Session, email: str, *, name: str = "", is_admin: bool = False) -> User:
-    """Create the user, or update name and admin flag if the email exists. Commits."""
+def add_user(
+    session: Session,
+    email: str,
+    *,
+    name: str = "",
+    is_admin: bool = False,
+    can_calibrate: bool = False,
+) -> User:
+    """Create the user, or update name and grant flags if the email exists. Commits.
+
+    Flags are only ever granted here, never revoked.
+    """
     email = normalise_email(email)
     if "@" not in email:
         raise ValueError(f"not an email address: {email!r}")
     user = get_by_email(session, email)
     if user is None:
-        user = User(email=email, name=name, is_admin=is_admin)
+        user = User(email=email, name=name, is_admin=is_admin, can_calibrate=can_calibrate)
         session.add(user)
     else:
         user.name = name or user.name
         user.is_admin = is_admin or user.is_admin
+        user.can_calibrate = can_calibrate or user.can_calibrate
     session.commit()
     return user
 

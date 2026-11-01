@@ -1,12 +1,14 @@
 import random
 import re
 from collections.abc import Iterator
-from datetime import date
+from datetime import UTC, date, datetime
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.accounts import magic_links
+from app.accounts.users import add_user
 from app.config import Settings, get_settings
 from app.db.session import get_session
 from app.grading.grader import Grader
@@ -14,7 +16,6 @@ from app.jobs.calibration import create_sample, current_items, grade_set
 from app.jobs.weekly_ingest import store_papers
 from app.main import create_app
 from app.sources.pubmed import parse_pubmed_xml
-from app.web import access
 from tests.conftest import FIXTURES
 from tests.fakes import FakeAnthropic, message
 
@@ -47,49 +48,44 @@ def client(session: Session) -> TestClient:
     return TestClient(app, base_url="https://maxfac.test")
 
 
-def enter(client: TestClient) -> None:
-    resp = client.post(
-        "/admin/calibrate/enter", data={"t": access.make_token(SETTINGS)}, follow_redirects=False
-    )
-    assert resp.status_code == 303
-    assert resp.headers["location"] == "/admin/calibrate"
+def enter(client: TestClient, session: Session, **flags: bool) -> None:
+    """Sign in as the surgeon, a calibrator unless flags say otherwise."""
+    user = add_user(session, "surgeon@example.com", **(flags or {"can_calibrate": True}))
+    token = magic_links.issue(session, user, datetime.now(UTC))
+    assert client.post("/auth", data={"t": token}, follow_redirects=False).status_code == 303
 
 
-def test_link_puts_token_in_fragment_not_query() -> None:
-    link = access.make_link(SETTINGS)
-    assert link.startswith("https://maxfac.test/admin/calibrate/enter#")
-    assert "?" not in link
+def test_anonymous_goes_to_login(client: TestClient, session: Session) -> None:
+    item = current_items(session)[0]
+    for resp in (
+        client.get("/admin/calibrate", follow_redirects=False),
+        client.get(f"/admin/calibrate/{item.id}", follow_redirects=False),
+        client.post(f"/admin/calibrate/{item.id}", data=SCORES, follow_redirects=False),
+    ):
+        assert resp.status_code == 303 and resp.headers["location"] == "/login"
 
 
-def test_pages_denied_without_access(client: TestClient, session: Session) -> None:
+def test_signed_in_without_permission_is_refused(client: TestClient, session: Session) -> None:
+    enter(client, session, is_admin=False)
     item = current_items(session)[0]
     assert client.get("/admin/calibrate").status_code == 403
-    assert client.get(f"/admin/calibrate/{item.id}").status_code == 403
     assert client.post(f"/admin/calibrate/{item.id}", data=SCORES).status_code == 403
+    session.refresh(item)
+    assert item.surgeon_scores is None
 
 
-def test_bad_or_foreign_token_rejected(client: TestClient) -> None:
-    other = Settings(_env_file=None, secret_key="other")  # type: ignore[call-arg]
-    for t in ("", "garbage", access.make_token(other)):
-        assert client.post("/admin/calibrate/enter", data={"t": t}).status_code == 403
+def test_admins_may_calibrate(client: TestClient, session: Session) -> None:
+    enter(client, session, is_admin=True)
+    assert client.get("/admin/calibrate").status_code == 200
 
 
-def test_enter_sets_secure_httponly_cookie(client: TestClient) -> None:
-    resp = client.post(
-        "/admin/calibrate/enter", data={"t": access.make_token(SETTINGS)}, follow_redirects=False
-    )
-    cookie = resp.headers["set-cookie"]
-    assert "HttpOnly" in cookie and "Secure" in cookie and "SameSite=lax" in cookie
-    assert "Path=/admin/calibrate" in cookie
-
-
-def test_enter_page_reads_fragment_client_side(client: TestClient) -> None:
-    html = client.get("/admin/calibrate/enter").text
-    assert "location.hash" in html and 'method="post"' in html
+def test_calibrators_see_a_link_from_any_page(client: TestClient, session: Session) -> None:
+    enter(client, session)
+    assert 'href="/admin/calibrate"' in client.get("/onboarding").text
 
 
 def test_overview_and_blind_item_page(client: TestClient, session: Session) -> None:
-    enter(client)
+    enter(client, session)
     overview = client.get("/admin/calibrate")
     assert overview.status_code == 200
     assert "0 of 3" in overview.text
@@ -105,7 +101,7 @@ def test_overview_and_blind_item_page(client: TestClient, session: Session) -> N
 
 
 def test_save_moves_to_next_ungraded_then_overview(client: TestClient, session: Session) -> None:
-    enter(client)
+    enter(client, session)
     items = current_items(session)
     for n, item in enumerate(items):
         resp = client.post(
@@ -131,7 +127,7 @@ def test_save_moves_to_next_ungraded_then_overview(client: TestClient, session: 
 
 
 def test_missing_score_rerenders_with_error(client: TestClient, session: Session) -> None:
-    enter(client)
+    enter(client, session)
     item = current_items(session)[0]
     resp = client.post(f"/admin/calibrate/{item.id}", data={"novelty": "2", "comment": "kept"})
     assert resp.status_code == 422

@@ -55,7 +55,10 @@
   {% if user %}
   <header class="top">
     <a class="brand" href="/">Maxfac Papers</a>
-    <form method="post" action="/logout"><button class="linklike small" type="submit">Sign out</button></form>
+    <span class="small">
+      {% if user.is_admin or user.can_calibrate %}<a href="/admin/calibrate">Calibration</a> · {% endif %}
+      <form method="post" action="/logout" style="display:inline"><button class="linklike" type="submit">Sign out</button></form>
+    </span>
   </header>
   {% endif %}
   <main>{% block content %}{% endblock %}</main>

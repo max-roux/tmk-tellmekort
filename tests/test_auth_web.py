@@ -157,19 +157,12 @@ def test_tampered_or_deleted_user_session_is_anonymous(
     assert client.get("/onboarding", follow_redirects=False).status_code == 303
 
 
-def test_admin_session_opens_calibration(client: TestClient, db_session: Session) -> None:
-    surgeon = add_user(db_session, "surgeon@example.com")
-    client.post("/auth", data={"t": magic_links.issue(db_session, surgeon, datetime.now(UTC))})
-    assert client.get("/admin/calibrate").status_code == 403
-    add_user(db_session, "surgeon@example.com", is_admin=True)
-    assert client.get("/admin/calibrate").status_code == 200
-
-
 def test_add_user_normalises_and_updates(db_session: Session) -> None:
     a = add_user(db_session, " Surgeon@Example.com ", name="Ana")
     b = add_user(db_session, "surgeon@example.com", is_admin=True)
-    assert a.id == b.id and b.email == "surgeon@example.com"
-    assert b.name == "Ana" and b.is_admin
+    c = add_user(db_session, "surgeon@example.com", can_calibrate=True)
+    assert a.id == b.id == c.id and c.email == "surgeon@example.com"
+    assert c.name == "Ana" and c.is_admin and c.can_calibrate  # flags are only granted
     with pytest.raises(ValueError):
         add_user(db_session, "not-an-email")
 

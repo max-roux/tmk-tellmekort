@@ -38,7 +38,6 @@ from app.jobs.narrow_candidates import (
 from app.jobs.weekly_ingest import ingest as run_ingest
 from app.profiles.service import coefficients, embed_topics, refresh_all_profiles
 from app.sources.pubmed import PubMedClient, load_specialty_query
-from app.web.access import make_link
 from app.web.auth import login_link
 
 cli = typer.Typer(no_args_is_help=True, help="Maxfac Paper Recommender operator CLI.")
@@ -235,12 +234,6 @@ def calibrate_grade() -> None:
     )
 
 
-@calibrate.command("link")
-def calibrate_link() -> None:
-    """Print the private link to the blind-grading page (valid 30 days)."""
-    typer.echo(make_link(get_settings()))
-
-
 @calibrate.command("report")
 def calibrate_report(
     version: Annotated[int, typer.Option(help="Rubric version.")] = RUBRIC_VERSION,
@@ -279,14 +272,20 @@ def users_add(
     email: str,
     name: Annotated[str, typer.Option(help="Display name.")] = "",
     admin: Annotated[bool, typer.Option(help="Can open /admin pages.")] = False,
+    calibrator: Annotated[
+        bool, typer.Option(help="Can blind-grade the calibration set (the surgeon).")
+    ] = False,
 ) -> None:
-    """Create a user, or update the name and admin flag of an existing one."""
+    """Create a user, or update the name and grant flags of an existing one."""
     with Session(get_engine()) as session:
         try:
-            user = add_user(session, email, name=name, is_admin=admin)
+            user = add_user(session, email, name=name, is_admin=admin, can_calibrate=calibrator)
         except ValueError as e:
             raise typer.BadParameter(str(e)) from None
-        typer.echo(f"{user.email}{' (admin)' if user.is_admin else ''}: ready to sign in.")
+        roles = [
+            r for r, on in (("admin", user.is_admin), ("calibrator", user.can_calibrate)) if on
+        ]
+        typer.echo(f"{user.email}{f' ({", ".join(roles)})' if roles else ''}: ready to sign in.")
 
 
 @users.command("list")
@@ -297,6 +296,7 @@ def users_list() -> None:
             state = "onboarded" if is_onboarded(session, u) else "not onboarded"
             vector = "profile vector" if session.get(ProfileVector, u.id) else "no profile vector"
             admin = ", admin" if u.is_admin else ""
+            admin += ", calibrator" if u.can_calibrate else ""
             typer.echo(f"{u.email}  ({state}, {vector}{admin})")
 
 

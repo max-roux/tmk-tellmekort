@@ -165,6 +165,8 @@ class User(Base):
     send_local_time: Mapped[time] = mapped_column(Time, server_default="06:30")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     is_admin: Mapped[bool] = mapped_column(Boolean, server_default="false")
+    # May blind-grade the calibration set (SPEC.md §12); admins always can.
+    can_calibrate: Mapped[bool] = mapped_column(Boolean, server_default="false")
 
 
 class MagicLink(Base):
