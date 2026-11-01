@@ -103,8 +103,9 @@ def _pick(
     session: Session, user: User, settings: Settings, now: datetime
 ) -> tuple[Picks, dict[str, FeedItem]]:
     ranked = queries.feed(session, user.id, settings, now.date(), limit=None)
+    # A paper the user already liked has been seen and saved: not news for the email.
     picks = select_picks(
-        [i.ranked for i in ranked],
+        [i.ranked for i in ranked if not i.state.liked],
         sent=emailed_pmids(session, user.id),
         fresh_since=now.date() - timedelta(days=FRESH_DAYS),
         cutoff=settings.email_min_weighted,

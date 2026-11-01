@@ -9,6 +9,7 @@ from app.accounts.users import add_user
 from app.config import Settings
 from app.db.models import CriterionSettings, EmailSend, User
 from app.email.base import EmailMessage, MailerError
+from app.feed import feedback
 from app.jobs.send_due_emails import preview, send_due
 from app.profiles import service
 from app.profiles.topics import ProposedTopic
@@ -164,3 +165,13 @@ def test_preview_renders_without_recording(db_session: Session, user: User) -> N
     message = preview(db_session, user, SETTINGS, SUNDAY)
     assert "Fresh this week" in message.text
     assert db_session.scalars(select(EmailSend)).all() == []
+
+
+def test_a_paper_the_user_already_liked_is_not_emailed(db_session: Session, user: User) -> None:
+    grade(db_session, "42963307", 5)
+    grade(db_session, "42949936", 4)
+    feedback.record(db_session, user.id, "42963307", "like", "app", SETTINGS)
+    send_due(db_session, SETTINGS, Mailer(), SUNDAY)
+    row = db_session.scalars(select(EmailSend)).one()
+    assert "42963307" not in (row.fresh_pmid, row.missed_pmid)
+    assert row.fresh_pmid == "42949936"
