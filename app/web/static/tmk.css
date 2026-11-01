@@ -16,7 +16,7 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-::selection { background: var(--accent); color: var(--paper); }
+::selection { background: var(--ink); color: var(--paper); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 a { color: inherit; text-decoration-thickness: var(--hair); text-underline-offset: 0.18em; }
@@ -416,7 +416,7 @@ p:last-child { margin-bottom: 0; }
 .figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.2rem 0 0.4rem; }
 .figures div { display: flex; flex-direction: column; align-items: center; }
 .figures .numeral { font-size: 2.1rem; color: var(--accent-text); }
-.figures .label { color: var(--ink-soft); margin: 0.4rem 0 0; font-size: 0.625rem; letter-spacing: 0.1em; }
+.figures .label { color: var(--ink-soft); margin: 0.4rem 0 0; letter-spacing: 0.1em; }
 
 /* ---------- Buttons, actions, forms ---------- */
 

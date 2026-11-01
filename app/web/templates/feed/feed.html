@@ -44,11 +44,11 @@
       <h2 id="run-title">This edition</h2>
       {% if run %}
       <div class="figures">
-        <div><span class="numeral">{{ run.found }}</span><span class="label">found in PubMed</span></div>
+        <div><span class="numeral">{{ run.found }}</span><span class="label">found</span></div>
         <div><span class="numeral">{{ run.screened }}</span><span class="label">screened</span></div>
         <div><span class="numeral">{{ run.graded }}</span><span class="label">graded</span></div>
       </div>
-      <p class="meta">Weekly run of {{ run.started_at.day }} {{ run.started_at.strftime("%B") }}</p>
+      <p class="meta">PubMed, weekly run of {{ run.started_at.day }} {{ run.started_at.strftime("%B") }}</p>
       {% else %}
       <p class="small muted">The first weekly run has not happened yet.</p>
       {% endif %}
