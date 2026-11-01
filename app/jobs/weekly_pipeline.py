@@ -178,7 +178,9 @@ def run_weekly(
                 c.mailer,
                 settings,
                 today,
-                selected_ungraded(session),
+                selected_ungraded(
+                    session, since=today - timedelta(days=settings.active_window_days)
+                ),
                 poll,
             ),
         ),

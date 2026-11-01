@@ -113,12 +113,22 @@ def narrow(
     return stats
 
 
-def selected_ungraded(session: Session, limit: int | None = None) -> list[str]:
-    """Papers selected for grading in any week that lack a current-version grade, best
-    narrowing score first (the order the spend guard keeps them in)."""
+def selected_ungraded(session: Session, *, since: date, limit: int | None = None) -> list[str]:
+    """Papers selected for grading in any week that lack a current-version grade and are
+    still in the active window (entered on or after `since`), best narrowing score first
+    (the order the spend guard keeps them in).
+
+    The window bounds what is queued: a paper that keeps failing stops being retried once
+    it ages out, and a rubric change does not re-queue every paper ever selected.
+    """
+    in_window = select(Paper.pmid).where(Paper.entrez_date >= since)
     stmt = (
         select(Candidate.pmid)
-        .where(Candidate.selected_for_grading, Candidate.pmid.not_in(currently_graded()))
+        .where(
+            Candidate.selected_for_grading,
+            Candidate.pmid.not_in(currently_graded()),
+            Candidate.pmid.in_(in_window),
+        )
         .group_by(Candidate.pmid)
         .order_by(func.max(Candidate.narrow_score).desc(), Candidate.pmid.desc())
         .limit(limit)

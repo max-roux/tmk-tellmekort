@@ -184,7 +184,8 @@ def grade(
     grader = _grader()
     today = datetime.now(UTC).date()
     with Session(get_engine()) as session, _pubmed() as pubmed:
-        todo = selected_ungraded(session, limit) if batch else (pmids or [])
+        since = datetime.now(UTC).date() - timedelta(days=get_settings().active_window_days)
+        todo = selected_ungraded(session, since=since, limit=limit) if batch else (pmids or [])
         texts = fetch_full_texts(session, pubmed, todo, settings.fulltext_max_tokens)
         typer.echo(
             f"Grading {len(todo)} papers with rubric v{RUBRIC_VERSION} "

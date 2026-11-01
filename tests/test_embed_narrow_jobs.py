@@ -110,13 +110,16 @@ def test_selected_ungraded_excludes_graded(session: Session) -> None:
     e = FakeEmbedder()
     embed_papers(session, e)
     narrow(session, e, **OCT, week=WEEK, limit=10, anchor_text="A")
-    assert len(selected_ungraded(session)) == 4
+    assert len(selected_ungraded(session, since=OCT["since"])) == 4
+    # After the active window moves past a paper, it is no longer worth grading (or
+    # regrading after a rubric change): it can never be shown.
+    assert "42949936" not in selected_ungraded(session, since=date(2026, 10, 29))
     grader = Grader(FakeAnthropic(sync=[message()]), model="claude-sonnet-5-5", effort="low")  # type: ignore[arg-type]
     from app.jobs.grade_papers import grade_sync
 
     grade_sync(session, grader, ["42958619"], date(2026, 11, 1))
-    assert "42958619" not in selected_ungraded(session)
-    assert len(selected_ungraded(session, limit=2)) == 2
+    assert "42958619" not in selected_ungraded(session, since=OCT["since"])
+    assert len(selected_ungraded(session, since=OCT["since"], limit=2)) == 2
 
 
 class FakePmc:
