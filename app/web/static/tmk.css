@@ -44,70 +44,32 @@ p:last-child { margin-bottom: 0; }
 
 .masthead { text-align: center; container-type: inline-size; }
 
-/* Front page: the full nameplate, set to the width of the page. */
-.nameplate {
+/* The small wordmark at the top of every page; "TMK" reads out by weight. */
+.wordmark-row { border-bottom: var(--hair) solid var(--rule-strong); padding: 0.5rem 0 0.4rem; }
+.wordmark {
+  display: inline-block;
+  padding: 0.65rem 0.5rem;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 17.7vw;          /* fallback; the container unit below wins */
-  font-size: 17.7cqi;
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  margin: 0;
-  padding: 0.2em 0 0.08em;
-  text-wrap: nowrap;
-}
-/* All ink; "TMK" reads out of the name by weight alone. */
-.nameplate .initial { font-weight: 900; }
-
-.edition {
-  font-family: var(--font-label);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink);
-  border-top: var(--hair) solid var(--rule-strong);
-  border-bottom: var(--hair) solid var(--rule-strong);
-  padding: 0.55rem 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.15rem 0.6rem;
-}
-.edition .dot { color: var(--accent); }
-.masthead:not(.compact) .edition { border-top: 3px double var(--rule-strong); }
-
-/* Inner pages: the compact TMK mark. */
-.masthead.compact { padding-top: 0.9rem; }
-.mark {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
   color: var(--ink);
   text-decoration: none;
-  padding: 0.25rem 0.5rem;
-  min-height: var(--tap);
-  justify-content: center;
 }
-.mark::after { content: ""; display: block; width: 100%; height: 2px; background: var(--accent); margin-top: 0.3rem; }
-.mark:hover { color: var(--ink); }
+.wordmark .initial { font-weight: 900; }
+.wordmark:hover { color: var(--ink); }
 
-/* The page's section title, like a section front. */
-.section-title {
-  font-family: var(--font-display);
+/* The section word, like Tablet's NEWS: heavy grotesque capitals. */
+.section-word {
+  font-family: var(--font-label);
   font-weight: 900;
-  font-size: clamp(2.5rem, 11vw, 6rem);
-  line-height: 0.95;
+  font-size: min(7.5rem, 11.5cqi);
+  line-height: 0.9;
   letter-spacing: -0.01em;
-  text-align: center;
-  margin: 1.4rem 0 0.4rem;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0.45em 0 0.3em;
 }
 .section-dek {
   text-align: center;
@@ -117,13 +79,31 @@ p:last-child { margin-bottom: 0; }
   margin: 0 auto 1.75rem;
 }
 
+.edition {
+  font-family: var(--font-label);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-top: 3px double var(--rule-strong);
+  padding: 0.55rem 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.15rem 0.6rem;
+}
+.edition .dot { color: var(--accent); }
+
 /* ---------- Section strip ---------- */
 
 .sections {
+  border-top: var(--hair) solid var(--rule-strong);
   border-bottom: var(--hair) solid var(--rule-strong);
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.5rem;
 }
-.masthead.compact + .sections { border-top: var(--hair) solid var(--rule-strong); margin-top: 0.6rem; }
+.wordmark-row + .sections, .masthead:has(> .wordmark-row:only-child) + .sections { border-top: 0; }
 .sections ul {
   list-style: none;
   margin: 0;
@@ -193,24 +173,6 @@ p:last-child { margin-bottom: 0; }
 
 .standfirst { color: var(--ink-soft); }
 
-.lead { text-align: left; padding-bottom: 1.75rem; border-bottom: var(--hair) solid var(--rule); }
-.lead .headline { font-size: clamp(1.9rem, 6.5vw, 3rem); line-height: 1.08; max-width: 24ch; margin: 0.4rem 0 0.9rem; }
-.lead .standfirst { font-size: 1.1875rem; line-height: 1.5; max-width: 40rem; margin: 0; }
-.lead .meta { margin-top: 0.9rem; }
-.lead-body {
-  display: grid;
-  gap: 1.5rem;
-  margin: 1.75rem 0 0;
-  text-align: left;
-}
-.lead-foot { display: grid; gap: 0.75rem; }
-.lead-foot .story-foot, .lead-foot .row-actions { justify-content: flex-start; margin: 0; }
-@media (min-width: 900px) {
-  .lead-body { grid-template-columns: minmax(0, 1fr) 17rem; grid-template-rows: auto 1fr; gap: 1.5rem 2.5rem; align-items: start; }
-  .lead-body .scorebox { grid-column: 2; grid-row: 1 / span 2; }
-  .lead-body .lead-foot { grid-column: 1; grid-row: 2; }
-}
-
 .pull { margin: 0; padding: 0.9rem 0 0; border-top: 2px solid var(--accent); }
 .pull p:not(.label) {
   font-family: var(--font-display);
@@ -220,8 +182,7 @@ p:last-child { margin-bottom: 0; }
   margin: 0;
 }
 
-/* The overall score and the five-criterion scorecard. */
-.scorebox { border: var(--hair) solid var(--rule-strong); }
+/* The overall score. */
 .overall {
   display: flex;
   align-items: baseline;
@@ -240,58 +201,9 @@ p:last-child { margin-bottom: 0; }
 .overall .numeral { font-size: 4.25rem; }
 .overall .label { color: var(--ink-soft); margin: 0; }
 
-.scorecard { margin: 0; padding: 0.15rem 1rem 0.35rem; }
-.scorecard div {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.4rem 0;
-  border-bottom: var(--hair) solid var(--rule);
-}
-.scorecard div:last-child { border-bottom: 0; }
-.scorecard dt {
-  font-family: var(--font-label);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-.scorecard dd {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.25rem;
-  line-height: 1;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.scorecard dd small { font-family: var(--font-label); font-size: 0.6875rem; color: var(--ink-soft); }
-
 .story-foot { margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.5rem 0.75rem; align-items: center; }
 
-/* Second stories: two columns from 900px, closed by Tablet's corner rules. */
-.seconds { display: grid; border-bottom: var(--hair) solid var(--rule); }
-.second { padding: 1.5rem 0; }
-.second + .second { border-top: var(--hair) solid var(--rule); }
-.second .headline { font-size: clamp(1.4rem, 4.6vw, 1.625rem); line-height: 1.15; margin-bottom: 0.7rem; }
-.second .standfirst { font-size: 1rem; margin: 0; max-width: 30rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
-.mini-score { display: flex; justify-content: flex-start; align-items: baseline; gap: 0.45rem; margin: 0.9rem 0 0; }
-.mini-score .numeral { font-size: 2.25rem; }
-.mini-score .label { color: var(--ink-soft); margin: 0; }
-@media (min-width: 900px) {
-  .lead { text-align: center; }
-  .lead .headline, .lead .standfirst { margin-left: auto; margin-right: auto; }
-  /* Centred headline; everything under it shares the standfirst's left edge. */
-  .lead .standfirst, .lead > .meta { text-align: left; max-width: 36rem; margin-left: auto; margin-right: auto; }
-  .second { text-align: center; }
-  .second > :not(.headline) { text-align: left; max-width: 30rem; margin-left: auto; margin-right: auto; }
-  .seconds { grid-template-columns: 1fr 1fr; }
-  .second { padding: 1.75rem 1.75rem; }
-  .second:first-child { padding-left: 0; border-right: var(--hair) solid var(--rule); }
-  .second:last-child { padding-right: 0; }
-  .second + .second { border-top: 0; }
-}
-
-/* Briefs: a ruled list on a phone, a row of cells on a wide page. */
+/* A small capitals heading over a ruled list. */
 .briefs-head {
   font-family: var(--font-label);
   font-size: 0.6875rem;
@@ -302,43 +214,6 @@ p:last-child { margin-bottom: 0; }
   margin: 2rem 0 0;
   padding-bottom: 0.6rem;
   border-bottom: var(--hair) solid var(--rule-strong);
-}
-.briefs { list-style: none; margin: 0; padding: 0; display: grid; }
-.brief {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.25rem 1rem;
-  align-items: start;
-  padding: 1rem 0;
-  border-bottom: var(--hair) solid var(--rule);
-}
-.brief .headline { font-size: 1.1875rem; line-height: 1.22; }
-.brief .meta { grid-column: 1; margin-top: 0.35rem; }
-.brief .numeral { grid-row: 1 / span 2; grid-column: 2; font-size: 1.75rem; padding-top: 0.1rem; }
-@media (min-width: 900px) {
-  .briefs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .brief {
-    grid-template-columns: 1fr;
-    text-align: center;
-    padding: 1.25rem 1.25rem 1.5rem;
-    border-bottom: 0;
-    border-top: var(--hair) solid var(--rule);
-    border-left: var(--hair) solid var(--rule);
-    align-content: start;
-  }
-  .brief:nth-child(-n+3) { border-top: 0; }
-  .brief:nth-child(3n+1) { border-left: 0; padding-left: 0; }
-  .brief:nth-child(3n) { padding-right: 0; }
-  .brief .numeral { grid-row: auto; grid-column: 1; order: -1; font-size: 2rem; padding: 0 0 0.35rem; }
-  .brief .meta { grid-column: 1; }
-}
-@media (min-width: 1200px) {
-  .briefs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .brief:nth-child(-n+4) { border-top: 0; }
-  .brief:nth-child(3n+1) { border-left: var(--hair) solid var(--rule); padding-left: 1.25rem; }
-  .brief:nth-child(3n) { padding-right: 1.25rem; }
-  .brief:nth-child(4n+1) { border-left: 0; padding-left: 0; }
-  .brief:nth-child(4n) { padding-right: 0; }
 }
 
 /* ---------- Paper page: a feature article ---------- */
@@ -386,16 +261,106 @@ p:last-child { margin-bottom: 0; }
 .dispute textarea { min-height: 5rem; }
 .feature-ids { text-align: center; margin-top: 1.5rem; }
 
-/* ---------- Front page grid ---------- */
+/* ---------- Front page: Tablet's grid of ruled cells ---------- */
 
-.front { display: grid; gap: 0; }
-.front-main { min-width: 0; }
-.rail { display: grid; gap: 1.25rem; align-content: start; padding: 1.75rem 0 0; }
+.front-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
+.cell { min-width: 0; padding: 1.25rem 0; border-bottom: var(--hair) solid var(--rule-mid); }
+.cell:first-child { padding-top: 0.25rem; }
+
+/* Phone: same order as print, the boxes after the second stories. */
+.cell-lead { order: 1; }
+.cell-second, .suggestion { order: 2; }
+.cell-aside { order: 3; border-bottom: 0; display: grid; gap: 1rem; align-content: start; }
+.cell-story { order: 4; }
+.cell-brief { order: 5; }
+.cell-figure { order: 6; }
+.suggestion { order: 0; }
+
 @media (min-width: 900px) {
-  .front { grid-template-columns: minmax(0, 1fr) 16.5rem; }
-  .front-main { padding-right: 2rem; border-right: var(--hair) solid var(--rule); }
-  .rail { padding: 0 0 0 2rem; }
+  .front-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+  .front-grid > * { order: 0; }
+  .cell {
+    padding: 0.25rem 1.1rem 1.4rem 0;
+    border-right: var(--hair) solid var(--rule-mid);
+    border-bottom: var(--hair) solid var(--rule-mid);
+  }
+  .cell:first-child { padding-top: 0.25rem; }
+  .cell-lead { grid-column: span 3; }
+  .cell-aside { grid-column: span 1; padding: 0; border: 0; }
+  .cell-second { grid-column: span 2; }
+  .suggestion { grid-column: 1 / -1; }
 }
+
+.dek {
+  font-family: var(--font-label);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin: 0.6rem 0 0;
+}
+.cell .meta { margin-top: 0.7rem; }
+
+/* The score plate: where Tablet runs a photograph, the paper's scores as a picture. */
+.plate {
+  display: grid;
+  gap: 1rem 1.75rem;
+  align-items: center;
+  background: var(--paper-deep);
+  padding: 1.1rem 1.25rem 1.25rem;
+  margin: 0 0 1.25rem;
+}
+.plate .overall { border: 0; padding: 0; justify-content: flex-start; }
+.plate .overall .numeral { font-size: 4.5rem; }
+.bars { margin: 0; display: grid; gap: 0.45rem; }
+.bars div { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr) 1.25rem; gap: 0.75rem; align-items: center; }
+.bars dt { font-family: var(--font-label); font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; }
+.bars dd { display: contents; }
+.bar { position: relative; height: 0.6rem; border-bottom: var(--hair) solid var(--rule-mid); }
+.bar::before { content: ""; position: absolute; inset: 0 auto 0 0; width: calc(var(--s) * 20%); background: var(--ink); }
+.bars .n { font-family: var(--font-display); font-size: 1.125rem; line-height: 1; text-align: right; font-variant-numeric: lining-nums tabular-nums; }
+@media (min-width: 640px) { .plate { grid-template-columns: auto minmax(0, 1fr); } }
+
+.plate-small { padding: 0.8rem 1rem; gap: 0.6rem 1.25rem; }
+.plate-small .overall .numeral { font-size: 2.75rem; }
+.plate-small .bars { gap: 0.3rem; }
+.plate-small .bars div { grid-template-columns: 9.5rem minmax(0, 1fr) 1rem; gap: 0.5rem; }
+.plate-small .bars dt { font-size: 0.625rem; letter-spacing: 0.08em; white-space: nowrap; }
+.plate-small .bar { height: 0.45rem; }
+.plate-small .bars .n { font-size: 0.9375rem; }
+
+/* Lead: centred like Tablet's lead under its picture. */
+.cell-lead .headline { font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; }
+.cell-lead > .dek { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.cell-lead .pull { margin: 1.25rem 0 0; }
+.cell-lead .story-foot { margin-top: 1rem; }
+.cell-lead .row-actions { margin-top: 0.6rem; }
+@media (min-width: 900px) {
+  .cell-lead > .headline, .cell-lead > .dek, .cell-lead > .meta { text-align: center; max-width: 40rem; margin-left: auto; margin-right: auto; }
+  .cell-lead > .headline { max-width: 26ch; }
+  .cell-lead .pull { max-width: 40rem; margin-left: auto; margin-right: auto; }
+  .cell-lead .story-foot, .cell-lead .row-actions { justify-content: center; }
+}
+
+.cell-second .headline { font-size: clamp(1.4rem, 3vw, 1.75rem); line-height: 1.12; text-align: center; }
+.cell-second .dek, .cell-second .meta { text-align: center; }
+.cell-second .dek { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.cell-second .row-actions { justify-content: center; margin-top: 0.9rem; }
+
+/* Short stories: Tablet's left-set column items. */
+.cell-story > .numeral { display: block; margin-bottom: 0.35rem; }
+.cell-story .headline { font-size: 1.1875rem; line-height: 1.2; }
+.cell-story .numeral { font-size: 1.75rem; line-height: 1; }
+.cell-story .dek { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+
+/* Briefs: centred titles, like Tablet's bottom row. */
+.cell-brief { text-align: center; }
+.cell-brief .numeral { display: block; font-size: 1.75rem; margin-bottom: 0.4rem; }
+.cell-brief .headline { font-size: 1.0625rem; line-height: 1.25; }
+
+/* The big numeral cell, like Tablet's "21". */
+.cell-figure { text-align: center; display: flex; flex-direction: column; justify-content: center; }
+.cell-figure .numeral { font-size: 4.5rem; line-height: 0.9; }
+.cell-figure p { font-family: var(--font-label); font-size: 0.8125rem; color: var(--ink-soft); margin: 0.6rem auto 0; max-width: 14rem; }
 
 /* Sidebar boxes: vermilion hairline frame, small-caps heading. */
 .box { border: var(--hair) solid var(--accent); padding: 0.9rem 1rem 1rem; text-align: center; }
@@ -414,6 +379,13 @@ p:last-child { margin-bottom: 0; }
 .box li { font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; }
 .box li + li { border-top: var(--hair) solid var(--rule); }
 .box .box-link { display: inline-flex; align-items: center; min-height: var(--tap); }
+/* Red-text box: every word in vermilion, like Tablet's featured boxes. */
+.box-red, .box-red li, .box-red .box-link { color: var(--accent-text); }
+.box-red li + li { border-top-color: var(--accent); }
+/* Inverted box: paper on ink, like "Listen to Tablet". */
+.box-ink { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.box-ink h2 { color: var(--paper); border-bottom-color: var(--paper); }
+.box-ink .figures .numeral, .box-ink .figures .label, .box-ink .meta, .box-ink p { color: var(--paper); }
 .figures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.2rem 0 0.4rem; }
 .figures div { display: flex; flex-direction: column; align-items: center; }
 .figures .numeral { font-size: 2.1rem; color: var(--accent-text); }
@@ -526,7 +498,7 @@ p.error:not(.notice) { border: 0; padding: 0; }
 /* A narrow reading column for forms and notices. */
 .welcome { text-align: center; padding-top: 2.5rem; font-size: 1.1875rem; }
 .masthead + main { padding-top: 1.75rem; }
-.masthead.compact + main { border-top: var(--hair) solid var(--rule-strong); margin-top: 0.6rem; }
+.masthead:has(> .section-word:last-child) + main { border-top: var(--hair) solid var(--rule-strong); }
 .column { max-width: var(--measure); margin: 0 auto; }
 .column > h1 { font-size: clamp(2rem, 7vw, 2.75rem); margin: 0.5rem 0 0.9rem; }
 .column > h2 { font-size: 1.5rem; margin: 2.5rem 0 0.75rem; }
@@ -549,7 +521,7 @@ p.error:not(.notice) { border: 0; padding: 0; }
   padding: 2rem 0;
 }
 .empty h2 { font-size: 1.75rem; margin-bottom: 0.75rem; }
-.front-main > .empty { margin-top: 0; border-top: 0; padding-top: 0.5rem; }
+.cell > .empty { margin: 0; border: 0; padding: 1.5rem 0; }
 
 /* ---------- One-tap confirm pages ---------- */
 

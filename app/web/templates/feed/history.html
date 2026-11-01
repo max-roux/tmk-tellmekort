@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% from "feed/_macros.html" import entry %}
 {% block title %}History · Tell Me Kort{% endblock %}
+{% block section %}<h1 class="section-word">History</h1>{% endblock %}
 {% block content %}
-<h1 class="section-title">History</h1>
 <p class="section-dek">Papers you marked read or not for you. Undo to put one back on the front page.</p>
 {% if entries %}
 <ol class="index">{% for e in entries %}{{ entry(e, "/history") }}{% endfor %}</ol>

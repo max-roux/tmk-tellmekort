@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Settings · Tell Me Kort{% endblock %}
+{% block section %}<h1 class="section-word">Settings</h1>{% endblock %}
 {% block content %}
-<h1 class="section-title">Settings</h1>
 <div class="form-page">
   {% if saved %}<p class="notice" role="status">Saved.</p>{% endif %}
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}

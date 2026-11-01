@@ -17,11 +17,10 @@
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <div class="page">
-    {% block masthead %}
-    <header class="masthead compact">
-      <a class="mark" href="/" aria-label="Tell Me Kort, front page">TMK</a>
+    <header class="masthead">
+      {% include "_nameplate.html" %}
+      {% block section %}{% endblock %}
     </header>
-    {% endblock %}
     {% if user %}
     {% set path = request.url.path %}
     <nav class="sections" aria-label="Sections">

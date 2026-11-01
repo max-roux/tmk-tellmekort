@@ -45,6 +45,7 @@
   --ink: #151515;
   --ink-soft: #55504a;    /* metadata, standfirsts: 6.6:1 on paper */
   --rule: rgb(21 21 21 / 0.22);       /* hairlines */
+  --rule-mid: rgb(21 21 21 / 0.45);   /* cell rules */
   --rule-strong: rgb(21 21 21 / 0.85); /* frame, control borders */
   --accent: #d9472b;      /* vermilion: rules, frames, large type (3.5:1) */
   --accent-text: #b23a1f; /* vermilion for small text (4.9:1) */
@@ -69,6 +70,7 @@
   --ink: #ede5d3;
   --ink-soft: #b3aa99;  /* 7.5:1 */
   --rule: rgb(237 229 211 / 0.2);
+  --rule-mid: rgb(237 229 211 / 0.4);
   --rule-strong: rgb(237 229 211 / 0.75);
   --accent: #e8603f;      /* 5.0:1 */
   --accent-text: #ef7556; /* 6.0:1 */
@@ -82,6 +84,7 @@
     --ink: #ede5d3;
     --ink-soft: #b3aa99;
     --rule: rgb(237 229 211 / 0.2);
+    --rule-mid: rgb(237 229 211 / 0.4);
     --rule-strong: rgb(237 229 211 / 0.75);
     --accent: #e8603f;
     --accent-text: #ef7556;

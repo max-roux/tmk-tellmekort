@@ -1,56 +1,50 @@
 {% extends "base.html" %}
-{% from "feed/_macros.html" import lead, second, brief %}
+{% from "feed/_macros.html" import lead, second, story, brief %}
 {% block title %}Tell Me Kort · No. {{ edition.number }}{% endblock %}
-{% block masthead %}
-<header class="masthead">
-  {% include "_nameplate.html" %}
-  <p class="edition">
-    <span>No. {{ edition.number }}</span><span class="dot" aria-hidden="true">·</span>
-    <span>Week of {{ edition.week_label }}</span><span class="dot" aria-hidden="true">·</span>
-    <span>{{ edition.papers }} paper{{ "s" if edition.papers != 1 }} in this edition</span>
-  </p>
-</header>
+{% block section %}
+<h1 class="section-word">This week</h1>
+<p class="edition">
+  <span>No. {{ edition.number }}</span><span class="dot" aria-hidden="true">·</span>
+  <span>Week of {{ edition.week_label }}</span><span class="dot" aria-hidden="true">·</span>
+  <span>{{ edition.papers }} paper{{ "s" if edition.papers != 1 }} in this edition</span>
+</p>
 {% endblock %}
 {% block content %}
-<div class="front">
-  <div class="front-main">
-    {% if suggestion %}
-    {% set name = dict(CRITERIA)[suggestion] %}
-    <aside class="notice suggestion" role="status" aria-label="Weight suggestion">
-      <p>Papers you like score high on {{ name|lower }}. Raise its weight?</p>
-      <div class="row-actions">
-        <form method="post" action="/suggestion/apply"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit" aria-pressed="true">Raise {{ name|lower }}</button></form>
-        <form method="post" action="/suggestion/dismiss"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit">No thanks</button></form>
-      </div>
-    </aside>
-    {% endif %}
-    {% if items %}
-    {{ lead(items[0]) }}
-    {% if items[1:3] %}
-    <div class="seconds">
-      {% for item in items[1:3] %}{{ second(item) }}{% endfor %}
+<div class="front-grid">
+  {% if suggestion %}
+  {% set name = dict(CRITERIA)[suggestion] %}
+  <aside class="notice suggestion" role="status" aria-label="Weight suggestion">
+    <p>Papers you like score high on {{ name|lower }}. Raise its weight?</p>
+    <div class="row-actions">
+      <form method="post" action="/suggestion/apply"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit" aria-pressed="true">Raise {{ name|lower }}</button></form>
+      <form method="post" action="/suggestion/dismiss"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit">No thanks</button></form>
     </div>
-    {% endif %}
-    {% else %}
-    <section class="empty" aria-labelledby="empty-title">
+  </aside>
+  {% endif %}
+
+  {% if items %}
+  {{ lead(items[0]) }}
+  {% else %}
+  <section class="cell cell-lead" aria-labelledby="empty-title">
+    <div class="empty">
       <h2 id="empty-title">No papers in this edition yet</h2>
       <p class="muted">Papers appear once they are graded and match your topics. New papers arrive with the weekly run on Sunday.</p>
       <p class="muted">You can <a href="/onboarding/topics">broaden your topics</a> or <a href="/onboarding/weights">relax your minimums</a>.</p>
-    </section>
-    {% endif %}
-  </div>
+    </div>
+  </section>
+  {% endif %}
 
-  <aside class="rail" aria-label="About this edition">
-    <section class="box" aria-labelledby="beat-title">
+  <aside class="cell cell-aside" aria-label="About this edition">
+    <section class="box box-red" aria-labelledby="beat-title">
       <h2 id="beat-title">Your beat</h2>
       {% if beat %}
       <ul>{% for label in beat %}<li>{{ label }}</li>{% endfor %}</ul>
       {% else %}
-      <p class="small muted">No active topics.</p>
+      <p class="small">No active topics.</p>
       {% endif %}
       <a class="box-link meta" href="/onboarding/topics">Edit topics</a>
     </section>
-    <section class="box" aria-labelledby="run-title">
+    <section class="box box-ink" aria-labelledby="run-title">
       <h2 id="run-title">This edition</h2>
       {% if run %}
       <div class="figures">
@@ -60,18 +54,20 @@
       </div>
       <p class="meta">PubMed, weekly run of {{ run.started_at.day }} {{ run.started_at.strftime("%B") }}</p>
       {% else %}
-      <p class="small muted">The first weekly run has not happened yet.</p>
+      <p class="small">The first weekly run has not happened yet.</p>
       {% endif %}
     </section>
   </aside>
-</div>
 
-{% if items[3:] %}
-<section aria-labelledby="briefs-title">
-  <h2 class="briefs-head" id="briefs-title">Also in this edition</h2>
-  <ol class="briefs">
-    {% for item in items[3:] %}{{ brief(item) }}{% endfor %}
-  </ol>
-</section>
-{% endif %}
+  {% for item in items[1:3] %}{{ second(item) }}{% endfor %}
+  {% for item in items[3:7] %}{{ story(item) }}{% endfor %}
+  {% for item in items[7:] %}{{ brief(item) }}{% endfor %}
+
+  {% if items %}
+  <div class="cell cell-figure">
+    <span class="numeral">{{ edition.papers }}</span>
+    <p>{% if run and run.graded %}picked for you from {{ run.graded }} papers graded this week{% else %}picked for you this week{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

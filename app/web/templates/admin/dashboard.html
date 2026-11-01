@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Admin · Tell Me Kort{% endblock %}
+{% block section %}<h1 class="section-word">Admin</h1>{% endblock %}
 {% block content %}
-<h1 class="section-title">Admin</h1>
 {% if sent %}<p class="notice" role="status">Test email sent to {{ user.email }}.</p>{% endif %}
 
 <section class="desk">

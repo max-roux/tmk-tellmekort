@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Calibration · Tell Me Kort{% endblock %}
+{% block section %}<h1 class="section-word">Calibration</h1>{% endblock %}
 {% block content %}
-<h1 class="section-title">Calibration</h1>
 <p class="section-dek">Grade {{ rows|length }} papers against the rubric. Score each paper on four criteria from its abstract, as you would judge it yourself.
 The model's scores are hidden until you are done; afterwards we compare them.</p>
 {% if rows %}
