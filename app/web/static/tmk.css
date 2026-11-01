@@ -270,7 +270,7 @@ p:last-child { margin-bottom: 0; }
 .second { padding: 1.5rem 0; }
 .second + .second { border-top: var(--hair) solid var(--rule); }
 .second .headline { font-size: clamp(1.4rem, 4.6vw, 1.625rem); line-height: 1.15; margin-bottom: 0.7rem; }
-.second .standfirst { font-size: 1rem; margin: 0; max-width: 30rem; }
+.second .standfirst { font-size: 1rem; margin: 0; max-width: 30rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
 .mini-score { display: flex; justify-content: flex-start; align-items: baseline; gap: 0.45rem; margin: 0.9rem 0 0; }
 .mini-score .numeral { font-size: 2.25rem; }
 .mini-score .label { color: var(--ink-soft); margin: 0; }
