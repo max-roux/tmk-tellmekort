@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     smtp_password: str = ""
     email_from: str = ""
     admin_email: str = ""
+    # Render sets RENDER=true on every service: production even if BASE_URL is wrong.
+    render: bool = False
 
     grade_limit_per_week: int = 100
     fulltext_max_tokens: int = 12_000
@@ -50,7 +52,7 @@ class Settings(BaseSettings):
 
     @property
     def is_production(self) -> bool:
-        return self.base_url.startswith("https://")
+        return self.render or self.base_url.startswith("https://")
 
     @property
     def email_provider(self) -> str:
@@ -64,11 +66,15 @@ class Settings(BaseSettings):
         if not self.is_production:
             return []
         problems = []
+        if not self.base_url.startswith("https://"):
+            problems.append("BASE_URL must be the app's https:// address (links and cookies)")
         if self.secret_key in ("", DEV_SECRET_KEY, "change-me"):
             problems.append("SECRET_KEY is unset or a placeholder (anyone could forge sessions)")
         problems += self._mail_problems()
         if not self.email_from:
             problems.append("EMAIL_FROM is unset")
+        if not self.admin_email:
+            problems.append("ADMIN_EMAIL is unset (failure and spend alerts would go nowhere)")
         return problems
 
     def _mail_problems(self) -> list[str]:

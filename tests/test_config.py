@@ -39,6 +39,7 @@ def test_production_problems_only_on_https() -> None:
         secret_key="a-long-random-value",
         postmark_server_token="pm",
         email_from="papers@mail.example.com",
+        admin_email="admin@example.com",
     )
     assert ready.production_problems() == []
 
@@ -65,6 +66,7 @@ def test_smtp_alone_is_enough_for_production() -> None:
             "base_url": "https://papers.example.com",
             "secret_key": "a-long-random-value",
             "email_from": "tmkpapers@gmail.com",
+            "admin_email": "admin@example.com",
             "smtp_host": "smtp.gmail.com",
             "smtp_username": "tmkpapers@gmail.com",
             "smtp_password": "app-pass",
@@ -97,3 +99,22 @@ def test_half_set_smtp_falls_back_to_the_outbox() -> None:
 
     half = Settings(_env_file=None, smtp_host="smtp.gmail.com")  # type: ignore[call-arg]
     assert isinstance(mailer_for(half), OutboxMailer)
+
+
+def test_on_render_a_missing_or_http_base_url_is_a_problem() -> None:
+    # Render sets RENDER=true on every service; the checks must not depend on BASE_URL.
+    for base_url in ("http://localhost:8000", "http://tmk-web.onrender.com", ""):
+        s = Settings(_env_file=None, render=True, base_url=base_url)  # type: ignore[call-arg]
+        problems = " ".join(s.production_problems())
+        assert "BASE_URL" in problems and "SECRET_KEY" in problems
+
+
+def test_production_needs_an_admin_email_for_alerts() -> None:
+    s = Settings(  # type: ignore[call-arg]
+        _env_file=None,
+        base_url="https://papers.example.com",
+        secret_key="a-long-random-value",
+        postmark_server_token="pm",
+        email_from="papers@mail.example.com",
+    )
+    assert "ADMIN_EMAIL" in " ".join(s.production_problems())

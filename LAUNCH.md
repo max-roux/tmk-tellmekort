@@ -33,7 +33,8 @@ marked **(Render shell)** run in the `tmk-web` service's Shell tab on Render, wi
       `BASE_URL` (the https address of the web service), `ANTHROPIC_API_KEY`,
       `VOYAGE_API_KEY`, `NCBI_API_KEY`, `NCBI_EMAIL`, `SMTP_USERNAME`, `SMTP_PASSWORD`
       (leave `POSTMARK_SERVER_TOKEN` empty for now), `EMAIL_FROM`, `ADMIN_EMAIL`. `SECRET_KEY` is generated and shared automatically.
-      The web service and jobs refuse to start without a way to send email or the secret key.
+      The web service and jobs refuse to start (on Render) unless `BASE_URL` is `https://`,
+      email can be sent and `ADMIN_EMAIL` is set; check a failed deploy's log for which.
 - [ ] Open `BASE_URL/healthz`: `{"status": "ok", "db": "ok"}`.
 
 ## 4. Accounts
