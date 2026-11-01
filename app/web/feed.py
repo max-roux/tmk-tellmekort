@@ -76,7 +76,9 @@ def answer_suggestion(
 def privacy(request: Request, user: CurrentUser, settings: SettingsDep) -> HTMLResponse:
     """The one-page privacy note (SPEC.md §16); public."""
     return TEMPLATES.TemplateResponse(
-        request, "privacy.html", {"user": user, "contact": settings.admin_email}
+        request,
+        "privacy.html",
+        {"user": user, "contact": settings.admin_email, "email_provider": settings.email_provider},
     )
 
 

@@ -30,7 +30,7 @@ def test_production_problems_only_on_https() -> None:
     assert local.production_problems() == []
     bare = Settings(_env_file=None, base_url="https://papers.example.com")  # type: ignore[call-arg]
     problems = " ".join(bare.production_problems())
-    assert "SECRET_KEY" in problems and "POSTMARK_SERVER_TOKEN" in problems
+    assert "SECRET_KEY" in problems and "POSTMARK_SERVER_TOKEN or SMTP_HOST" in problems
     assert "EMAIL_FROM" in problems
     ready = Settings(  # type: ignore[call-arg]
         _env_file=None,
@@ -56,3 +56,35 @@ def test_pertinence_thresholds_parse_and_must_ascend(monkeypatch: pytest.MonkeyP
     monkeypatch.setenv("PERTINENCE_THRESHOLDS", "[0.5, 0.3, 0.45, 0.7]")
     with pytest.raises(ValueError, match="ascending"):
         Settings(_env_file=None)  # type: ignore[call-arg]
+
+
+def test_smtp_alone_is_enough_for_production() -> None:
+    def gmail(**overrides: str) -> Settings:
+        values = {
+            "base_url": "https://papers.example.com",
+            "secret_key": "a-long-random-value",
+            "email_from": "maxfacpapers@gmail.com",
+            "smtp_host": "smtp.gmail.com",
+            "smtp_username": "maxfacpapers@gmail.com",
+            "smtp_password": "app-pass",
+        } | overrides
+        return Settings(_env_file=None, **values)  # type: ignore[call-arg, arg-type]
+
+    assert gmail().production_problems() == []
+    assert "SMTP_PASSWORD" in " ".join(gmail(smtp_password="").production_problems())
+
+
+def test_mailer_prefers_postmark_then_smtp_then_outbox() -> None:
+    from app.email import mailer_for
+    from app.email.outbox import OutboxMailer
+    from app.email.postmark import PostmarkMailer
+    from app.email.smtp import SmtpMailer
+
+    base = {"email_from": "maxfacpapers@gmail.com"}
+    smtp = {"smtp_host": "smtp.gmail.com", "smtp_username": "u", "smtp_password": "p"}
+    both = Settings(_env_file=None, postmark_server_token="pm", **base, **smtp)  # type: ignore[call-arg, arg-type]
+    only_smtp = Settings(_env_file=None, **base, **smtp)  # type: ignore[call-arg, arg-type]
+    neither = Settings(_env_file=None, **base)  # type: ignore[call-arg, arg-type]
+    assert isinstance(mailer_for(both), PostmarkMailer)
+    assert isinstance(mailer_for(only_smtp), SmtpMailer)
+    assert isinstance(mailer_for(neither), OutboxMailer)

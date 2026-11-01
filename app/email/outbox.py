@@ -1,6 +1,6 @@
 """Development mailer: writes messages to a local folder instead of sending them.
 
-Used when POSTMARK_SERVER_TOKEN is unset. The folder (var/outbox by default) is
+Used when neither POSTMARK_SERVER_TOKEN nor SMTP_HOST is set. The folder (var/outbox by default) is
 gitignored; messages may contain sign-in links, so it is for local use only.
 """
 

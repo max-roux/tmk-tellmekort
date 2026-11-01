@@ -19,11 +19,11 @@
 <h2>Who else handles it</h2>
 <ul>
   <li><strong>Render</strong> hosts the app and its database in Frankfurt, in the EU.</li>
-  <li><strong>Postmark</strong> delivers our emails, so it receives your email address and the email's contents. Open and click tracking is switched off.</li>
+  <li><strong>{{ email_provider }}</strong> delivers our emails, so it receives your email address and the email's contents. We add no open or click tracking.</li>
   <li><strong>Anthropic</strong> grades papers and turns your interests into topic suggestions, so it receives paper text and the interests you type during setup.</li>
   <li><strong>Voyage AI</strong> turns paper text and your topic descriptions into vectors for matching.</li>
 </ul>
-<p>Anthropic, Voyage AI and Postmark may process this data outside the EU under their own data processing terms. Paper data comes from PubMed (NCBI); nothing about you is sent there.</p>
+<p>Anthropic, Voyage AI and {{ email_provider }} may process this data outside the EU under their own data processing terms. Paper data comes from PubMed (NCBI); nothing about you is sent there.</p>
 
 <h2>How long, and how to remove it</h2>
 <p>We keep your data while you have an account. You can delete your account at any time from <a href="/settings">Settings</a>: that removes everything above straight away. Papers and their grades are shared by all users and stay.</p>

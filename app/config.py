@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     ncbi_email: str = ""
     ncbi_tool: str = "maxfac-recommender"
     postmark_server_token: str = ""
+    # SMTP fallback when there is no Postmark token, e.g. Gmail with an app password.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
     email_from: str = ""
     admin_email: str = ""
 
@@ -46,6 +51,13 @@ class Settings(BaseSettings):
     def is_production(self) -> bool:
         return self.base_url.startswith("https://")
 
+    @property
+    def email_provider(self) -> str:
+        """Who delivers our email, for the privacy note (SPEC.md §16)."""
+        if self.postmark_server_token or not self.smtp_host:
+            return "Postmark"
+        return "Google (Gmail)" if "gmail" in self.smtp_host else self.smtp_host
+
     def production_problems(self) -> list[str]:
         """Settings that would make a public deployment silently insecure or broken."""
         if not self.is_production:
@@ -53,11 +65,26 @@ class Settings(BaseSettings):
         problems = []
         if self.secret_key in ("", DEV_SECRET_KEY, "change-me"):
             problems.append("SECRET_KEY is unset or a placeholder (anyone could forge sessions)")
-        if not self.postmark_server_token:
-            problems.append("POSTMARK_SERVER_TOKEN is unset (sign-in emails would not be sent)")
+        problems += self._mail_problems()
         if not self.email_from:
             problems.append("EMAIL_FROM is unset")
         return problems
+
+    def _mail_problems(self) -> list[str]:
+        if self.postmark_server_token:
+            return []
+        if not self.smtp_host:
+            return [
+                "POSTMARK_SERVER_TOKEN or SMTP_HOST must be set (sign-in emails would not be sent)"
+            ]
+        return [
+            f"{name} is unset"
+            for name, value in (
+                ("SMTP_USERNAME", self.smtp_username),
+                ("SMTP_PASSWORD", self.smtp_password),
+            )
+            if not value
+        ]
 
     @field_validator("pertinence_thresholds")
     @classmethod

@@ -10,9 +10,14 @@ marked **(Render shell)** run in the `maxfac-web` service's Shell tab on Render,
 - [ ] **Voyage AI** API key. Add a payment method: without one, Voyage limits requests to
       about 3 a minute.
 - [ ] **NCBI** API key and a contact email (https://account.ncbi.nlm.nih.gov/settings/).
-- [ ] **Postmark**: create a server, add a sending subdomain of the company domain
-      (e.g. `papers.example.com`), and verify its SPF and DKIM records. Note the server
-      token and the From address (e.g. `Maxfac Papers <papers@papers.example.com>`).
+- [ ] **Email (MVP: Gmail)**: create a dedicated Gmail account for the app, turn on 2-Step
+      Verification, then create an App password (Google Account → Security → App passwords).
+      `SMTP_USERNAME` is the address, `SMTP_PASSWORD` the 16-character app password,
+      `EMAIL_FROM` the same address (the app adds the "Tell Me Kort" name). `scripts/setup_accounts.sh`
+      walks through it and sends a test email.
+- [ ] **Later, Postmark**: create a server, add a sending subdomain of the company domain and
+      verify its DKIM and Return-Path records; set `POSTMARK_SERVER_TOKEN` and a matching
+      `EMAIL_FROM`. Postmark takes over from SMTP as soon as the token is set.
 
 ## 2. Check embeddings locally
 
@@ -26,9 +31,9 @@ marked **(Render shell)** run in the `maxfac-web` service's Shell tab on Render,
       cron jobs (`maxfac-send` hourly, `maxfac-weekly` on Sundays), all in Frankfurt.
 - [ ] Fill in the variables Render asks for, on each service that lists them:
       `BASE_URL` (the https address of the web service), `ANTHROPIC_API_KEY`,
-      `VOYAGE_API_KEY`, `NCBI_API_KEY`, `NCBI_EMAIL`, `POSTMARK_SERVER_TOKEN`,
-      `EMAIL_FROM`, `ADMIN_EMAIL`. `SECRET_KEY` is generated and shared automatically.
-      The web service and jobs refuse to start if Postmark or the secret key is missing.
+      `VOYAGE_API_KEY`, `NCBI_API_KEY`, `NCBI_EMAIL`, `SMTP_USERNAME`, `SMTP_PASSWORD`
+      (leave `POSTMARK_SERVER_TOKEN` empty for now), `EMAIL_FROM`, `ADMIN_EMAIL`. `SECRET_KEY` is generated and shared automatically.
+      The web service and jobs refuse to start without a way to send email or the secret key.
 - [ ] Open `BASE_URL/healthz`: `{"status": "ok", "db": "ok"}`.
 
 ## 4. Accounts

@@ -7,7 +7,7 @@ Maxfac Paper Recommender: weekly LLM-graded research-paper recommendations for a
 ## How to work
 - Build in the milestone order of SPEC.md §18. Finish and demo one milestone before starting the next.
 - Keep `app/domain/` pure (no DB, HTTP or clock calls; pass `now` in). All ranking, eligibility and pick logic lives there and is unit-tested.
-- External APIs (NCBI, Anthropic, Voyage, Postmark) go behind thin clients. Tests use recorded fixtures; never call live APIs in tests.
+- External APIs (NCBI, Anthropic, Voyage, Postmark, SMTP) go behind thin clients. Tests use recorded fixtures; never call live APIs in tests.
 - Every pipeline step must be idempotent and safe to re-run.
 - Any change to the rubric text bumps `RUBRIC_VERSION` in `app/grading/rubric.py`.
 - Never store patient data. Never log API keys or full email tokens.

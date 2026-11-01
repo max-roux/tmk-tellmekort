@@ -52,11 +52,11 @@ Status: milestones 1-10 built (see §18); launch steps are in LAUNCH.md. This fi
 | LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via a JSON schema (`output_config.format`). |
 | Embeddings | Voyage AI `voyage-4` (1024 dims) | Free tier covers the pilot volume. Keep behind an interface so it can be swapped. |
 | Paper source | NCBI E-utilities (PubMed + PMC `efetch`) | Register an API key (10 req/s). Send `tool` and `email` params. |
-| Email | Postmark (transactional), subdomain of the ApS domain with SPF + DKIM | Free plan covers the pilot. Without `POSTMARK_SERVER_TOKEN` (local development) emails are written to a gitignored `var/outbox/` folder instead. |
+| Email | MVP: a dedicated Gmail account over SMTP (`smtp.gmail.com:587`, app password); free, no domain needed, ~500 emails/day. Later: Postmark (transactional) on a subdomain of the ApS domain with SPF + DKIM | Postmark is used when `POSTMARK_SERVER_TOKEN` is set, else SMTP when `SMTP_HOST` is set, else (local development) emails are written to a gitignored `var/outbox/` folder. Render blocks SMTP ports on free instances only; our services are paid. |
 | Hosting | Render, Frankfurt region: web service (Starter), Postgres (Basic), cron jobs | All data in the EU. |
 | Auth | Magic link by email | Random token, single-use, 15 min expiry; only its hash is stored. |
 | Signed links | `itsdangerous` | For one-tap email actions and magic links. |
-| Tests | pytest, with recorded fixtures for PubMed / Anthropic / Voyage / Postmark | No live API calls in CI. |
+| Tests | pytest, with recorded fixtures for PubMed / Anthropic / Voyage / Postmark / SMTP | No live API calls in CI. |
 | Tooling | `uv`, `ruff`, `mypy` (strict on `app/domain`) | |
 
 Expected run cost for the pilot: ~$20–25/month (see §14).
@@ -92,7 +92,7 @@ app/
     rubric.py            # RUBRIC_VERSION + prompt text
     grader.py            # batch submit / poll / parse
   embeddings/            # interface + voyage impl
-  email/                 # templates + postmark client
+  email/                 # templates + postmark and smtp clients
   web/                   # routes and templates
   jobs/
     weekly_ingest.py
@@ -312,7 +312,7 @@ Action buttons: **Like**, **Mark read**, **Not for me**, **Open in app**.
 - No login is required for these actions; opening the app itself still requires a session.
 
 ### 10.5 Delivery
-Postmark transactional stream, with HTML and a plain-text part. Store `postmark_message_id`. No open or click tracking pixels (privacy, and the feedback links already give the signal).
+Postmark transactional stream (or SMTP in the MVP), with HTML and a plain-text part. Store the provider's message id in `postmark_message_id`. No open or click tracking pixels (privacy, and the feedback links already give the signal).
 
 ---
 
@@ -384,7 +384,7 @@ Later, disputes (§9) feed periodic recalibration.
 |---|---|---|
 | Grading | ~430 papers × ~6.4k input + ~600 output tokens at $2 / $10 per M, Batch −50% | 4–8 |
 | Embeddings | ~1M tokens/month, within the Voyage free tier | 0 |
-| Email | Postmark free tier (100/month) for the pilot; Basic $15 above that | 0 |
+| Email | Gmail SMTP for the MVP; later Postmark free tier (100/month), Basic $15 above that | 0 |
 | Hosting | Render Starter web $7 + Basic Postgres ~$7 + cron jobs (cents) | ~14 |
 | **Total (pilot)** | | **~20–25** |
 
@@ -394,18 +394,18 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.30, 0.40, 0.50, 0.60]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.30, 0.40, 0.50, 0.60]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
 
 ---
 
 ## 16. Privacy and security
 
 - Personal data stored: the surgeon's email, name, interests and feedback only. No patient data, ever.
-- Hosted in the EU (Render Frankfurt). Postmark, Anthropic and Voyage receive only paper text, profile text and the email address (Postmark only). List them as sub-processors in a one-page privacy note.
+- Hosted in the EU (Render Frankfurt). The email provider (Postmark, or Google for Gmail SMTP), Anthropic and Voyage receive only paper text, profile text and the email address (email provider only); `/privacy` names whichever provider is configured. List them as sub-processors in a one-page privacy note.
 - Account deletion endpoint: `/settings` → delete (type "delete" to confirm) removes all of the user's rows (by cascade, plus login attempts by email) and signs them out. Papers and grades are shared and stay.
 - `/privacy` lists what is stored, the sub-processors and what each receives, retention, deletion and the contact (`ADMIN_EMAIL`).
 - Magic links and action tokens are single-purpose, signed and expiring; only their hashes are stored.
-- When `BASE_URL` is `https://`, the web app refuses to start with a missing or placeholder `SECRET_KEY`, or without `POSTMARK_SERVER_TOKEN` and `EMAIL_FROM`, rather than run with forgeable sessions or silently unsent sign-in emails.
+- When `BASE_URL` is `https://`, the web app refuses to start with a missing or placeholder `SECRET_KEY`, or without `EMAIL_FROM` and a way to send (`POSTMARK_SERVER_TOKEN`, or `SMTP_HOST` with its username and password), rather than run with forgeable sessions or silently unsent sign-in emails.
 - Rate-limit `/login`: 5 per hour per email and 50 per hour overall. No per-IP limit: behind Render's proxy the client address comes from a header the client can forge, and IPs are personal data we would rather not keep.
 
 ---
