@@ -48,3 +48,11 @@ def test_app_refuses_to_start_misconfigured() -> None:
     bare = Settings(_env_file=None, base_url="https://papers.example.com")  # type: ignore[call-arg]
     with pytest.raises(RuntimeError, match="SECRET_KEY"):
         create_app(bare)
+
+
+def test_pertinence_thresholds_parse_and_must_ascend(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PERTINENCE_THRESHOLDS", "[0.2, 0.3, 0.45, 0.7]")
+    assert Settings(_env_file=None).pertinence_thresholds == (0.2, 0.3, 0.45, 0.7)  # type: ignore[call-arg]
+    monkeypatch.setenv("PERTINENCE_THRESHOLDS", "[0.5, 0.3, 0.45, 0.7]")
+    with pytest.raises(ValueError, match="ascending"):
+        Settings(_env_file=None)  # type: ignore[call-arg]

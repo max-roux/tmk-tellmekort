@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     fulltext_max_tokens: int = 12_000
     llm_monthly_cap_usd: float = 30.0
     pertinence_gate: float = 0.30
+    # Pertinence cosine needed for scores 2, 3, 4 and 5 (SPEC.md §8.2); ascending.
+    pertinence_thresholds: tuple[float, float, float, float] = (0.30, 0.40, 0.50, 0.60)
     email_min_weighted: float = 3.5
     active_window_days: int = 90
     # Profile vector coefficients (SPEC.md §8.1); the not-for-me term is subtracted.
@@ -56,6 +58,13 @@ class Settings(BaseSettings):
         if not self.email_from:
             problems.append("EMAIL_FROM is unset")
         return problems
+
+    @field_validator("pertinence_thresholds")
+    @classmethod
+    def _ascending(cls, v: tuple[float, ...]) -> tuple[float, ...]:
+        if list(v) != sorted(v):
+            raise ValueError("pertinence thresholds must be ascending")
+        return v
 
     @field_validator("database_url")
     @classmethod

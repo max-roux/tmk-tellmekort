@@ -13,6 +13,7 @@ class Preferences:
     weights: dict[str, float]
     minimums: dict[str, int | None]
     hide_case_reports: bool
+    study_types: frozenset[str] | None = None  # design buckets to keep; None keeps all
 
 
 class PreferencesError(ValueError):
