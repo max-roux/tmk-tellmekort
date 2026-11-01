@@ -101,3 +101,8 @@ def test_persistent_server_errors_give_up_after_max_attempts() -> None:
     with pytest.raises(VoyageError, match="HTTP 503 after retries"):
         make(lambda r: httpx.Response(503), sleeps).embed(["a"], "query")
     assert sleeps == [1, 2, 4, 8, 16]  # 6 attempts, 5 waits
+
+
+def test_persistent_rate_limit_says_how_to_lift_it() -> None:
+    with pytest.raises(VoyageError, match=r"HTTP 429.*payment method"):
+        make(lambda r: httpx.Response(429)).embed(["a"], "query")

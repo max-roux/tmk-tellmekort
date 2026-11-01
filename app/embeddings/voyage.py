@@ -17,6 +17,10 @@ MAX_TEXTS_PER_REQUEST = 128
 # Voyage allows 320K tokens per request for voyage-4; stay well under it.
 MAX_CHARS_PER_REQUEST = 400_000  # ~100K tokens at ~4 chars/token
 _RETRY_STATUS = {429, 500, 502, 503, 504}
+_RATE_LIMIT_HINT = (
+    " (rate limit: without a payment method Voyage allows ~3 requests and 10K tokens a"
+    " minute, less than one batch of abstracts; add one at dash.voyageai.com → Billing)"
+)
 
 
 class VoyageError(EmbeddingError):
@@ -109,7 +113,8 @@ class VoyageEmbedder:
             if resp is not None and resp.status_code not in _RETRY_STATUS:
                 return _parse(resp)
             if resp is not None and last:
-                raise VoyageError(f"embeddings: HTTP {resp.status_code} after retries")
+                hint = _RATE_LIMIT_HINT if resp.status_code == 429 else ""
+                raise VoyageError(f"embeddings: HTTP {resp.status_code} after retries{hint}")
             self._sleep(_delay(resp, attempt))
         raise AssertionError("unreachable")
 

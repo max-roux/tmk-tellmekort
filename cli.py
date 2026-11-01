@@ -19,6 +19,7 @@ from app.domain.criteria import INTRINSIC_CRITERIA
 from app.email import mailer_for
 from app.email.outbox import DEFAULT_DIR as OUTBOX_DIR
 from app.email.outbox import OutboxMailer
+from app.embeddings.base import EmbeddingError
 from app.embeddings.voyage import VoyageEmbedder
 from app.grading.grader import Grader
 from app.grading.rubric import RUBRIC_VERSION
@@ -118,11 +119,17 @@ def ingest(
 def embed() -> None:
     """Embed papers and topics lacking a current embedding, then refresh profile vectors."""
     embedder = _embedder()
-    with Session(get_engine()) as session:
-        stats = embed_papers(session, embedder)
-        topics = embed_topics(session, embedder)
-        profiles = refresh_all_profiles(session, embedder.model, coefficients(get_settings()))
-    embedder.close()
+    try:
+        with Session(get_engine()) as session:
+            stats = embed_papers(session, embedder)
+            topics = embed_topics(session, embedder)
+            profiles = refresh_all_profiles(session, embedder.model, coefficients(get_settings()))
+    except EmbeddingError as e:
+        # Chunks already embedded are committed; re-running resumes from there.
+        typer.echo(f"Embedding stopped: {e}", err=True)
+        raise typer.Exit(1) from None
+    finally:
+        embedder.close()
     typer.echo(
         f"Embedded {stats.embedded} papers ({stats.tokens} tokens) and {topics} topics; "
         f"{profiles} users have a profile vector."
