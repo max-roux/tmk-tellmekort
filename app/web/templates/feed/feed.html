@@ -3,6 +3,16 @@
 {% block title %}Your feed · Maxfac Papers{% endblock %}
 {% block content %}
 <h1>Your feed</h1>
+{% if suggestion %}
+{% set name = dict(CRITERIA)[suggestion] %}
+<div class="notice" role="status">
+  <p style="margin:0 0 .5rem">Papers you like score high on {{ name|lower }}. Raise its weight?</p>
+  <div class="row-actions" style="margin:0">
+    <form method="post" action="/suggestion/apply"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit" aria-pressed="true">Raise {{ name|lower }}</button></form>
+    <form method="post" action="/suggestion/dismiss"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit">No thanks</button></form>
+  </div>
+</div>
+{% endif %}
 <p class="muted small">The best graded papers of the last 90 days for your profile. Read and dismissed papers move to <a href="/history">History</a>.</p>
 {% for item in items %}
   {{ card(item, "/") }}

@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from app.accounts.users import is_onboarded
 from app.db.models import FEEDBACK_KINDS, Paper, User
 from app.db.session import get_session
-from app.feed import feedback, queries
+from app.domain.criteria import ALL_CRITERIA
+from app.feed import feedback, queries, suggestions
 from app.web.deps import SettingsDep
 from app.web.sessions import CurrentUser, RequiredUser
 from app.web.templating import TEMPLATES
@@ -46,9 +47,26 @@ def home(
     if not is_onboarded(session, user):
         return RedirectResponse("/onboarding", status_code=303)
     items = queries.feed(session, user.id, settings, today())
+    suggestion = suggestions.current_suggestion(session, user.id, settings)
     return TEMPLATES.TemplateResponse(
-        request, "feed/feed.html", {"user": user, "items": items, "nav": "feed"}
+        request,
+        "feed/feed.html",
+        {"user": user, "items": items, "nav": "feed", "suggestion": suggestion},
     )
+
+
+@router.post("/suggestion/{choice}")
+def answer_suggestion(
+    choice: str,
+    user: RequiredUser,
+    session: SessionDep,
+    criterion: Annotated[str, Form()] = "",
+) -> Response:
+    """Apply or dismiss a weight suggestion; weights only change on an explicit apply."""
+    if choice not in ("apply", "dismiss") or criterion not in ALL_CRITERIA:
+        return HTMLResponse("Unknown suggestion.", status_code=422)
+    (suggestions.apply if choice == "apply" else suggestions.dismiss)(session, user.id, criterion)
+    return RedirectResponse("/", status_code=303)
 
 
 @router.get("/paper/{pmid}", response_class=HTMLResponse)

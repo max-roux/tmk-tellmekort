@@ -257,6 +257,8 @@ class CriterionSettings(Base):
     min_practical_usefulness: Mapped[int | None] = mapped_column(SmallInteger)
     hide_case_reports: Mapped[bool] = mapped_column(Boolean, server_default="true")
     study_types: Mapped[list[str] | None] = mapped_column(ARRAY(Text))
+    # Weight suggestions the user dismissed (SPEC.md §8.5); they are not shown again.
+    dismissed_suggestions: Mapped[list[str]] = mapped_column(ARRAY(Text), server_default="{}")
 
 
 class ProfileVector(Base):
