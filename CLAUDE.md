@@ -18,6 +18,9 @@ Maxfac Paper Recommender: weekly LLM-graded research-paper recommendations for a
 - `uv run mypy app`: type check
 - `uv run alembic upgrade head`: migrate
 - `uv run python cli.py --help`: ingest, grade, regrade, calibrate, send-test
+- `uv run python tools/crapper.py`: CRAP score per function (keep every function under 10)
+- `uv run python tools/dryer.py`: near-duplicate functions (rank 0.8 or above)
+- `uv run mutmut run` then `uv run mutmut results`: mutation testing of `app/domain` and `app/feed`
 
 ## Conventions
 - Python 3.12, SQLAlchemy 2.x typed ORM, pydantic-settings for config.

@@ -2,7 +2,7 @@
 
 A web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
-Status: design agreed, nothing built. This file is the source of truth; update it when decisions change.
+Status: milestones 1-7 built (see §18). This file is the source of truth; update it when decisions change.
 
 ---
 
@@ -126,7 +126,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **criterion_settings**: `user_id` (PK), `w_pertinence`, `w_proof_strength`, `w_novelty`, `w_depth`, `w_practical_usefulness` (floats 0–5, default 1), `min_pertinence`, `min_proof_strength`, `min_novelty`, `min_depth`, `min_practical_usefulness` (smallint 1–5, nullable = no minimum), `hide_case_reports` (bool, default true), `study_types` (text[], nullable = all).
 
-**feedback**: `id`, `user_id`, `pmid`, `kind` (`read` | `like` | `not_for_me` | `unlike` | `unread`), `source` (`email` | `app`), `created_at`. Append-only; current state is derived from it (§9).
+**feedback**: `id`, `user_id`, `pmid`, `kind` (`read` | `like` | `not_for_me` | `unlike` | `unread` | `undismiss`, which undoes `not_for_me`), `source` (`email` | `app`), `created_at`. Append-only; current state is derived from it (§9).
 
 **score_disputes**: `id`, `user_id`, `pmid`, `grade_id`, `criterion`, `user_score` (1–5, nullable), `comment`, `created_at`.
 
@@ -374,7 +374,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.30, 0.40, 0.50, 0.60]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
 
 ---
 
