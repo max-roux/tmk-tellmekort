@@ -1,4 +1,4 @@
-Sign in to Maxfac Papers
+Sign in to Tell Me Kort
 
 Open this link to sign in. It works once and expires in {{ minutes }} minutes:
 

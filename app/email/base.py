@@ -13,6 +13,14 @@ TEMPLATES = Environment(
 )
 
 
+NAME = "Tell Me Kort"
+
+
+def sender_with_name(address: str) -> str:
+    """`Tell Me Kort <address>`, unless EMAIL_FROM already carries a display name."""
+    return address if "<" in address else f"{NAME} <{address}>"
+
+
 @dataclass(frozen=True)
 class EmailMessage:
     to: str

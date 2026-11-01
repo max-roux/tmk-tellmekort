@@ -79,7 +79,7 @@ def login(
         token = magic_links.issue(session, user, now)
         message = render(
             "magic_link",
-            "Sign in to Maxfac Papers",
+            "Sign in to Tell Me Kort",
             user.email,
             link=login_link(settings, token),
             minutes=int(magic_links.LINK_TTL.total_seconds() // 60),

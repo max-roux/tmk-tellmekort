@@ -46,7 +46,7 @@ from app.profiles.service import coefficients, embed_topics, refresh_all_profile
 from app.sources.pubmed import PubMedClient, load_specialty_query
 from app.web.auth import login_link
 
-cli = typer.Typer(no_args_is_help=True, help="Maxfac Paper Recommender operator CLI.")
+cli = typer.Typer(no_args_is_help=True, help="Tell Me Kort operator CLI.")
 calibrate = typer.Typer(
     no_args_is_help=True, help="Rubric calibration with the surgeon (SPEC §12)."
 )

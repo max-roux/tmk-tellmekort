@@ -5,7 +5,7 @@ from pathlib import Path
 import httpx
 import pytest
 
-from app.email.base import EmailMessage, MailerError, render
+from app.email.base import EmailMessage, MailerError, render, sender_with_name
 from app.email.outbox import OutboxMailer
 from app.email.postmark import POSTMARK_BASE, PostmarkMailer
 
@@ -48,11 +48,16 @@ def test_postmark_request_shape_without_tracking() -> None:
     assert req.url.path == "/email"
     assert req.headers["X-Postmark-Server-Token"] == "pm-test"
     body = json.loads(req.content)
-    assert body["From"] == "papers@mail.example.com"
+    assert body["From"] == "Tell Me Kort <papers@mail.example.com>"
     assert body["To"] == "surgeon@example.com"
     assert body["MessageStream"] == "outbound"
     assert body["TrackOpens"] is False and body["TrackLinks"] == "None"
     assert LINK in body["TextBody"] and LINK in body["HtmlBody"]
+
+
+def test_sender_keeps_a_display_name_it_already_has() -> None:
+    assert sender_with_name("papers@mail.example.com") == "Tell Me Kort <papers@mail.example.com>"
+    assert sender_with_name("TMK <papers@mail.example.com>") == "TMK <papers@mail.example.com>"
 
 
 def test_postmark_errors_raise() -> None:

@@ -46,6 +46,7 @@ def test_due_user_gets_fresh_and_missed_once_per_week(db_session: Session, user:
     stats = send_due(db_session, SETTINGS, mailer, SUNDAY)
     assert (stats.sent, stats.quiet, stats.failed) == (1, 0, 0)
     (msg,) = to_user(mailer, user)
+    assert msg.subject.startswith("Tell Me Kort: ")
     assert "Fresh this week" in msg.text and "You may have missed" in msg.text
     assert msg.text.index("Fresh this week") < msg.text.index("You may have missed")
     links = re.findall(r"https://maxfac\.test/a/\w+#[\w.-]+", msg.html)
@@ -84,7 +85,9 @@ def test_quiet_week_tells_the_user_and_alerts_the_admin(db_session: Session, use
     assert (stats.sent, stats.quiet) == (1, 1)
     (msg,) = to_user(mailer, user)
     assert "quiet week" in msg.text.lower() and "https://maxfac.test/" in msg.text
+    assert msg.subject == "Tell Me Kort: a quiet week"
     (alert,) = [m for m in mailer.sent if m.to == "admin@example.com"]
+    assert alert.subject.startswith("[TMK] ")
     assert user.email in alert.text
 
 

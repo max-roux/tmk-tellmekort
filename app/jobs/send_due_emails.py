@@ -22,7 +22,7 @@ from app.domain.criteria import INTRINSIC_CRITERIA
 from app.domain.picks import Picks, is_due, local_week, select_picks
 from app.email.actions import ACTIONS, action_link
 from app.email.alerts import alert_admin
-from app.email.base import EmailMessage, Mailer, MailerError, render
+from app.email.base import NAME, EmailMessage, Mailer, MailerError, render
 from app.feed import queries
 from app.feed.queries import FeedItem
 from app.grading.rubric import criterion_labels
@@ -130,11 +130,12 @@ def _message(
     picks, items = _pick(session, user, settings, now)
     base = settings.base_url.rstrip("/")
     if picks.quiet:
-        return render("weekly_quiet", "A quiet week", user.email, user=user, base=base), picks
+        subject = f"{NAME}: a quiet week"
+        return render("weekly_quiet", subject, user.email, user=user, base=base), picks
     papers = _email_papers(
         picks, items, load_preferences(session, user.id).weights, user, send_id, settings
     )
-    subject = papers[0].item.paper.title
+    subject = f"{NAME}: {papers[0].item.paper.title}"
     if len(subject) > 90:
         subject = subject[:87].rsplit(" ", 1)[0] + "…"
     message = render(

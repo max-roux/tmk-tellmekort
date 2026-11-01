@@ -14,6 +14,6 @@ def alert_admin(mailer: Mailer, settings: Settings, subject: str, body: str) -> 
         log.warning("alert not sent, ADMIN_EMAIL unset: %s", subject)
         return
     try:
-        mailer.send(render("admin_alert", f"[Maxfac] {subject}", settings.admin_email, body=body))
+        mailer.send(render("admin_alert", f"[TMK] {subject}", settings.admin_email, body=body))
     except MailerError as e:
         log.error("alert '%s' failed: %s", subject, e)

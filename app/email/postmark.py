@@ -3,7 +3,7 @@
 import httpx
 from pydantic import BaseModel, ValidationError
 
-from app.email.base import EmailMessage, MailerError
+from app.email.base import EmailMessage, MailerError, sender_with_name
 
 POSTMARK_BASE = "https://api.postmarkapp.com"
 
@@ -23,7 +23,7 @@ class PostmarkMailer:
         stream: str = "outbound",
         http: httpx.Client | None = None,
     ) -> None:
-        self._sender = sender
+        self._sender = sender_with_name(sender)
         self._stream = stream
         self._http = http or httpx.Client(base_url=POSTMARK_BASE, timeout=30)
         self._headers = {"Accept": "application/json", "X-Postmark-Server-Token": server_token}
