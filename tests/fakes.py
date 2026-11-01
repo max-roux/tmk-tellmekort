@@ -131,3 +131,23 @@ class FakeEmbedder:
     def embed(self, texts: list[str], input_type: str) -> Embeddings:
         self.calls.append((len(texts), input_type))
         return Embeddings(vectors=[self._vector(t) for t in texts], tokens=10 * len(texts))
+
+
+class FakeMessages:
+    """client.messages.create for plain (non-batch) calls."""
+
+    def __init__(self, responses: list[dict[str, Any] | Exception]) -> None:
+        self.responses = responses
+        self.calls: list[dict[str, Any]] = []
+
+    def create(self, **kwargs: Any) -> Message:
+        self.calls.append(kwargs)
+        r = self.responses.pop(0)
+        if isinstance(r, Exception):
+            raise r
+        return Message.model_validate(r)
+
+
+class FakeMessagesClient:
+    def __init__(self, responses: list[dict[str, Any] | Exception]) -> None:
+        self.messages = FakeMessages(responses)

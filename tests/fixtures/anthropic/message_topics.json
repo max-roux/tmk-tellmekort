@@ -1,0 +1,22 @@
+{
+  "id": "msg_01FixtureTopics",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5-5",
+  "content": [
+    {"type": "thinking", "thinking": "", "signature": "sig-fixture"},
+    {
+      "type": "text",
+      "text": "{\"topics\": [{\"label\": \"Orthognathic surgery: virtual surgical planning\", \"description\": \"Computer-assisted virtual surgical planning, CAD/CAM splints and patient-specific implants in orthognathic surgery for dentofacial deformities.\"}, {\"label\": \"Mandibular reconstruction  with fibula flap\", \"description\": \"Free fibula flap reconstruction of segmental mandibular defects after oral cavity cancer resection, including dental implant rehabilitation.\"}, {\"label\": \"Medication-related osteonecrosis of the jaw\", \"description\": \"MRONJ in patients on antiresorptive or antiangiogenic therapy: prevention, staging and surgical versus conservative treatment.\"}, {\"label\": \"Temporomandibular joint replacement\", \"description\": \"Alloplastic total temporomandibular joint replacement for end-stage TMJ disease, ankylosis and condylar resorption.\"}]}"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "stop_details": null,
+  "usage": {
+    "input_tokens": 420,
+    "output_tokens": 380,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0
+  }
+}
