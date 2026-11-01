@@ -3,11 +3,13 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     Numeric,
@@ -117,3 +119,32 @@ class CalibrationItem(Base):
     surgeon_scores: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     model_scores: Mapped[dict[str, int] | None] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+EMBEDDING_DIM = 1024
+
+
+class PaperEmbedding(Base):
+    """Embedding of title + abstract. Re-embedded when the model changes."""
+
+    __tablename__ = "paper_embeddings"
+
+    pmid: Mapped[str] = mapped_column(
+        ForeignKey("papers.pmid", ondelete="CASCADE"), primary_key=True
+    )
+    model: Mapped[str] = mapped_column(Text)
+    vector: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIM))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Candidate(Base):
+    """A paper considered for grading in one ingest week (SPEC.md §6.3)."""
+
+    __tablename__ = "candidates"
+
+    pmid: Mapped[str] = mapped_column(
+        ForeignKey("papers.pmid", ondelete="CASCADE"), primary_key=True
+    )
+    week_of: Mapped[date] = mapped_column(Date, primary_key=True, index=True)
+    narrow_score: Mapped[float] = mapped_column(Float)
+    selected_for_grading: Mapped[bool] = mapped_column(Boolean)
