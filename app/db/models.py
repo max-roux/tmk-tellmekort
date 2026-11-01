@@ -261,3 +261,50 @@ class ProfileVector(Base):
     model: Mapped[str] = mapped_column(Text)
     vector: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIM))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+FEEDBACK_KINDS = ("read", "unread", "like", "unlike", "not_for_me", "undismiss")
+
+
+class Feedback(Base):
+    """Append-only feedback events; a paper's state per user is derived from them (§9)."""
+
+    __tablename__ = "feedback"
+    __table_args__ = (
+        CheckConstraint(
+            "kind IN (" + ", ".join(f"'{k}'" for k in FEEDBACK_KINDS) + ")", name="kind"
+        ),
+        CheckConstraint("source IN ('email', 'app')", name="source"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    pmid: Mapped[str] = mapped_column(ForeignKey("papers.pmid", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ScoreDispute(Base):
+    """A surgeon disagreeing with one score; never changes the shared grade (§9)."""
+
+    __tablename__ = "score_disputes"
+    __table_args__ = (
+        CheckConstraint(
+            "criterion IN (" + ", ".join(f"'{c}'" for c in ALL_CRITERIA) + ")", name="criterion"
+        ),
+        CheckConstraint("user_score BETWEEN 1 AND 5", name="user_score_range"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    pmid: Mapped[str] = mapped_column(ForeignKey("papers.pmid", ondelete="CASCADE"))
+    grade_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("grades.id", ondelete="CASCADE"))
+    criterion: Mapped[str] = mapped_column(Text)
+    user_score: Mapped[int | None] = mapped_column(SmallInteger)
+    comment: Mapped[str] = mapped_column(Text, server_default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
