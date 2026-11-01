@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T10:55:54Z",
+  "title": "Design System: Tell Me Kort",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Newsprint",
+        "canonical": "#efe9dd",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262523",
+          "#43423f",
+          "#63615c",
+          "#85827b",
+          "#a9a59c",
+          "#cec9be",
+          "#f4eee2"
+        ],
+        "mode": "light (CSS --paper)"
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Deep Newsprint",
+        "canonical": "#e6dfd1",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262522",
+          "#44423e",
+          "#64615b",
+          "#86827a",
+          "#aaa49a",
+          "#cfc8bc",
+          "#f4eee0"
+        ],
+        "mode": "light (CSS --paper-deep)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#151515",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ],
+        "contrast": "15.1:1 on paper",
+        "mode": "light (CSS --ink)"
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#55504a",
+        "tonalRamp": [
+          "#0d0b08",
+          "#282420",
+          "#46413c",
+          "#65605b",
+          "#86827c",
+          "#a8a4a0",
+          "#ccc8c5",
+          "#f0eeeb"
+        ],
+        "contrast": "6.6:1 on paper",
+        "mode": "light (CSS --ink-soft)"
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgb(21 21 21 / 0.22)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "light (CSS --rule)"
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Rule",
+        "canonical": "rgb(21 21 21 / 0.85)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "light (CSS --rule-strong)"
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Vermilion",
+        "canonical": "#d9472b",
+        "tonalRamp": [
+          "#250000",
+          "#4e0000",
+          "#7b1602",
+          "#aa2f17",
+          "#db4a2e",
+          "#f87a61",
+          "#ffa790",
+          "#ffd4c0"
+        ],
+        "contrast": "3.5:1 on paper: large type, rules and frames only",
+        "mode": "light (CSS --accent)"
+      },
+      "accent-text": {
+        "role": "primary",
+        "displayName": "Vermilion for Text",
+        "canonical": "#b23a1f",
+        "tonalRamp": [
+          "#260000",
+          "#4e0000",
+          "#791a02",
+          "#a7341a",
+          "#c95d45",
+          "#e78771",
+          "#ffb29e",
+          "#ffddcc"
+        ],
+        "contrast": "4.9:1 on paper",
+        "mode": "light (CSS --accent-text)"
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "Newsprint on Ink",
+        "canonical": "#efe9dd",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262523",
+          "#43423f",
+          "#63615c",
+          "#85827b",
+          "#a9a59c",
+          "#cec9be",
+          "#f4eee2"
+        ],
+        "mode": "light (CSS --on-ink)"
+      },
+      "evening-paper": {
+        "role": "neutral",
+        "displayName": "Evening Charcoal",
+        "canonical": "#1d1b18",
+        "tonalRamp": [
+          "#0d0b08",
+          "#272522",
+          "#43423f",
+          "#63615e",
+          "#838280",
+          "#a6a5a3",
+          "#cac9c8",
+          "#efeeed"
+        ],
+        "mode": "dark, prefers-color-scheme (CSS --paper)"
+      },
+      "evening-paper-deep": {
+        "role": "neutral",
+        "displayName": "Deep Evening Charcoal",
+        "canonical": "#26231f",
+        "tonalRamp": [
+          "#0d0b08",
+          "#282521",
+          "#44413e",
+          "#63615d",
+          "#84827f",
+          "#a6a5a2",
+          "#cac9c7",
+          "#efeeed"
+        ],
+        "mode": "dark, prefers-color-scheme (CSS --paper-deep)"
+      },
+      "evening-ink": {
+        "role": "neutral",
+        "displayName": "Evening Cream Ink",
+        "canonical": "#ede5d3",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#44423d",
+          "#646159",
+          "#868278",
+          "#aaa598",
+          "#cfc9b9",
+          "#f6eedc"
+        ],
+        "contrast": "13.7:1 on evening paper",
+        "mode": "dark, prefers-color-scheme (CSS --ink)"
+      },
+      "evening-ink-soft": {
+        "role": "neutral",
+        "displayName": "Evening Soft Ink",
+        "canonical": "#b3aa99",
+        "tonalRamp": [
+          "#0d0b08",
+          "#28251f",
+          "#464139",
+          "#666156",
+          "#898174",
+          "#ada493",
+          "#d0c8b9",
+          "#f5eee0"
+        ],
+        "contrast": "7.5:1 on evening paper",
+        "mode": "dark, prefers-color-scheme (CSS --ink-soft)"
+      },
+      "evening-rule": {
+        "role": "neutral",
+        "displayName": "Evening Hairline",
+        "canonical": "rgb(237 229 211 / 0.2)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#44423d",
+          "#646159",
+          "#868278",
+          "#aaa598",
+          "#cfc9b9",
+          "#f6eedc"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "dark, prefers-color-scheme (CSS --rule)"
+      },
+      "evening-rule-strong": {
+        "role": "neutral",
+        "displayName": "Evening Strong Rule",
+        "canonical": "rgb(237 229 211 / 0.75)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#44423d",
+          "#646159",
+          "#868278",
+          "#aaa598",
+          "#cfc9b9",
+          "#f6eedc"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "dark, prefers-color-scheme (CSS --rule-strong)"
+      },
+      "evening-accent": {
+        "role": "primary",
+        "displayName": "Evening Vermilion",
+        "canonical": "#e8603f",
+        "tonalRamp": [
+          "#210000",
+          "#480c00",
+          "#73230e",
+          "#a13b22",
+          "#d25536",
+          "#f97a5b",
+          "#ffa78b",
+          "#ffd3bb"
+        ],
+        "contrast": "5.0:1 on evening paper",
+        "mode": "dark, prefers-color-scheme (CSS --accent)"
+      },
+      "evening-accent-text": {
+        "role": "primary",
+        "displayName": "Evening Vermilion for Text",
+        "canonical": "#ef7556",
+        "tonalRamp": [
+          "#1d0200",
+          "#421408",
+          "#6c2b1b",
+          "#98442f",
+          "#c85f44",
+          "#f57e5f",
+          "#ffa98d",
+          "#ffd4bc"
+        ],
+        "contrast": "6.0:1 on evening paper",
+        "mode": "dark, prefers-color-scheme (CSS --accent-text)"
+      },
+      "evening-on-ink": {
+        "role": "neutral",
+        "displayName": "Charcoal on Cream",
+        "canonical": "#1d1b18",
+        "tonalRamp": [
+          "#0d0b08",
+          "#272522",
+          "#43423f",
+          "#63615e",
+          "#838280",
+          "#a6a5a3",
+          "#cac9c8",
+          "#efeeed"
+        ],
+        "mode": "dark, prefers-color-scheme (CSS --on-ink)"
+      }
+    },
+    "typographyMeta": {
+      "nameplate": {
+        "displayName": "Nameplate",
+        "purpose": "Front-page 'Tell Me Kort', full width of the frame; T, M, K in vermilion."
+      },
+      "section-title": {
+        "displayName": "Section Title",
+        "purpose": "Inner section fronts: Library, History, Calibration, Admin, Not found."
+      },
+      "headline-lead": {
+        "displayName": "Lead Headline",
+        "purpose": "Lead story and paper-page feature title."
+      },
+      "headline-second": {
+        "displayName": "Second Headline",
+        "purpose": "Second stories (#2-3)."
+      },
+      "headline-index": {
+        "displayName": "Index Headline",
+        "purpose": "Library, history and listing rows."
+      },
+      "headline-brief": {
+        "displayName": "Brief Headline",
+        "purpose": "Briefs (#4-10)."
+      },
+      "pull": {
+        "displayName": "Pull Line",
+        "purpose": "'Why it matters', Playfair italic under a 2px vermilion rule."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Scores and counts; 5rem on the paper page down to 1.5rem in form steps."
+      },
+      "standfirst": {
+        "displayName": "Standfirst",
+        "purpose": "The grade's summary under a headline, soft ink."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading text, Source Serif 4 with optical sizes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Inter tracked capitals: metadata, scorecard criteria, field labels, edition line, section links."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Inter 600 capitals on buttons."
+      }
+    },
+    "shadows": [
+      {
+        "name": "checkbox-inset",
+        "value": "inset 0 0 0 3px var(--paper)",
+        "purpose": "Drawn mark, not elevation: the paper ring inside a checked ink checkbox."
+      },
+      {
+        "name": "step-underline",
+        "value": "inset 0 -2px 0 var(--accent)",
+        "purpose": "Drawn mark, not elevation: the vermilion underline on the current onboarding step."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fade",
+        "value": "background-color 120ms ease-out, color 120ms ease-out",
+        "purpose": "Buttons and section links on hover; only under prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "steps",
+        "value": "640px",
+        "purpose": "Onboarding step strip goes from two cells to four."
+      },
+      {
+        "name": "grid",
+        "value": "900px",
+        "purpose": "The column grid: front-page rail, two second stories, three brief cells, paper-page score column, frame margins."
+      },
+      {
+        "name": "wide",
+        "value": "1200px",
+        "purpose": "Briefs go to four cells."
+      }
+    ],
+    "fonts": [
+      {
+        "family": "Playfair Display",
+        "files": [
+          "playfair-display-latin-wght-normal.woff2",
+          "playfair-display-latin-wght-italic.woff2"
+        ],
+        "axes": "wght 400-900",
+        "license": "OFL",
+        "role": "nameplate and section titles (900), headlines and numerals (400), pull lines (400 italic)"
+      },
+      {
+        "family": "Source Serif 4",
+        "files": [
+          "source-serif-4-latin-standard-normal.woff2",
+          "source-serif-4-latin-standard-italic.woff2"
+        ],
+        "axes": "wght 200-900, optical sizing auto",
+        "license": "OFL",
+        "role": "body and standfirsts"
+      },
+      {
+        "family": "Inter",
+        "files": [
+          "inter-latin-wght-normal.woff2"
+        ],
+        "axes": "wght 100-900",
+        "license": "OFL",
+        "role": "tracked capitals for labels, metadata, navigation, buttons (brief-pinned; detector overused-font finding suppressed in .impeccable/config.json)"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Print-style hairline button, square, capitals label; secondary actions such as 'Scores and reasons'.",
+      "html": "<a class=\"ds-button\" href=\"#\">Scores and reasons</a>",
+      "css": ".ds-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; text-decoration: none; cursor: pointer; } .ds-button:hover { background: var(--paper-deep, #e6dfd1); } .ds-button:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } @media (prefers-reduced-motion: no-preference) { .ds-button { transition: background-color 120ms ease-out, color 120ms ease-out; } }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled ink; 'Read the paper', confirmations and form submits.",
+      "html": "<a class=\"ds-button-primary\" href=\"#\">Read the paper</a>",
+      "css": ".ds-button-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--on-ink, #efe9dd); background: var(--ink, #151515); border: 1px solid var(--ink, #151515); border-radius: 0; text-decoration: none; } .ds-button-primary:hover { text-decoration: underline; } .ds-button-primary:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Small Toggle Button",
+      "kind": "button",
+      "refersTo": "button-small",
+      "description": "Like / Mark read / Not for me row; the pressed state fills ink.",
+      "html": "<div class=\"ds-row\"><button class=\"ds-small\" aria-pressed=\"true\">Liked</button><button class=\"ds-small\">Mark read</button><button class=\"ds-small\">Not for me</button></div>",
+      "css": ".ds-row { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-small { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.8rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; cursor: pointer; } .ds-small:hover { background: var(--paper-deep, #e6dfd1); } .ds-small[aria-pressed=\"true\"] { background: var(--ink, #151515); color: var(--on-ink, #efe9dd); border-color: var(--ink, #151515); } .ds-small:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Printed-form blank: a single strong underline, label in Inter capitals above.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@example.com\"></label>",
+      "css": ".ds-field { display: block; max-width: 24rem; } .ds-field-label { display: block; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; margin: 0 0 0.35rem; color: var(--ink, #151515); } .ds-input { width: 100%; min-height: 2.75rem; font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 1.0625rem; color: var(--ink, #151515); background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; padding: 0.6rem 0.1rem; } .ds-input::placeholder { color: var(--ink-soft, #55504a); } .ds-input:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+    },
+    {
+      "name": "Section Strip",
+      "kind": "nav",
+      "refersTo": "section-link",
+      "description": "Centred tracked-capital sections between rules; the current page in bold ink with a vermilion underline.",
+      "html": "<nav class=\"ds-sections\"><a href=\"#\" aria-current=\"page\">Front page</a><a href=\"#\">Library</a><a href=\"#\">History</a><a href=\"#\">Profile</a></nav>",
+      "css": ".ds-sections { display: flex; flex-wrap: wrap; justify-content: center; border-top: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-sections a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.5rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.1em; color: var(--ink-soft, #55504a); text-decoration: none; } .ds-sections a:hover { color: var(--ink, #151515); } .ds-sections a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-sections a[aria-current] { color: var(--ink, #151515); font-weight: 700; text-decoration: underline 2px var(--accent, #d9472b); text-underline-offset: 0.55em; }"
+    },
+    {
+      "name": "Open Access Stamp",
+      "kind": "chip",
+      "refersTo": "stamp",
+      "description": "Small capitals stamp in a vermilion hairline frame, inside the meta line.",
+      "html": "<p class=\"ds-meta\">Journal name<span class=\"ds-sep\">·</span>2026<span class=\"ds-sep\">·</span><span class=\"ds-stamp\">Open access</span></p>",
+      "css": ".ds-meta { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; line-height: 1.6; color: var(--ink-soft, #55504a); margin: 0; } .ds-sep { color: var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0 0.25rem; } .ds-stamp { display: inline-block; border: 1px solid var(--accent, #d9472b); color: var(--accent-text, #b23a1f); padding: 0.05rem 0.4rem; font-weight: 600; letter-spacing: 0.14em; white-space: nowrap; }"
+    },
+    {
+      "name": "Sidebar Box",
+      "kind": "card",
+      "refersTo": "sidebar-box",
+      "description": "Right-rail box in a vermilion hairline frame with a tracked-capital heading.",
+      "html": "<section class=\"ds-box\"><h2>Your beat</h2><ul><li>Topic one</li><li>Topic two</li><li>Topic three</li></ul></section>",
+      "css": ".ds-box { border: 1px solid var(--accent, #d9472b); padding: 0.9rem 1rem 1rem; text-align: center; max-width: 16.5rem; background: var(--paper, #efe9dd); color: var(--ink, #151515); } .ds-box h2 { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--accent-text, #b23a1f); margin: 0 0 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--accent, #d9472b); } .ds-box ul { list-style: none; margin: 0; padding: 0; } .ds-box li { font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; } .ds-box li + li { border-top: 1px solid var(--rule, rgb(21 21 21 / 0.22)); }"
+    },
+    {
+      "name": "Scorebox",
+      "kind": "custom",
+      "refersTo": "scorebox",
+      "description": "Lead-story score: big Playfair numeral with 'for you' over a hairline scorecard of the five criteria.",
+      "html": "<div class=\"ds-scorebox\"><p class=\"ds-overall\"><span class=\"ds-numeral\">4.2</span><span class=\"ds-lbl\">for you</span></p><dl class=\"ds-card\"><div><dt>Criterion one</dt><dd>4</dd></div><div><dt>Criterion two</dt><dd>3</dd></div><div><dt>Criterion three</dt><dd>5</dd></div></dl></div>",
+      "css": ".ds-scorebox { border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); max-width: 17rem; color: var(--ink, #151515); } .ds-overall { display: flex; align-items: baseline; justify-content: center; gap: 0.6rem; margin: 0; padding: 0.9rem 1rem 0.8rem; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-numeral { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: 4.25rem; line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; } .ds-lbl, .ds-card dt { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--ink-soft, #55504a); } .ds-card { margin: 0; padding: 0.15rem 1rem 0.35rem; } .ds-card div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule, rgb(21 21 21 / 0.22)); } .ds-card div:last-child { border-bottom: 0; } .ds-card dt { color: var(--ink, #151515); } .ds-card dd { margin: 0; font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 1.25rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }"
+    },
+    {
+      "name": "Pull Line",
+      "kind": "custom",
+      "refersTo": "pull",
+      "description": "'Why it matters' in Playfair italic under a 2px vermilion rule.",
+      "html": "<blockquote class=\"ds-pull\"><p class=\"ds-pull-label\">Why it matters</p><p class=\"ds-pull-text\">The why-it-matters line from the grade.</p></blockquote>",
+      "css": ".ds-pull { margin: 0; padding: 0.9rem 0 0; border-top: 2px solid var(--accent, #d9472b); max-width: 32rem; } .ds-pull-label { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--accent-text, #b23a1f); margin: 0 0 0.35rem; } .ds-pull-text { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-style: italic; font-size: 1.5rem; line-height: 1.3; margin: 0; color: var(--ink, #151515); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Typeset Weekly",
+    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader's system setting.\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
+    "keyCharacteristics": [
+      "One ruled page frame around everything; hairline rules divide stories, rows and columns.",
+      "Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Inter (tracked-capital apparatus).",
+      "Square corners everywhere, including checkboxes and range thumbs.",
+      "One vermilion accent, for rules, frames, the nameplate initials and large type; a darker vermilion for small text.",
+      "Phone first: one column, the multi-column grid from 900px, every target at least 44px."
+    ],
+    "rules": [
+      {
+        "name": "The One Vermilion Rule",
+        "body": "Vermilion is the only hue. It draws rules, frames and the nameplate initials and marks state; it never fills a surface or a button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Small Text Rule",
+        "body": "Any vermilion text under display size uses `accent-text`, never `accent`. `accent` on morning paper is 3.5:1 and is reserved for large type and non-text marks.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Editions Rule",
+        "body": "Every colour is a custom property on `:root` with a morning and an evening value; components never hard-code a colour, so both editions come from the same rules.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Per Job Rule",
+        "body": "Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Inter labels (metadata, navigation, buttons, field labels). Never swap a role.",
+        "section": "typography"
+      },
+      {
+        "name": "The Numeral Rule",
+        "body": "Every score is a Playfair numeral with lining tabular figures, set beside the reason or label that explains it. Never a pill, a badge or a coloured chip.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data Label Rule",
+        "body": "A tracked-capital label above or beside content names a field of the data (\"Why it matters\", \"for you\", \"Scores and reasons\") or carries the data itself. The paper page's line above the feature title, the grade's study design and sample size (\"<study design> · n = <sample size>\"), is intentional and pinned by the brief and SPEC.md §11.2. Never invent a kicker or eyebrow line that carries no data.",
+        "section": "typography"
+      },
+      {
+        "name": "The 900 Rule",
+        "body": "One column below 900px, the column grid from 900px. Same content order at every width; nothing is hidden on a phone.",
+        "section": "layout"
+      },
+      {
+        "name": "The 44 Rule",
+        "body": "Every link, button, toggle, summary, select and checkbox row is at least 44px tall (`tap`), including the section strip, the skip link and the compact mark. No horizontal scroll at 375px.",
+        "section": "layout"
+      },
+      {
+        "name": "The Ruled, Not Raised Rule",
+        "body": "Separate things with a rule, never with a shadow, a fill or a floating card.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do draw every division with a rule: 1px `rule` between items, 1px `rule-strong` for frames and controls, 2px `accent` above a pull line.",
+      "Do keep every corner square (0px), including form controls.",
+      "Do set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.",
+      "Do use `accent-text` for any small vermilion text and keep `accent` for rules, frames, the nameplate initials and large type.",
+      "Do define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.",
+      "Do keep labels, metadata, navigation and buttons in Inter capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.",
+      "Do make every interactive element at least 44px tall and keep one column below 900px.",
+      "Do self-host every font and asset; the page makes no external requests."
+    ],
+    "donts": [
+      "Don't add JavaScript; plain forms that POST and redirect carry every action.",
+      "Don't round a corner, fill a resting card, or add an elevation shadow.",
+      "Don't put a score in a pill, badge or coloured chip.",
+      "Don't introduce a second accent hue or fill a button or surface with vermilion.",
+      "Don't set small text in `accent` (#d9472b is 3.5:1 on paper).",
+      "Don't add a kicker or eyebrow line that carries no data; a label above a headline must state a field of the paper, as the study design and sample size line does on the paper page.",
+      "Don't swap the type roles: no Inter headlines, no Playfair labels, no serif buttons."
+    ]
+  }
+}

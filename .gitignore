@@ -10,3 +10,6 @@ __pycache__/
 var/
 .coverage
 mutants/
+
+# impeccable review captures (local only)
+.impeccable/review/

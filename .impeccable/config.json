@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-01T10:42:00.944Z",
+        "reason": "brief-pinned: the user's redesign prompt names Inter for labels, metadata, nav and buttons"
+      }
+    ]
+  }
+}
