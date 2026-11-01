@@ -40,6 +40,7 @@ from app.jobs.narrow_candidates import (
 )
 from app.jobs.send_due_emails import preview, send_due
 from app.jobs.weekly_ingest import ingest as run_ingest
+from app.jobs.weekly_pipeline import Clients, run_weekly
 from app.profiles.service import coefficients, embed_topics, refresh_all_profiles
 from app.sources.pubmed import PubMedClient, load_specialty_query
 from app.web.auth import login_link
@@ -320,6 +321,24 @@ def _production_ready() -> None:
     if problems := get_settings().production_problems():
         typer.echo("Refusing to send: " + "; ".join(problems), err=True)
         raise typer.Exit(1)
+
+
+@cli.command()
+def weekly() -> None:
+    """Run the whole weekly pipeline: ingest, embed, narrow, full text, grade (Sunday cron)."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    _production_ready()
+    settings = get_settings()
+    embedder = _embedder()
+    with Session(get_engine()) as session, _pubmed() as pubmed:
+        clients = Clients(pubmed, embedder, _grader(), mailer_for(settings))
+        run = run_weekly(session, settings, clients, datetime.now(UTC))
+    embedder.close()
+    grade = run.stats["grade"]
+    typer.echo(
+        f"Done: stored {run.stats['ingest']['stored']} papers, graded {grade['graded']} "
+        f"(dropped by the cap {grade['dropped']}), ${grade['month_usd']:.2f} spent this month."
+    )
 
 
 @cli.command("send-due")

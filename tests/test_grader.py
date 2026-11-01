@@ -6,12 +6,14 @@ import httpx
 
 from app.db.models import Paper
 from app.grading.grader import (
+    ESTIMATED_OUTPUT_TOKENS,
     FALLBACK_BETA,
     GradeFailure,
     GradeInput,
     GradeOutcome,
     Grader,
     build_user_content,
+    estimate_cost,
     parse_message,
 )
 from app.grading.rubric import GRADE_SCHEMA, RUBRIC_TEXT
@@ -133,3 +135,14 @@ def test_parses_recorded_live_response() -> None:
     assert r.model == "claude-sonnet-5-5"
     assert all(1 <= s <= 5 for s in r.data.scores.values())
     assert r.usage.cache_read > 0  # rubric system prompt served from cache
+
+
+def test_estimate_cost_is_batch_priced_and_grows_with_full_text() -> None:
+    abstract = estimate_cost("claude-sonnet-5-5", GradeInput(paper()))
+    chars = len(RUBRIC_TEXT) + len(build_user_content(GradeInput(paper())))
+    # Batch: $1 / $5 per million input / output tokens.
+    expected = (Decimal(chars // 4) * 1 + Decimal(ESTIMATED_OUTPUT_TOKENS) * 5) / 1_000_000
+    assert abstract == expected
+    full = estimate_cost("claude-sonnet-5-5", GradeInput(paper(), "x" * 40_000))
+    # 40,000 chars = 10,000 more input tokens (plus the <full_text> tags) at $1 per million.
+    assert Decimal("0.0100") <= full - abstract < Decimal("0.0101")

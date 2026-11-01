@@ -117,13 +117,14 @@ def narrow(
 
 
 def selected_ungraded(session: Session, limit: int | None = None) -> list[str]:
-    """Papers selected for grading in any week that lack a current-version grade."""
+    """Papers selected for grading in any week that lack a current-version grade, best
+    narrowing score first (the order the spend guard keeps them in)."""
     graded = select(Grade.pmid).where(Grade.rubric_version == RUBRIC_VERSION)
     stmt = (
         select(Candidate.pmid)
         .where(Candidate.selected_for_grading, Candidate.pmid.not_in(graded))
         .group_by(Candidate.pmid)
-        .order_by(Candidate.pmid.desc())
+        .order_by(func.max(Candidate.narrow_score).desc(), Candidate.pmid.desc())
         .limit(limit)
     )
     return list(session.scalars(stmt))

@@ -92,6 +92,21 @@ def build_user_content(item: GradeInput) -> str:
     return "\n".join(lines)
 
 
+# Real rubric v1 grades used at most ~610 output tokens (thinking + answer); keep headroom.
+ESTIMATED_OUTPUT_TOKENS = 800
+CHARS_PER_TOKEN = 4
+
+
+def estimate_cost(model: str, item: GradeInput) -> Decimal:
+    """Batch cost of grading `item`, from text length, before submitting (SPEC.md §6.6).
+
+    Ignores prompt caching, so it errs high.
+    """
+    chars = len(RUBRIC_TEXT) + len(build_user_content(item))
+    usage = TokenUsage(input=chars // CHARS_PER_TOKEN, output=ESTIMATED_OUTPUT_TOKENS)
+    return cost_usd(model, usage, batch=True)
+
+
 def _usage(u: _Usage) -> TokenUsage:
     return TokenUsage(
         input=u.input_tokens,

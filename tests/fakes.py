@@ -3,6 +3,7 @@
 import hashlib
 import json
 from collections.abc import Iterator
+from datetime import date
 from typing import Any
 
 import numpy as np
@@ -11,6 +12,7 @@ from anthropic.types.beta import BetaMessage
 from anthropic.types.messages import MessageBatch, MessageBatchIndividualResponse
 
 from app.embeddings.base import Embeddings
+from app.sources.pmc import PmcArticle
 from app.sources.pubmed import ParseResult, PubMedError, parse_pubmed_xml
 from tests.conftest import FIXTURES
 
@@ -175,3 +177,12 @@ class FakePubMed:
             papers=[p for p in PUBMED_SAMPLE.papers if p.pmid in pmids],
             skipped_no_abstract=[p for p in PUBMED_SAMPLE.skipped_no_abstract if p in pmids],
         )
+
+    def search(self, query: str, mindate: date, maxdate: date) -> list[str]:
+        if self.fail:
+            raise PubMedError("down")
+        papers = PUBMED_SAMPLE.papers
+        return [p.pmid for p in papers if mindate <= p.entrez_date <= maxdate]
+
+    def fetch_pmc(self, pmcids: list[str], max_tokens: int) -> list[PmcArticle]:
+        return []  # no open-access full text
