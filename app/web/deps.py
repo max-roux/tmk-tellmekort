@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Iterator
+from functools import lru_cache
 from typing import Annotated
 
 import anthropic
@@ -21,17 +22,19 @@ log = logging.getLogger(__name__)
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
-def get_mailer(settings: SettingsDep) -> Iterator[Mailer]:
+@lru_cache
+def _postmark(server_token: str, sender: str) -> PostmarkMailer:
+    # One long-lived client: it must outlive the request, since sign-in emails are sent
+    # from a background task after the response.
+    return PostmarkMailer(server_token=server_token, sender=sender)
+
+
+def get_mailer(settings: SettingsDep) -> Mailer:
     """Postmark when configured; otherwise the local outbox folder (development)."""
     if not settings.postmark_server_token:
         log.warning("POSTMARK_SERVER_TOKEN not set: writing email to the local outbox")
-        yield OutboxMailer()
-        return
-    mailer = PostmarkMailer(server_token=settings.postmark_server_token, sender=settings.email_from)
-    try:
-        yield mailer
-    finally:
-        mailer.close()
+        return OutboxMailer()
+    return _postmark(settings.postmark_server_token, settings.email_from)
 
 
 MailerDep = Annotated[Mailer, Depends(get_mailer)]

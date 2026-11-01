@@ -16,7 +16,7 @@ from app.accounts.users import add_user
 from app.config import Settings, get_settings
 from app.db.models import CriterionSettings, MagicLink
 from app.db.session import get_session
-from app.email.base import EmailMessage
+from app.email.base import EmailMessage, MailerError
 from app.main import create_app
 from app.web import sessions
 from app.web.deps import get_mailer
@@ -30,8 +30,13 @@ EMAIL = "Surgeon@Example.com"
 class CapturingMailer:
     def __init__(self) -> None:
         self.sent: list[EmailMessage] = []
+        self.fail = False
+        self.attempts = 0
 
     def send(self, message: EmailMessage) -> str:
+        self.attempts += 1
+        if self.fail:
+            raise MailerError("postmark: error 406: Inactive recipient")
         self.sent.append(message)
         return f"m-{len(self.sent)}"
 
@@ -73,6 +78,16 @@ def test_login_emails_a_fragment_link_to_known_users_only(
     token = token_from(mailer.sent[0])
     stored = db_session.scalars(select(MagicLink.token_hash)).all()
     assert stored == [magic_links.hash_token(token)]  # only the hash is kept
+
+
+def test_login_sends_after_responding_and_survives_mailer_errors(
+    client: TestClient, db_session: Session, mailer: CapturingMailer
+) -> None:
+    add_user(db_session, "surgeon@example.com")
+    mailer.fail = True
+    resp = client.post("/login", data={"email": EMAIL})
+    assert resp.status_code == 200 and "Check your email" in resp.text
+    assert mailer.attempts == 1
 
 
 def test_login_rejects_blank_email(client: TestClient) -> None:

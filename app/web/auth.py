@@ -6,10 +6,11 @@ a page that POSTs the token, so mail scanners that prefetch links cannot use it 
 """
 
 import logging
+import uuid
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.orm import Session
 
@@ -17,7 +18,7 @@ from app.accounts import magic_links
 from app.accounts.users import get_by_email, is_onboarded, normalise_email
 from app.config import Settings
 from app.db.session import get_session
-from app.email.base import MailerError, render
+from app.email.base import EmailMessage, Mailer, MailerError, render
 from app.web.deps import MailerDep, SettingsDep
 from app.web.sessions import CurrentUser, end_session, start_session
 from app.web.templating import TEMPLATES
@@ -30,6 +31,13 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 def login_link(settings: Settings, token: str) -> str:
     return f"{settings.base_url.rstrip('/')}/auth#{token}"
+
+
+def _send(mailer: Mailer, message: EmailMessage, user_id: uuid.UUID) -> None:
+    try:
+        mailer.send(message)
+    except MailerError as e:
+        log.error("sign-in email to user %s failed: %s", user_id, e)
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -45,6 +53,7 @@ def login(
     session: SessionDep,
     settings: SettingsDep,
     mailer: MailerDep,
+    background: BackgroundTasks,
     email: Annotated[str, Form()] = "",
 ) -> Response:
     email = normalise_email(email)
@@ -63,7 +72,8 @@ def login(
             {"error": "Too many sign-in requests. Try again in an hour.", "email": email},
             status_code=429,
         )
-    # Same answer whether or not the address has an account (no account enumeration).
+    # Same answer whether or not the address has an account (no account enumeration), and
+    # the email goes out after the response, so response time does not tell either.
     if (user := get_by_email(session, email)) is not None:
         token = magic_links.issue(session, user, now)
         message = render(
@@ -73,10 +83,7 @@ def login(
             link=login_link(settings, token),
             minutes=int(magic_links.LINK_TTL.total_seconds() // 60),
         )
-        try:
-            mailer.send(message)
-        except MailerError as e:
-            log.error("sign-in email to user %s failed: %s", user.id, e)
+        background.add_task(_send, mailer, message, user.id)
     return TEMPLATES.TemplateResponse(request, "auth/check_email.html", {"email": email})
 
 
