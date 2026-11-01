@@ -14,36 +14,75 @@
 </div>
 {%- endmacro %}
 
-{% macro meta(paper, grade) -%}
+{% macro meta(paper, grade, source=True) -%}
 <p class="meta">
-  {{ paper.journal }}{% if paper.pub_date %}, {{ paper.pub_date.year }}{% endif %}
-  {% if grade %} · Graded from {{ "full text" if grade.input_source == "full_text" else "abstract" }}{% endif %}
-  {% if paper.is_open_access %} · <span class="badge">Open access</span>{% endif %}
+  {{ paper.journal.split(" : ")[0] }}{% if paper.pub_date %}<span class="sep">·</span>{{ paper.pub_date.year }}{% endif %}
+  {%- if grade and source %}<span class="sep">·</span>Graded from {{ "full text" if grade.input_source == "full_text" else "abstract" }}{% endif %}
+  {%- if paper.is_open_access %}<span class="sep">·</span><span class="stamp">Open access</span>{% endif %}
 </p>
+{%- endmacro %}
+
+{% macro score(value) -%}{{ "%.1f"|format(value) }}{%- endmacro %}
+
+{% macro scorecard(scores) -%}
+<dl class="scorecard" aria-label="Scores out of 5">
+  {% for key, name in CRITERIA %}<div><dt>{{ name }}</dt><dd>{{ scores[key] }}</dd></div>{% endfor %}
+</dl>
+{%- endmacro %}
+
+{% macro lead(item) -%}
+<article class="lead" data-pmid="{{ item.pmid }}">
+  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
+  <p class="standfirst">{{ item.grade.summary }}</p>
+  {{ meta(item.paper, item.grade) }}
+  <div class="lead-body">
+    <blockquote class="pull">
+      <p class="label">Why it matters</p>
+      <p>{{ item.grade.why_it_matters }}</p>
+    </blockquote>
+    <div class="scorebox">
+      <p class="overall"><span class="numeral">{{ score(item.ranked.weighted) }}</span><span class="label">for you</span></p>
+      {{ scorecard(item.ranked.scores) }}
+    </div>
+    <div class="lead-foot">
+      <div class="story-foot">
+        <a class="button primary" href="{{ item.paper.url }}" rel="noopener" target="_blank">Read the paper</a>
+        <a class="button" href="/paper/{{ item.pmid }}">Scores and reasons</a>
+      </div>
+      {{ actions(item.pmid, item.state, "/") }}
+    </div>
+  </div>
+</article>
+{%- endmacro %}
+
+{% macro second(item) -%}
+<article class="second" data-pmid="{{ item.pmid }}">
+  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
+  <p class="standfirst">{{ item.grade.summary }}</p>
+  {{ meta(item.paper, item.grade) }}
+  <p class="mini-score"><span class="numeral">{{ score(item.ranked.weighted) }}</span><span class="label">for you</span></p>
+  <div class="story-foot">{{ actions(item.pmid, item.state, "/") }}</div>
+</article>
+{%- endmacro %}
+
+{% macro brief(item) -%}
+<li class="brief" data-pmid="{{ item.pmid }}">
+  <h3 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h3>
+  {{ meta(item.paper, item.grade, source=False) }}
+  <span class="numeral" aria-label="{{ score(item.ranked.weighted) }} for you">{{ score(item.ranked.weighted) }}</span>
+</li>
+{%- endmacro %}
+
+{% macro entry(e, next) -%}
+<li data-pmid="{{ e.pmid }}">
+  <h2 class="headline"><a href="{{ '/paper/' ~ e.pmid if e.grade else e.paper.url }}">{{ e.paper.title }}</a></h2>
+  {{ meta(e.paper, e.grade) }}
+  {{ actions(e.pmid, e.state, next) }}
+</li>
 {%- endmacro %}
 
 {% macro pills(scores) -%}
 <ul class="pills" aria-label="Scores out of 5">
   {% for key, name in CRITERIA %}<li class="pill">{{ name }} <b>{{ scores[key] }}</b></li>{% endfor %}
 </ul>
-{%- endmacro %}
-
-{% macro card(item, next) -%}
-<article class="card" data-pmid="{{ item.pmid }}">
-  <h2 class="paper-title"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
-  {{ meta(item.paper, item.grade) }}
-  {{ pills(item.ranked.scores) }}
-  <p>{{ item.grade.summary }}</p>
-  <p><strong>Why it matters:</strong> {{ item.grade.why_it_matters }}</p>
-  <p class="small"><a href="{{ item.paper.url }}" rel="noopener" target="_blank">Read the paper</a> · <a href="/paper/{{ item.pmid }}">All scores and reasons</a></p>
-  {{ actions(item.pmid, item.state, next) }}
-</article>
-{%- endmacro %}
-
-{% macro entry(e, next) -%}
-<article class="card" data-pmid="{{ e.pmid }}">
-  <h2 class="paper-title"><a href="{{ '/paper/' ~ e.pmid if e.grade else e.paper.url }}">{{ e.paper.title }}</a></h2>
-  {{ meta(e.paper, e.grade) }}
-  {{ actions(e.pmid, e.state, next) }}
-</article>
 {%- endmacro %}

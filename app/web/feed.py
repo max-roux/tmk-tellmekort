@@ -2,6 +2,7 @@
 
 from datetime import UTC, date, datetime
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -10,7 +11,8 @@ from sqlalchemy.orm import Session
 from app.accounts.users import is_onboarded
 from app.db.models import FEEDBACK_KINDS, Paper, User
 from app.db.session import get_session
-from app.feed import feedback, queries
+from app.domain.edition import edition
+from app.feed import feedback, front, queries
 from app.web.deps import SettingsDep
 from app.web.sessions import CurrentUser, RequiredUser
 from app.web.templating import TEMPLATES
@@ -20,8 +22,12 @@ router = APIRouter()
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
+def now() -> datetime:
+    return datetime.now(UTC)
+
+
 def today() -> date:
-    return datetime.now(UTC).date()
+    return now().date()
 
 
 def _local_path(target: str, fallback: str) -> str:
@@ -46,9 +52,14 @@ def home(
     if not is_onboarded(session, user):
         return RedirectResponse("/onboarding", status_code=303)
     items = queries.feed(session, user.id, settings, today())
-    return TEMPLATES.TemplateResponse(
-        request, "feed/feed.html", {"user": user, "items": items, "nav": "feed"}
-    )
+    context = {
+        "user": user,
+        "items": items,
+        "edition": edition(now(), ZoneInfo(user.timezone), len(items)),
+        "beat": front.beat(session, user.id),
+        "run": front.latest_run(session),
+    }
+    return TEMPLATES.TemplateResponse(request, "feed/feed.html", context)
 
 
 @router.get("/paper/{pmid}", response_class=HTMLResponse)
@@ -110,7 +121,7 @@ def dispute(
 def _shelf_page(request: Request, user: User, session: Session, name: str) -> HTMLResponse:
     entries = queries.shelf(session, user.id, name)
     return TEMPLATES.TemplateResponse(
-        request, f"feed/{name}.html", {"user": user, "entries": entries, "nav": name}
+        request, f"feed/{name}.html", {"user": user, "entries": entries}
     )
 
 

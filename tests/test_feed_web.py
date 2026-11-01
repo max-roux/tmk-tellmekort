@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.accounts import magic_links
 from app.config import get_settings
-from app.db.models import Feedback, ScoreDispute, User
+from app.db.models import Feedback, PipelineRun, ScoreDispute, User
 from app.db.session import get_session
 from app.main import create_app
 from app.web import feed as feed_routes
@@ -26,6 +26,7 @@ def client(db_session: Session, user: User, monkeypatch: pytest.MonkeyPatch) -> 
     grade(db_session, MID, 4)
     grade(db_session, LOW, 3)
     monkeypatch.setattr(feed_routes, "today", lambda: TODAY)
+    monkeypatch.setattr(feed_routes, "now", lambda: datetime(2026, 10, 29, 9, tzinfo=UTC))
     app = create_app()
 
     def override_session() -> Iterator[Session]:
@@ -52,6 +53,34 @@ def test_feed_shows_ranked_cards_with_scores_and_actions(client: TestClient) -> 
     for label in ("Pertinence", "Proof strength", "Novelty", "Depth", "Practical usefulness"):
         assert label in html
     assert 'value="like"' in html and 'value="read"' in html and 'value="not_for_me"' in html
+
+
+def test_front_page_carries_the_edition_line_and_sidebar_boxes(
+    client: TestClient, db_session: Session
+) -> None:
+    db_session.add(
+        PipelineRun(
+            started_at=datetime(2026, 10, 25, 1, tzinfo=UTC),
+            status="ok",
+            stats={"ingest": {"found": 240}, "narrow": {"candidates": 180}, "grade": {"graded": 97}},
+        )
+    )
+    db_session.commit()
+    html = client.get("/").text
+    assert "No. 44" in html and "Week of 26 October 2026" in html
+    assert "3 papers in this edition" in html
+    assert "Your beat" in html and "Fibula" in html
+    assert ">240<" in html and ">180<" in html and ">97<" in html
+    assert 'aria-current="page">Front page' in html
+
+
+def test_front_page_empty_state(client: TestClient) -> None:
+    for pmid in (TOP, MID, LOW):
+        client.post(f"/paper/{pmid}/feedback", data={"kind": "read", "next": "/"})
+    html = client.get("/").text
+    assert pmids_in(html) == [] and "0 papers in this edition" in html
+    assert "No papers in this edition yet" in html
+    assert "The first weekly run has not happened yet." in html
 
 
 def test_feedback_from_feed_returns_to_feed_and_hides_read(

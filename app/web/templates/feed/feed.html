@@ -1,15 +1,67 @@
 {% extends "base.html" %}
-{% from "feed/_macros.html" import card %}
-{% block title %}Your feed · Maxfac Papers{% endblock %}
+{% from "feed/_macros.html" import lead, second, brief %}
+{% block title %}Tell Me Kort · No. {{ edition.number }}{% endblock %}
+{% block masthead %}
+<header class="masthead">
+  {% include "_nameplate.html" %}
+  <p class="edition">
+    <span>No. {{ edition.number }}</span><span class="dot" aria-hidden="true">·</span>
+    <span>Week of {{ edition.week_label }}</span><span class="dot" aria-hidden="true">·</span>
+    <span>{{ edition.papers }} paper{{ "s" if edition.papers != 1 }} in this edition</span>
+  </p>
+</header>
+{% endblock %}
 {% block content %}
-<h1>Your feed</h1>
-<p class="muted small">The best graded papers of the last 90 days for your profile. Read and dismissed papers move to <a href="/history">History</a>.</p>
-{% for item in items %}
-  {{ card(item, "/") }}
-{% else %}
-  <div class="card">
-    <p><strong>Nothing to show yet.</strong></p>
-    <p class="muted">Papers appear here once they are graded and match your topics. If you just set up your profile, new papers arrive with the weekly run. You can also <a href="/onboarding/topics">broaden your topics</a> or <a href="/onboarding/weights">relax your minimums</a>.</p>
+<div class="front">
+  <div class="front-main">
+    {% if items %}
+    {{ lead(items[0]) }}
+    {% if items[1:3] %}
+    <div class="seconds">
+      {% for item in items[1:3] %}{{ second(item) }}{% endfor %}
+    </div>
+    {% endif %}
+    {% else %}
+    <section class="empty" aria-labelledby="empty-title">
+      <h2 id="empty-title">No papers in this edition yet</h2>
+      <p class="muted">Papers appear once they are graded and match your topics. New papers arrive with the weekly run on Sunday.</p>
+      <p class="muted">You can <a href="/onboarding/topics">broaden your topics</a> or <a href="/onboarding/weights">relax your minimums</a>.</p>
+    </section>
+    {% endif %}
   </div>
-{% endfor %}
+
+  <aside class="rail" aria-label="About this edition">
+    <section class="box" aria-labelledby="beat-title">
+      <h2 id="beat-title">Your beat</h2>
+      {% if beat %}
+      <ul>{% for label in beat %}<li>{{ label }}</li>{% endfor %}</ul>
+      {% else %}
+      <p class="small muted">No active topics.</p>
+      {% endif %}
+      <a class="box-link meta" href="/onboarding/topics">Edit topics</a>
+    </section>
+    <section class="box" aria-labelledby="run-title">
+      <h2 id="run-title">This edition</h2>
+      {% if run %}
+      <div class="figures">
+        <div><span class="numeral">{{ run.found }}</span><span class="label">found in PubMed</span></div>
+        <div><span class="numeral">{{ run.screened }}</span><span class="label">screened</span></div>
+        <div><span class="numeral">{{ run.graded }}</span><span class="label">graded</span></div>
+      </div>
+      <p class="meta">Weekly run of {{ run.started_at.day }} {{ run.started_at.strftime("%B") }}</p>
+      {% else %}
+      <p class="small muted">The first weekly run has not happened yet.</p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+
+{% if items[3:] %}
+<section aria-labelledby="briefs-title">
+  <h2 class="briefs-head" id="briefs-title">Also in this edition</h2>
+  <ol class="briefs">
+    {% for item in items[3:] %}{{ brief(item) }}{% endfor %}
+  </ol>
+</section>
+{% endif %}
 {% endblock %}
