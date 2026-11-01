@@ -1,40 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Calibration{% endblock %}
-{% block head %}
-<style>
-  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: .75rem 0 1.25rem; }
-  .progress > span { display: block; height: 100%; background: var(--accent); }
-  ol.papers { list-style: none; padding: 0; margin: 0; }
-  ol.papers li { display: flex; gap: .75rem; align-items: baseline; padding: .7rem 0; border-top: 1px solid var(--line); }
-  ol.papers .n { color: var(--muted); min-width: 1.5rem; font-variant-numeric: tabular-nums; }
-  ol.papers a { flex: 1; text-decoration: none; color: var(--ink); }
-  ol.papers a:hover { color: var(--accent); }
-  .status { font-size: .8rem; white-space: nowrap; color: var(--muted); }
-  .status.done { color: var(--ok); }
-</style>
-{% endblock %}
+{% block title %}Calibration · Tell Me Kort{% endblock %}
 {% block content %}
-<p class="eyebrow">Rubric calibration</p>
-<h1>Grade {{ rows|length }} papers against the rubric</h1>
-<p class="muted">Score each paper on four criteria from its abstract, as you would judge it yourself.
-  The model's scores are hidden until you are done; afterwards we compare them.</p>
+<h1 class="section-title">Calibration</h1>
+<p class="section-dek">Grade {{ rows|length }} papers against the rubric. Score each paper on four criteria from its abstract, as you would judge it yourself.
+The model's scores are hidden until you are done; afterwards we compare them.</p>
 {% if rows %}
+<div class="column">
 <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="{{ rows|length }}" aria-valuenow="{{ done }}">
   <span style="width: {{ (100 * done / rows|length)|round }}%"></span>
 </div>
 <p><strong>{{ done }} of {{ rows|length }}</strong> graded.
-  {% if next_url %}<a class="button" href="{{ next_url }}">{{ "Start" if done == 0 else "Continue" }}</a>
+  {% if next_url %}<a class="button primary" href="{{ next_url }}">{{ "Start" if done == 0 else "Continue" }}</a>
   {% else %}All done, thank you.{% endif %}</p>
-<ol class="papers">
+</div>
+<ol class="index papers">
   {% for item, paper in rows %}
   <li>
-    <span class="n">{{ loop.index }}</span>
+    <span class="numeral n">{{ loop.index }}</span>
     <a href="/admin/calibrate/{{ item.id }}">{{ paper.title }}</a>
-    {% if item.surgeon_scores %}<span class="status done">Graded</span>{% else %}<span class="status">To do</span>{% endif %}
+    {% if item.surgeon_scores %}<span class="meta status done">Graded</span>{% else %}<span class="meta status">To do</span>{% endif %}
   </li>
   {% endfor %}
 </ol>
 {% else %}
-<p class="muted">No calibration set yet.</p>
+<section class="empty"><p class="muted">No calibration set yet.</p></section>
 {% endif %}
 {% endblock %}

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Confirm · Maxfac Papers{% endblock %}
+{% block title %}Confirm · Tell Me Kort{% endblock %}
 {% block content %}
-<form id="act" method="post" action="/a" class="card stack">
+<form id="act" method="post" action="/a" class="column confirm">
+  <h1>One tap to confirm</h1>
   <input type="hidden" name="t" id="t">
   <p id="status">Tap to confirm.</p>
-  <div><button class="button" type="submit">{{ button }}</button></div>
+  <div class="actions"><button class="button" type="submit">{{ button }}</button></div>
 </form>
 <script>
   // Keep the token out of the address bar and history; submitting stays a human tap.

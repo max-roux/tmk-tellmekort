@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Saved · Maxfac Papers{% endblock %}
+{% block title %}Saved · Tell Me Kort{% endblock %}
 {% block content %}
-<h1>Saved ✓</h1>
-<p>{{ label }}.{% if name %} Thanks, {{ name }}.{% endif %}</p>
-<p><a class="button" href="/">Open your feed</a> <a class="button secondary" href="/paper/{{ pmid }}">See the paper</a></p>
+<div class="column">
+  <h1>Saved</h1>
+  <p>{{ label }}.{% if name %} Thanks, {{ name }}.{% endif %}</p>
+  <div class="actions"><a class="button primary" href="/">Open the front page</a> <a class="button" href="/paper/{{ pmid }}">See the paper</a></div>
+</div>
 {% endblock %}

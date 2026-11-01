@@ -1,25 +1,7 @@
 {% extends "base.html" %}
-{% block head %}
-<style>
-  .steps { list-style: none; display: flex; flex-wrap: wrap; gap: .25rem 1rem; padding: 0; margin: 0 0 1.5rem; font-size: .9rem; }
-  .steps a { color: var(--muted); text-decoration: none; }
-  .steps [aria-current] a { color: var(--ink); font-weight: 700; border-bottom: 2px solid var(--accent); }
-  .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; }
-  .topic-row { display: grid; grid-template-columns: auto 1fr; gap: .4rem .75rem; align-items: start; }
-  .topic-row input[type=checkbox] { width: 1.2rem; height: 1.2rem; margin-top: .65rem; }
-  .topic-row textarea { min-height: 4.2rem; }
-  .criterion { display: grid; grid-template-columns: 1fr; gap: .35rem; }
-  .criterion .controls { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: center; }
-  .criterion output { font-variant-numeric: tabular-nums; min-width: 2.5rem; text-align: right; font-weight: 600; }
-  input[type=range] { width: 100%; accent-color: var(--accent); }
-  .min { display: flex; gap: .5rem; align-items: center; }
-  .min select { width: auto; }
-  .seed-list { list-style: none; padding: 0; margin: 0; }
-  .seed-list li { display: flex; justify-content: space-between; gap: 1rem; padding: .5rem 0; border-top: 1px solid var(--line); }
-  .seed-list li:first-child { border-top: 0; }
-</style>
-{% endblock %}
 {% block content %}
-{% include "onboarding/_steps.html" %}
-{% block step %}{% endblock %}
+<div class="form-page">
+  {% include "onboarding/_steps.html" %}
+  {% block step %}{% endblock %}
+</div>
 {% endblock %}

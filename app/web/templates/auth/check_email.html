@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Check your email · Maxfac Papers{% endblock %}
+{% block title %}Check your email · Tell Me Kort{% endblock %}
 {% block content %}
-<h1>Check your email</h1>
-<p>If <strong>{{ email }}</strong> has an account, a sign-in link is on its way. It works once and expires in 15 minutes.</p>
-<p class="muted small">Nothing after a few minutes? Check your spam folder, or <a href="/login">try again</a>.</p>
+<div class="column">
+  <h1>Check your email</h1>
+  <p>If <strong>{{ email }}</strong> has an account, a sign-in link is on its way. It works once and expires in 15 minutes.</p>
+  <p class="muted small">Nothing after a few minutes? Check your spam folder, or <a href="/login">try again</a>.</p>
+</div>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "onboarding/base.html" %}
-{% block title %}Your topics · Maxfac Papers{% endblock %}
+{% block title %}Your topics · Tell Me Kort{% endblock %}
 {% block step %}
 <h1>Confirm your topics</h1>
 {% if notice %}<p class="notice">{{ notice }}</p>{% endif %}
@@ -7,21 +7,22 @@
 <form method="post" action="/onboarding/topics">
   <input type="hidden" name="count" value="{{ rows|length }}">
   {% for t in rows %}
-  <div class="card topic-row">
-    <input type="checkbox" name="keep_{{ loop.index0 }}" id="keep_{{ loop.index0 }}" aria-label="Keep this topic" {% if t.label %}checked{% endif %}>
+  <div class="form-row topic-row">
+    <span class="numeral row-no" aria-hidden="true">{{ loop.index }}</span>
+    <label class="keep"><input type="checkbox" name="keep_{{ loop.index0 }}" id="keep_{{ loop.index0 }}" {% if t.label %}checked{% endif %}><span class="visually-hidden">Keep this topic</span></label>
     <div class="stack">
-      <label for="label_{{ loop.index0 }}" class="small">Topic</label>
+      <label for="label_{{ loop.index0 }}" class="field-label">Topic</label>
       <input type="text" id="label_{{ loop.index0 }}" name="label_{{ loop.index0 }}" value="{{ t.label }}" maxlength="120"
              placeholder="{% if not t.label %}Add a topic{% endif %}"
              oninput="if (this.value.trim()) document.getElementById('keep_{{ loop.index0 }}').checked = true">
-      <label for="description_{{ loop.index0 }}" class="small">Description</label>
+      <label for="description_{{ loop.index0 }}" class="field-label">Description</label>
       <textarea id="description_{{ loop.index0 }}" name="description_{{ loop.index0 }}" maxlength="600">{{ t.description }}</textarea>
     </div>
   </div>
   {% endfor %}
   {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
   <div class="actions">
-    <button class="button" type="submit">Save topics</button>
+    <button class="button primary" type="submit">Save topics</button>
     <a href="/onboarding">Start again from my interests</a>
   </div>
 </form>

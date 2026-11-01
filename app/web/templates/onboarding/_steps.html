@@ -1,6 +1,5 @@
-<p class="eyebrow">Set up · step {{ step }} of 4</p>
-<ol class="steps" aria-label="Setup steps">
+<ol class="steps" aria-label="Setup steps, step {{ step }} of 4">
   {% for n, name, href in [(1, "Interests", "/onboarding"), (2, "Topics", "/onboarding/topics"), (3, "Seed papers", "/onboarding/seeds"), (4, "Weights", "/onboarding/weights")] %}
-  <li{% if n == step %} aria-current="step"{% endif %}><a href="{{ href }}">{{ name }}</a></li>
+  <li{% if n == step %} aria-current="step"{% endif %}><a href="{{ href }}"><span class="numeral">{{ n }}</span><span>{{ name }}</span></a></li>
   {% endfor %}
 </ol>

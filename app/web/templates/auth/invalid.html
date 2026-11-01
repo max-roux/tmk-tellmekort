@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Link expired · Maxfac Papers{% endblock %}
+{% block title %}Link expired · Tell Me Kort{% endblock %}
 {% block content %}
-<h1>This link has expired</h1>
-<p>Sign-in links work once and only for 15 minutes.</p>
-<p><a class="button" href="/login">Email me a new link</a></p>
+<div class="column">
+  <h1>This link has expired</h1>
+  <p>Sign-in links work once and only for 15 minutes.</p>
+  <div class="actions"><a class="button primary" href="/login">Email me a new link</a></div>
+</div>
 {% endblock %}

@@ -1,28 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Admin · Maxfac Papers{% endblock %}
-{% block head %}
-<style>
-  table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-  th, td { text-align: left; padding: .35rem .4rem; border-top: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
-  .scroll { overflow-x: auto; }
-  .bar { height: .5rem; background: var(--line); border-radius: 999px; overflow: hidden; margin: .4rem 0; }
-  .bar span { display: block; height: 100%; background: var(--accent); }
-  .bar.warn span { background: var(--warn); }
-  .status-failed { color: var(--warn); font-weight: 700; }
-</style>
-{% endblock %}
+{% block title %}Admin · Tell Me Kort{% endblock %}
 {% block content %}
-<h1>Admin</h1>
+<h1 class="section-title">Admin</h1>
 {% if sent %}<p class="notice" role="status">Test email sent to {{ user.email }}.</p>{% endif %}
 
-<section class="card">
+<section class="desk">
   <h2>LLM spend this month</h2>
   <p><strong>${{ "%.2f"|format(spent) }}</strong> of ${{ "%.2f"|format(cap) }} ({{ share }}%)</p>
-  <div class="bar{% if share >= 80 %} warn{% endif %}"><span style="width: {{ [share, 100]|min }}%"></span></div>
+  <div class="progress{% if share >= 80 %} warn{% endif %}"><span style="width: {{ [share, 100]|min }}%"></span></div>
 </section>
 
-<section class="card">
+<section class="desk">
   <h2>Weekly runs</h2>
   {% if runs %}
   <div class="scroll"><table>
@@ -41,7 +29,7 @@
   {% else %}<p class="muted">No runs yet. The Sunday cron runs <code>cli.py weekly</code>.</p>{% endif %}
 </section>
 
-<section class="card">
+<section class="desk">
   <h2>Score disputes</h2>
   {% if disputes %}
   <div class="scroll"><table>
@@ -60,7 +48,7 @@
   {% else %}<p class="muted">No disputes yet.</p>{% endif %}
 </section>
 
-<section class="card">
+<section class="desk">
   <h2>Calibration</h2>
   {% if report.n %}
   <p>{{ report.n }} papers scored by both. Launch bar: <strong>{{ "met" if report.meets_launch_bar else "not met" }}</strong>.</p>
@@ -73,9 +61,9 @@
   {% else %}<p class="muted">No calibration scores yet. <a href="/admin/calibrate">Open calibration</a>.</p>{% endif %}
 </section>
 
-<section class="card">
+<section class="desk">
   <h2>Test email</h2>
   <p class="muted small">Sends you the weekly email you would get now, without recording it as this week's email. Its buttons won't work.</p>
-  <form method="post" action="/admin/send-test"><button class="button" type="submit">Send test email</button></form>
+  <form method="post" action="/admin/send-test"><button class="button primary" type="submit">Send test email</button></form>
 </section>
 {% endblock %}

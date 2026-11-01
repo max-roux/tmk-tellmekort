@@ -1,15 +1,15 @@
 {% extends "onboarding/base.html" %}
-{% block title %}Your interests · Maxfac Papers{% endblock %}
+{% block title %}Your interests · Tell Me Kort{% endblock %}
 {% block step %}
 <h1>What do you want to read about?</h1>
 <p class="muted">Describe your clinical and research interests in your own words: procedures, conditions, techniques, populations. A few sentences is enough. We'll turn them into topics you can edit.</p>
 <form method="post" action="/onboarding/interests" class="stack" id="interests">
-  <label for="interests-text">Your interests</label>
+  <label for="interests-text" class="field-label">Your interests</label>
   <textarea id="interests-text" name="interests" maxlength="4000" placeholder="e.g. Virtual surgical planning and patient-specific implants in orthognathic surgery; free fibula flap reconstruction of the mandible after oral cancer; medication-related osteonecrosis of the jaw…"></textarea>
   {% if not can_propose %}<p class="muted small">Topic suggestions aren't set up on this server, so you'll type topics by hand on the next step.</p>{% endif %}
   <div class="actions">
-    <button class="button" type="submit">{% if can_propose %}Suggest topics{% else %}Next{% endif %}</button>
-    {% if has_topics %}<a class="button secondary" href="/onboarding/topics">Keep my current topics</a>{% endif %}
+    <button class="button primary" type="submit">{% if can_propose %}Suggest topics{% else %}Next{% endif %}</button>
+    {% if has_topics %}<a class="button" href="/onboarding/topics">Keep my current topics</a>{% endif %}
   </div>
   <p class="muted small" id="wait" hidden>Reading your interests… this takes up to half a minute.</p>
 </form>
