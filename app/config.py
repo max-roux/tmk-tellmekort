@@ -38,7 +38,8 @@ class Settings(BaseSettings):
     llm_monthly_cap_usd: float = 30.0
     pertinence_gate: float = 0.30
     # Pertinence cosine needed for scores 2, 3, 4 and 5 (SPEC.md §8.2); ascending.
-    pertinence_thresholds: tuple[float, float, float, float] = (0.30, 0.40, 0.50, 0.60)
+    # Set from the first real run: graded papers' cosines span ~0.55-0.71 (10th-90th pct).
+    pertinence_thresholds: tuple[float, float, float, float] = (0.50, 0.58, 0.65, 0.72)
     email_min_weighted: float = 3.5
     active_window_days: int = 90
     # Profile vector coefficients (SPEC.md §8.1); the not-for-me term is subtracted.

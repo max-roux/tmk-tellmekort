@@ -98,7 +98,7 @@ def pertinence_cosines(
 
 
 def pertinence_score(cos: float, thresholds: Sequence[float]) -> int:
-    """1, plus one for each threshold reached: [0.30, 0.40, 0.50, 0.60] maps to 1-5."""
+    """1, plus one for each threshold reached: four ascending thresholds map to 1-5."""
     return 1 + sum(cos >= t for t in thresholds)
 
 

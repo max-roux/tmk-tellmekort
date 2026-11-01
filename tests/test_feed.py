@@ -29,7 +29,7 @@ def test_feed_ranks_graded_pertinent_papers(db_session: Session, user: User) -> 
     items = feed(db_session, user)
     assert [i.pmid for i in items] == ["42963307", "42949936", "42963182"]
     top = items[0]
-    assert top.ranked.scores["pertinence"] == 4  # cos 0.55
+    assert top.ranked.scores["pertinence"] == 2  # cos 0.55: past 0.50, short of 0.58
     assert top.grade.summary == "Summary." and top.paper.journal
 
 

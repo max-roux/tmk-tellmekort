@@ -258,7 +258,7 @@ v = normalize(
 Coefficients live in config. Recompute on any topic or feedback change.
 
 ### 8.2 Pertinence score
-`cos = cosine(paper, profile_vector)`. Map to 1–5 with configured thresholds (start with `[0.30, 0.40, 0.50, 0.60]` for 2/3/4/5, then tune from real data). Also keep the max cosine to any single topic, so a paper strongly matching one niche topic isn't diluted: `pertinence_cos = max(cos_profile, max_topic_cos)`.
+`cos = cosine(paper, profile_vector)`. Map to 1–5 with configured thresholds `[0.50, 0.58, 0.65, 0.72]` for 2/3/4/5. These were tuned on the first real run (2026-11-01): narrowing keeps papers close to the profile, so the graded papers' cosines span ~0.55–0.71 (10th–90th percentile), and the starting guess `[0.30, 0.40, 0.50, 0.60]` gave 82 of 102 eligible papers a 5. Recheck once the pilot surgeon's own topics are saved. Also keep the max cosine to any single topic, so a paper strongly matching one niche topic isn't diluted: `pertinence_cos = max(cos_profile, max_topic_cos)`.
 
 ### 8.3 Eligibility
 A paper is eligible for a user if all of these hold:
@@ -394,7 +394,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.30, 0.40, 0.50, 0.60]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `SMTP_HOST`, `SMTP_PORT=587`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `PERTINENCE_THRESHOLDS=[0.50, 0.58, 0.65, 0.72]` (§8.2, ascending), `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
 
 ---
 
