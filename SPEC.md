@@ -46,7 +46,7 @@ Status: milestones 1-7 built (see §18). This file is the source of truth; updat
 | Concern | Choice | Notes |
 |---|---|---|
 | Language | Python 3.12 | |
-| Web | FastAPI + Jinja2 templates + HTMX | Server-rendered, no SPA build step. |
+| Web | FastAPI + Jinja2 templates | Server-rendered, no SPA build step. Actions are plain HTML forms that POST and redirect back. |
 | DB | Postgres 16 + `pgvector` | Embeddings stored in the DB. |
 | ORM / migrations | SQLAlchemy 2.x + Alembic | |
 | LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via a JSON schema (`output_config.format`). |
@@ -93,7 +93,7 @@ app/
     grader.py            # batch submit / poll / parse
   embeddings/            # interface + voyage impl
   email/                 # templates + postmark client
-  web/                   # routes, templates, htmx partials
+  web/                   # routes and templates
   jobs/
     weekly_ingest.py
     send_due_emails.py
@@ -316,7 +316,7 @@ Postmark transactional stream, with HTML and a plain-text part. Store `postmark_
 
 ## 11. Web app
 
-Server-rendered with HTMX for in-place updates. Must work well on a phone.
+Server-rendered; actions are plain forms that POST and redirect back to the page they came from (no front-end JavaScript library). Must work well on a phone.
 
 | Route | Purpose |
 |---|---|
@@ -418,7 +418,7 @@ Each milestone is shippable and demoable.
 
 ## 19. Assumptions to confirm (chosen during spec writing, not discussed)
 
-- HTMX + server-rendered templates rather than a JS front end.
+- Server-rendered templates with plain forms rather than a JS front end (HTMX was dropped in milestone 7: a full-page reload after each action is fast enough).
 - Voyage `voyage-4` for embeddings and `pgvector` for storage.
 - Render Frankfurt rather than Railway.
 - Default send time Monday 06:30 Copenhagen; the surgeon can change it in settings.
