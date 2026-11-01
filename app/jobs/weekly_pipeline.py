@@ -16,11 +16,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.db.models import LlmSpend, Paper, PipelineRun
+from app.db.models import Paper, PipelineRun
 from app.domain.spend import Budget, crossed_alert_line, fit_budget
 from app.email.alerts import alert_admin
 from app.email.base import Mailer
 from app.embeddings.base import Embedder
+from app.grading.cost import month_spend
 from app.grading.grader import GradeInput, Grader, estimate_cost
 from app.jobs.embed_papers import embed_papers
 from app.jobs.full_text import fetch_full_texts
@@ -49,12 +50,6 @@ class Clients:
     embedder: Embedder
     grader: Grader
     mailer: Mailer
-
-
-def month_spend(session: Session, day: date) -> Decimal:
-    return session.scalar(
-        select(LlmSpend.usd).where(LlmSpend.month == day.replace(day=1))
-    ) or Decimal(0)
 
 
 def _ingest(session: Session, c: Clients, today: date) -> dict[str, Any]:

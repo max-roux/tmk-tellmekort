@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -72,3 +73,9 @@ def record_spend(session: Session, day: date, usd: Decimal) -> None:
         index_elements=[LlmSpend.month], set_={"usd": LlmSpend.usd + stmt.excluded.usd}
     )
     session.execute(stmt)
+
+
+def month_spend(session: Session, day: date) -> Decimal:
+    """USD spent in the month containing `day`."""
+    spent = session.scalar(select(LlmSpend.usd).where(LlmSpend.month == day.replace(day=1)))
+    return spent or Decimal(0)

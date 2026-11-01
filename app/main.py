@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.db.session import get_session
-from app.web import actions, auth, calibrate, feed, onboarding
+from app.web import actions, admin, auth, calibrate, feed, onboarding
 from app.web.sessions import LoginRequiredError
 
 
@@ -20,6 +20,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth.router)
     app.include_router(onboarding.router)
     app.include_router(calibrate.router)
+    app.include_router(admin.router)
     app.include_router(feed.router)
     app.include_router(actions.router)
 
