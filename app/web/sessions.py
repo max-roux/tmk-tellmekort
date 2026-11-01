@@ -5,9 +5,11 @@ the session; there is no server-side session store.
 """
 
 import uuid
+from collections.abc import Callable
 from typing import Annotated
 
 from fastapi import Depends, Request, Response
+from fastapi.responses import RedirectResponse
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from sqlalchemy.orm import Session
 
@@ -72,3 +74,12 @@ def require_user(user: Annotated[User | None, Depends(current_user)]) -> User:
 
 CurrentUser = Annotated[User | None, Depends(current_user)]
 RequiredUser = Annotated[User, Depends(require_user)]
+
+
+def gate(
+    user: User | None, allowed: Callable[[User], bool], refuse: Callable[[User], Response]
+) -> Response | None:
+    """None when `user` may proceed; else a redirect to sign in, or `refuse(user)`."""
+    if user is None:
+        return RedirectResponse("/login", status_code=303)
+    return None if allowed(user) else refuse(user)

@@ -17,7 +17,7 @@ from app.db.session import get_session
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.grading.rubric import criterion_guides
 from app.jobs.calibration import current_items, save_surgeon_scores
-from app.web.sessions import CurrentUser
+from app.web.sessions import CurrentUser, gate
 from app.web.templating import TEMPLATES
 
 router = APIRouter(prefix="/admin/calibrate")
@@ -27,13 +27,13 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 def _gate(request: Request, user: User | None) -> Response | None:
     """A response refusing access, or None when the user may calibrate."""
-    if user is None:
-        return RedirectResponse("/login", status_code=303)
-    if not (user.is_admin or user.can_calibrate):
-        return TEMPLATES.TemplateResponse(
-            request, "calibrate/denied.html", {"user": user}, status_code=403
-        )
-    return None
+    return gate(
+        user,
+        lambda u: u.is_admin or u.can_calibrate,
+        lambda u: TEMPLATES.TemplateResponse(
+            request, "calibrate/denied.html", {"user": u}, status_code=403
+        ),
+    )
 
 
 def _render_item(

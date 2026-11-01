@@ -17,7 +17,7 @@ from app.grading.rubric import criterion_labels
 from app.jobs.calibration import calibration_report
 from app.jobs.send_due_emails import preview
 from app.web.deps import MailerDep, SettingsDep
-from app.web.sessions import CurrentUser
+from app.web.sessions import CurrentUser, gate
 from app.web.templating import TEMPLATES
 
 router = APIRouter(prefix="/admin")
@@ -42,12 +42,8 @@ class DisputeRow:
     comment: str
 
 
-def _gate(request: Request, user: User | None) -> Response | None:
-    if user is None:
-        return RedirectResponse("/login", status_code=303)
-    if not user.is_admin:
-        return HTMLResponse("Admins only.", status_code=403)
-    return None
+def _gate(user: User | None) -> Response | None:
+    return gate(user, lambda u: u.is_admin, lambda u: HTMLResponse("Admins only.", 403))
 
 
 def _disputes(session: Session) -> list[DisputeRow]:
@@ -82,7 +78,7 @@ def dashboard(
     settings: SettingsDep,
     sent: str = "",
 ) -> Response:
-    if refused := _gate(request, user):
+    if refused := _gate(user):
         return refused
     spent = month_spend(session, now().date())
     cap = Decimal(str(settings.llm_monthly_cap_usd))
@@ -114,7 +110,7 @@ def send_test(
     mailer: MailerDep,
 ) -> Response:
     """Email the admin the weekly email they would get now (not recorded as a send)."""
-    if refused := _gate(request, user):
+    if refused := _gate(user):
         return refused
     assert user is not None
     mailer.send(preview(session, user, settings, now()))

@@ -1,5 +1,4 @@
 # Render Blueprint: all resources in Frankfurt (SPEC.md §3, §16).
-# The weekly ingest cron job is added in milestone 9.
 databases:
   - name: maxfac-db
     region: frankfurt
@@ -68,6 +67,45 @@ services:
           name: maxfac-web
           envVarKey: SECRET_KEY
       - key: BASE_URL
+        sync: false
+      - key: POSTMARK_SERVER_TOKEN
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+
+  # Weekly pipeline: Sunday 01:00 UTC = 02:00 Copenhagen in winter, 03:00 in summer (SPEC.md §6).
+  # Render stops a run after 12 h; the job waits at most 10 h for the grading batch.
+  - type: cron
+    name: maxfac-weekly
+    runtime: python
+    region: frankfurt
+    plan: starter
+    schedule: "0 1 * * 0"
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    startCommand: uv run --no-sync python cli.py weekly
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.13"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maxfac-db
+          property: connectionString
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: maxfac-web
+          envVarKey: SECRET_KEY
+      - key: BASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: NCBI_API_KEY
+        sync: false
+      - key: NCBI_EMAIL
         sync: false
       - key: POSTMARK_SERVER_TOKEN
         sync: false

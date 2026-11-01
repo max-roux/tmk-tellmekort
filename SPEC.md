@@ -2,7 +2,7 @@
 
 A web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
-Status: milestones 1-8 built (see §18). This file is the source of truth; update it when decisions change.
+Status: milestones 1-9 built (see §18). This file is the source of truth; update it when decisions change.
 
 ---
 
@@ -140,6 +140,8 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **login_attempts**: `id`, `email`, `created_at`. For the `/login` rate limit; rows older than an hour are pruned.
 
+**pipeline_runs**: `id`, `started_at`, `finished_at`, `status` (`running` | `ok` | `failed`), `stats` (jsonb, per step), `error`.
+
 **calibration_items**: `id`, `pmid`, `rubric_version`, `surgeon_scores` (jsonb), `model_scores` (jsonb), `created_at`.
 
 **grading_batches**: `id` (Anthropic batch id, PK), `rubric_version`, `model`, `pmids` (text[]), `input_sources` (jsonb: pmid → source), `submitted_at`, `ended_at` (nullable), `status` (`submitted` | `collected` | `failed`). Lets a re-run resume an open batch instead of paying for a new one.
@@ -148,7 +150,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 ## 6. Weekly ingest pipeline
 
-Runs as a Render cron job, Sunday 02:00 Europe/Copenhagen. Every step is idempotent and resumable: re-running for the same week must not duplicate rows or re-grade already graded papers.
+Runs as a Render cron job (`cli.py weekly`), Sundays at 01:00 UTC (Render schedules in UTC: 02:00 Copenhagen in winter, 03:00 in summer). Every step is idempotent and resumable: re-running for the same week must not duplicate rows or re-grade already graded papers. Each run is recorded in `pipeline_runs` with per-step stats; a failed run is recorded, the admin is emailed, and the job exits non-zero.
 
 ### 6.1 Fetch
 - `esearch` on PubMed with the **specialty query** (config file `app/sources/specialty_query.txt`), restricted to `entrez_date` in the last 14 days (overlapping the previous run, so papers entered on its day after it ran are not missed; stored papers are skipped), plus a backfill mode for the first run (90 days).
@@ -169,10 +171,10 @@ Papers are embedded with `input_type: document`; the anchor, topics and other qu
 For selected papers with a PMCID, fetch the article with PMC `efetch` (JATS XML). (NCBI retired the PMC OA Web Service in August 2026, and BioC returns nothing for recent articles.) A paper is **open access** when its XML carries a Creative Commons licence; set `is_open_access` then. Use the full text only when it is open access *and* the XML includes the body. Strip references, figures, tables and back matter, and truncate to `FULLTEXT_MAX_TOKENS` (default 12,000, estimated at 4 characters per token) keeping Methods and Results first. Otherwise grade from the abstract plus metadata. Record `input_source`. Full text is fetched at grading time and not stored.
 
 ### 6.5 Grade
-Submit one Message Batch with one request per paper (see §7). Poll until it finishes (batches usually complete well within an hour; timeout after 24 h with an alert). Parse results, validate them (§7.4), and store them in `grades`. Failed or invalid items are retried once individually, then logged and skipped.
+Submit one Message Batch with one request per paper (see §7). Poll until it finishes (batches usually complete well within an hour). Render stops a cron run after 12 h, so the run waits at most 10 h, then fails with an alert; the next run (or a manual `cli.py weekly`) collects the still-open batch instead of paying for a new one. Parse results, validate them (§7.4), and store them in `grades`. Failed or invalid items are retried once individually, then logged and skipped.
 
 ### 6.6 Spend guard
-Before submitting, estimate cost from token counts. If `llm_spend` for the month + estimate > `LLM_MONTHLY_CAP_USD` (default 30), grade only the top N that fit and email the admin. Alert at 80% of the cap.
+Before submitting, estimate each paper's batch cost from its prompt length (4 characters per token, plus 800 output tokens; real v1 grades use at most ~610; prompt caching is ignored, so the estimate errs high). If `llm_spend` for the month + estimate > `LLM_MONTHLY_CAP_USD` (default 30), grade only the top N that fit, best narrowing score first, stopping at the first paper that does not fit; email the admin. The rest stay selected and are graded in a later run. Email the admin when the month's spend crosses 80% of the cap (once, on crossing).
 
 ---
 
@@ -329,7 +331,7 @@ Server-rendered; actions are plain forms that POST and redirect back to the page
 | `/history` | Read and dismissed papers, with undo. |
 | `/profile` | Topics (add/edit/deactivate), seed papers, weights (5 sliders), minimums, hard filters. Changes re-rank the feed immediately. |
 | `/settings` | Send day/time, timezone, email address. |
-| `/admin` | Admin only: last ingest run stats, spend vs cap, disputes, calibration report, "send test email" button. |
+| `/admin` | Admin only: the last 5 weekly runs (status, stored, graded, cut by the cap, error), this month's LLM spend vs cap, recent score disputes (model score beside the surgeon's), the calibration agreement table, and a "send test email" button that emails the admin their own weekly email preview (not recorded as a send). |
 
 ### 11.1 Onboarding topic extraction
 The free text goes to Sonnet (normal API, not batch) with JSON-schema output (as for grading: forced tool use is not available on this model) → 4–12 topics, each with `label` and a 1–2 sentence `description` written in PubMed vocabulary. The free text itself is not stored. The user confirms or edits them; each confirmed topic's description is embedded. Seed PMIDs/DOIs/PubMed links are resolved via `esearch`/`efetch`; DOIs are resolved through esearch `[doi]`. Seeds without an abstract are not used (nothing to embed).
