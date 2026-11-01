@@ -384,6 +384,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 - Hosted in the EU (Render Frankfurt). Postmark, Anthropic and Voyage receive only paper text, profile text and the email address (Postmark only). List them as sub-processors in a one-page privacy note.
 - Account deletion endpoint: `/settings` → delete removes all of the user's rows.
 - Magic links and action tokens are single-purpose, signed and expiring; only their hashes are stored.
+- When `BASE_URL` is `https://`, the web app refuses to start with a missing or placeholder `SECRET_KEY`, or without `POSTMARK_SERVER_TOKEN` and `EMAIL_FROM`, rather than run with forgeable sessions or silently unsent sign-in emails.
 - Rate-limit `/login` (5 per hour per email and per IP).
 
 ---

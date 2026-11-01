@@ -7,13 +7,17 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.accounts.users import is_onboarded
+from app.config import Settings, get_settings
 from app.db.session import get_session
 from app.web import auth, calibrate, onboarding
 from app.web.sessions import CurrentUser, LoginRequiredError
 from app.web.templating import TEMPLATES
 
 
-def create_app() -> FastAPI:
+def create_app(settings: Settings | None = None) -> FastAPI:
+    settings = settings or get_settings()
+    if problems := settings.production_problems():
+        raise RuntimeError("Refusing to start: " + "; ".join(problems))
     app = FastAPI(title="Maxfac Paper Recommender")
     app.include_router(auth.router)
     app.include_router(onboarding.router)

@@ -4,6 +4,8 @@ from typing import Literal
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+DEV_SECRET_KEY = "dev-insecure-change-me"
+
 
 class Settings(BaseSettings):
     """All runtime configuration. See SPEC.md §15."""
@@ -11,7 +13,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str = "postgresql+psycopg://maxfac:maxfac@localhost:5432/maxfac"
-    secret_key: str = "dev-insecure-change-me"
+    secret_key: str = DEV_SECRET_KEY
     base_url: str = "http://localhost:8000"
 
     anthropic_api_key: str = ""
@@ -37,6 +39,23 @@ class Settings(BaseSettings):
     profile_coef_seeds: float = 1.0
     profile_coef_liked: float = 0.5
     profile_coef_not_for_me: float = 0.3
+
+    @property
+    def is_production(self) -> bool:
+        return self.base_url.startswith("https://")
+
+    def production_problems(self) -> list[str]:
+        """Settings that would make a public deployment silently insecure or broken."""
+        if not self.is_production:
+            return []
+        problems = []
+        if self.secret_key in ("", DEV_SECRET_KEY, "change-me"):
+            problems.append("SECRET_KEY is unset or a placeholder (anyone could forge sessions)")
+        if not self.postmark_server_token:
+            problems.append("POSTMARK_SERVER_TOKEN is unset (sign-in emails would not be sent)")
+        if not self.email_from:
+            problems.append("EMAIL_FROM is unset")
+        return problems
 
     @field_validator("database_url")
     @classmethod
