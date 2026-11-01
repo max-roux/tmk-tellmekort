@@ -308,7 +308,7 @@
     "typographyMeta": {
       "nameplate": {
         "displayName": "Nameplate",
-        "purpose": "Front-page 'Tell Me Kort', full width of the frame; T, M, K in vermilion."
+        "purpose": "Front-page 'Tell Me Kort', full width of the frame; all ink, weight 400 with T, M, K at 900."
       },
       "section-title": {
         "displayName": "Section Title",
@@ -400,7 +400,7 @@
         ],
         "axes": "wght 400-900",
         "license": "OFL",
-        "role": "nameplate and section titles (900), headlines and numerals (400), pull lines (400 italic)"
+        "role": "nameplate (400 with 900 initials), section titles (900), headlines and numerals (400), pull lines (400 italic)"
       },
       {
         "family": "Source Serif 4",
@@ -499,18 +499,18 @@
   ],
   "narrative": {
     "northStar": "The Typeset Weekly",
-    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader's system setting.\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
+    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
     "keyCharacteristics": [
       "One ruled page frame around everything; hairline rules divide stories, rows and columns.",
       "Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Inter (tracked-capital apparatus).",
       "Square corners everywhere, including checkboxes and range thumbs.",
-      "One vermilion accent, for rules, frames, the nameplate initials and large type; a darker vermilion for small text.",
+      "One vermilion accent, for rules, frames and large type; a darker vermilion for small text.",
       "Phone first: one column, the multi-column grid from 900px, every target at least 44px."
     ],
     "rules": [
       {
         "name": "The One Vermilion Rule",
-        "body": "Vermilion is the only hue. It draws rules, frames and the nameplate initials and marks state; it never fills a surface or a button.",
+        "body": "Vermilion is the only hue. It draws rules, frames and large numerals and marks state; it never fills a surface or a button.",
         "section": "colors"
       },
       {
@@ -558,7 +558,7 @@
       "Do draw every division with a rule: 1px `rule` between items, 1px `rule-strong` for frames and controls, 2px `accent` above a pull line.",
       "Do keep every corner square (0px), including form controls.",
       "Do set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.",
-      "Do use `accent-text` for any small vermilion text and keep `accent` for rules, frames, the nameplate initials and large type.",
+      "Do use `accent-text` for any small vermilion text and keep `accent` for rules, frames and large type.",
       "Do define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.",
       "Do keep labels, metadata, navigation and buttons in Inter capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.",
       "Do make every interactive element at least 44px tall and keep one column below 900px.",

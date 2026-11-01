@@ -23,8 +23,8 @@ colors:
 typography:
   nameplate:
     fontFamily: "Playfair Display, Iowan Old Style, Georgia, serif"
-    fontSize: "17.4cqi"
-    fontWeight: 900
+    fontSize: "17.7cqi"
+    fontWeight: 400
     lineHeight: 0.92
     letterSpacing: "-0.02em"
   section-title:
@@ -165,7 +165,7 @@ components:
 
 Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.
 
-The page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader's system setting.
+The page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).
 
 The system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.
 
@@ -173,7 +173,7 @@ The system refuses the card-list feed: no rounded cards, no score pills, no roun
 - One ruled page frame around everything; hairline rules divide stories, rows and columns.
 - Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Inter (tracked-capital apparatus).
 - Square corners everywhere, including checkboxes and range thumbs.
-- One vermilion accent, for rules, frames, the nameplate initials and large type; a darker vermilion for small text.
+- One vermilion accent, for rules, frames and large type; a darker vermilion for small text.
 - Phone first: one column, the multi-column grid from 900px, every target at least 44px.
 
 ## Colors
@@ -181,7 +181,7 @@ The system refuses the card-list feed: no rounded cards, no score pills, no roun
 Newsprint and ink with one vermilion, printed twice: a morning edition on warm paper and an evening edition on warm charcoal.
 
 ### Primary
-- **Vermilion** (`accent`): the only accent. The T, M and K of the nameplate, the bar under the compact TMK mark, the rule above a pull line, sidebar box frames, the "Open access" stamp border, the current section's underline, the focus ring, the warning progress bar and the selected calibration level outline. On paper it measures 3.5:1, so it carries rules, frames and large type only, never small text.
+- **Vermilion** (`accent`): the only accent. The bar under the compact TMK mark, the rule above a pull line, sidebar box frames, the "Open access" stamp border, the current section's underline, the focus ring, the warning progress bar and the selected calibration level outline. On paper it measures 3.5:1, so it carries rules, frames and large type only, never small text.
 - **Vermilion for Text** (`accent-text`): the same hue darkened to 4.9:1 on paper for small text: labels such as "Why it matters", sidebar box headings, the "Disagree?" control, form row numbers, sidebar figures, error text, link hover.
 
 ### Neutral
@@ -196,7 +196,7 @@ Newsprint and ink with one vermilion, printed twice: a morning edition on warm p
 Under `prefers-color-scheme: dark` the same token names take the `evening-*` values: warm charcoal paper, a slightly lighter charcoal for `paper-deep`, cream ink, soft ink at 7.5:1, rules in cream at 20% and 75%. The vermilion is lightened to pass AA on charcoal: accent 5.0:1, accent-text 6.0:1. Text on filled ink becomes charcoal.
 
 ### Named Rules
-**The One Vermilion Rule.** Vermilion is the only hue. It draws rules, frames and the nameplate initials and marks state; it never fills a surface or a button.
+**The One Vermilion Rule.** Vermilion is the only hue. It draws rules, frames and large numerals and marks state; it never fills a surface or a button.
 
 **The Small Text Rule.** Any vermilion text under display size uses `accent-text`, never `accent`. `accent` on morning paper is 3.5:1 and is reserved for large type and non-text marks.
 
@@ -212,7 +212,7 @@ Under `prefers-color-scheme: dark` the same token names take the `evening-*` val
 
 All three are SIL Open Font License, self-hosted as variable WOFF2 in `app/web/static/fonts/` with their OFL texts beside them, `font-display: swap`, and the Playfair and Source Serif roman files preloaded. No font is fetched from a third party.
 
-**Why Playfair Display, not Abril Fatface.** Abril Fatface ships a single weight. The system needs a 900 nameplate and section titles, 400 headlines and 400 numerals from one family so the masthead, the stories and the scores read as one typeface at different pitches. Playfair Display is a variable font across 400 to 900 with an italic (used for pull lines). Its lightest weight, 400, is the "light" numeral: large, regular-weight and high-contrast, it reads light against the 900 nameplate.
+**Why Playfair Display, not Abril Fatface.** Abril Fatface ships a single weight. The system needs a nameplate that mixes 400 and 900 within one word, 900 section titles, 400 headlines and 400 numerals from one family so the masthead, the stories and the scores read as one typeface at different pitches. Playfair Display is a variable font across 400 to 900 with an italic (used for pull lines). Its lightest weight, 400, is the "light" numeral: large, regular-weight and high-contrast, it reads light against the 900 initials of the nameplate.
 
 **Why Source Serif 4.** A text serif drawn for screens, with an optical size axis: `font-optical-sizing: auto` gives the 17px body and the 19px standfirst their own cuts, so small text stays sturdy and larger text gains finesse. Lining figures are set on the body so PMIDs, years and sample sizes align with the Playfair numerals.
 
@@ -299,7 +299,7 @@ The lead story's score: a 1px strong-rule frame holding the big overall numeral 
 - **Error:** vermilion-text, semibold; a notice or error block sits between two vermilion rules.
 
 ### Navigation
-- **Masthead:** the front page carries the full nameplate with T, M and K in vermilion, then the edition rule (No., week of, paper count) in Inter capitals between a 3px double rule and a hairline, separated by vermilion dots. Inner pages carry the compact TMK mark.
+- **Masthead:** the front page carries the full nameplate in ink, Playfair 400 with T, M and K in 900 so "TMK" reads out by weight alone, then the edition rule (No., week of, paper count) in Inter capitals between a 3px double rule and a hairline, separated by vermilion dots. Inner pages carry the compact TMK mark.
 - **Section strip:** Front page, Library, History, Profile, Calibration and Admin where allowed, and Sign out, centred between rules in Inter capitals at 0.10em, soft ink at rest, ink on hover. The current section is bold ink with a 2px vermilion underline offset 0.55em. It wraps on a phone; every item is 44px tall.
 - **Onboarding steps:** a ruled four-cell strip (two cells on a phone) of numeral and label; the current step is ink, bold, with a vermilion numeral and a 2px vermilion underline.
 
@@ -315,7 +315,7 @@ Onboarding reads as a numbered printed form: each row is a 2rem vermilion Playfa
 - **Do** draw every division with a rule: 1px `rule` between items, 1px `rule-strong` for frames and controls, 2px `accent` above a pull line.
 - **Do** keep every corner square (0px), including form controls.
 - **Do** set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.
-- **Do** use `accent-text` for any small vermilion text and keep `accent` for rules, frames, the nameplate initials and large type.
+- **Do** use `accent-text` for any small vermilion text and keep `accent` for rules, frames and large type.
 - **Do** define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.
 - **Do** keep labels, metadata, navigation and buttons in Inter capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.
 - **Do** make every interactive element at least 44px tall and keep one column below 900px.
