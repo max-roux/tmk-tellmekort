@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from sqlalchemy import func, select
@@ -25,8 +25,9 @@ pytestmark = pytest.mark.db
 
 SAMPLE = parse_pubmed_xml((FIXTURES / "pubmed" / "efetch_sample.xml").read_bytes()).papers
 WEEK = date(2026, 10, 26)
+NEXT_WEEK = date(2026, 11, 2)
 # Entrez dates in the fixture: four papers 2026-10-28..30, one (42746924) on 2026-09-16.
-OCT = {"start": date(2026, 10, 24), "end": date(2026, 10, 31)}
+OCT = {"since": date(2026, 10, 24)}
 
 
 @pytest.fixture
@@ -71,13 +72,33 @@ def test_narrow_selects_closest_to_anchor_and_reruns_cleanly(session: Session) -
     assert e.calls[-1] == (1, "query")
     selected = set(session.scalars(select(Candidate.pmid).where(Candidate.selected_for_grading)))
     assert selected == {"42963182", "42949936"}
-    assert session.get(Candidate, ("42746924", WEEK)) is None  # outside the window
+    assert session.get(Candidate, ("42746924", WEEK)) is None  # before `since`
 
     # Seeds are always included; a rerun overwrites the week's rows.
     narrow(session, e, **OCT, week=WEEK, limit=1, anchor_text="ANCHOR", always_include={"42958619"})
     assert count(session, Candidate) == 4
     selected = set(session.scalars(select(Candidate.pmid).where(Candidate.selected_for_grading)))
     assert selected == {"42963182", "42958619"}
+
+
+def test_narrow_scores_late_arrivals_once(db_session: Session) -> None:
+    late, early = SAMPLE[-1], SAMPLE[:-1]  # 42746924 has the oldest entrez date
+    since = date(2026, 9, 1)
+    e = FakeEmbedder()
+    store_papers(db_session, early)
+    embed_papers(db_session, e)
+    assert narrow(db_session, e, since=since, week=WEEK, limit=1, anchor_text="A").candidates == 4
+
+    # Stored after this week's run, with an entrez date inside last week's range.
+    store_papers(db_session, [late])
+    embed_papers(db_session, e)
+    stats = narrow(db_session, e, since=since, week=NEXT_WEEK, limit=5, anchor_text="A")
+    assert (stats.candidates, stats.selected) == (1, 1)
+    assert db_session.get(Candidate, (late.pmid, NEXT_WEEK)) is not None
+    following = NEXT_WEEK + timedelta(days=7)
+    assert (
+        narrow(db_session, e, since=since, week=following, limit=5, anchor_text="A").candidates == 0
+    )
 
 
 def test_narrow_reports_missing_embeddings(session: Session) -> None:

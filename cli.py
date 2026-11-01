@@ -81,6 +81,10 @@ def _window(days: int, backfill: bool, until: datetime | None) -> tuple[date, da
     return end - timedelta(days=span - 1), end
 
 
+# Two weeks, so papers entered on the previous run's day after it ran are still caught;
+# already stored papers are skipped, so the overlap costs only a search.
+INGEST_DAYS = 14
+
 DaysOpt = Annotated[int, typer.Option(help="Entrez-date window, ending on --until.")]
 BackfillOpt = Annotated[
     bool, typer.Option(help="Cover the whole active window (ACTIVE_WINDOW_DAYS).")
@@ -91,7 +95,9 @@ UntilOpt = Annotated[
 
 
 @cli.command()
-def ingest(days: DaysOpt = 7, backfill: BackfillOpt = False, until: UntilOpt = None) -> None:
+def ingest(
+    days: DaysOpt = INGEST_DAYS, backfill: BackfillOpt = False, until: UntilOpt = None
+) -> None:
     """Fetch papers from PubMed with the specialty query and store them."""
     start, end = _window(days, backfill, until)
     typer.echo(f"Ingesting entrez dates {start} .. {end}")
@@ -120,25 +126,21 @@ def embed() -> None:
 
 @cli.command("narrow")
 def narrow_cmd(
-    days: DaysOpt = 7,
-    backfill: BackfillOpt = False,
-    until: UntilOpt = None,
     limit: Annotated[
         int | None, typer.Option(help="Papers to select (default GRADE_LIMIT_PER_WEEK).")
     ] = None,
 ) -> None:
-    """Score papers in the window against the specialty anchor and select the top N."""
+    """Score papers not yet considered against the anchor and users; select the top N."""
     settings = get_settings()
-    start, end = _window(days, backfill, until)
     embedder = _embedder()
-    week = week_of(datetime.now(UTC).date())
+    today = datetime.now(UTC).date()
+    week = week_of(today)
     with Session(get_engine()) as session:
         refs = user_references(session, embedder.model)
         stats = narrow(
             session,
             embedder,
-            start=start,
-            end=end,
+            since=today - timedelta(days=settings.active_window_days),
             week=week,
             limit=limit or settings.grade_limit_per_week,
             anchor_text=load_anchor(),
@@ -147,12 +149,12 @@ def narrow_cmd(
         )
     embedder.close()
     typer.echo(
-        f"Week of {week}: {stats.candidates} candidates ({start} .. {end}), "
+        f"Week of {week}: {stats.candidates} new candidates, "
         f"{stats.selected} selected for grading "
         f"({len(refs.vectors)} user vectors, {len(refs.seeds)} seed papers)."
     )
     if stats.missing_embeddings:
-        typer.echo(f"{stats.missing_embeddings} papers in the window have no embedding: run embed.")
+        typer.echo(f"{stats.missing_embeddings} new papers have no embedding: run embed.")
 
 
 @cli.command()

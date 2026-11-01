@@ -59,26 +59,31 @@ def narrow(
     session: Session,
     embedder: Embedder,
     *,
-    start: date,
-    end: date,
+    since: date,
     week: date,
     limit: int,
     anchor_text: str,
     profile_vectors: Sequence[Sequence[float]] = (),
     always_include: AbstractSet[str] = frozenset(),
 ) -> NarrowStats:
-    """Score papers entered in [start, end] and mark the top `limit` for grading.
+    """Score papers not yet considered in an earlier week and mark the top `limit` for grading.
+
+    The pool is every paper with an entrez date on or after `since` (the start of the
+    active window) that has no candidate row from another week. Using "not yet scored"
+    rather than a date range means papers that reach PubMed or our database late are
+    still considered once; re-running in the same week re-scores that week's pool.
 
     References are the specialty anchor plus users' profile and topic vectors
     (`user_references`); `always_include` holds users' seed papers.
     """
-    in_window = Paper.entrez_date.between(start, end)
+    earlier_weeks = select(Candidate.pmid).where(Candidate.week_of != week)
+    pool = Paper.entrez_date >= since, Paper.pmid.not_in(earlier_weeks)
     rows = session.execute(
         select(PaperEmbedding.pmid, PaperEmbedding.vector)
         .join(Paper, Paper.pmid == PaperEmbedding.pmid)
-        .where(in_window, PaperEmbedding.model == embedder.model)
+        .where(*pool, PaperEmbedding.model == embedder.model)
     ).all()
-    total = session.scalar(select(func.count()).select_from(Paper).where(in_window))
+    total = session.scalar(select(func.count()).select_from(Paper).where(*pool))
     stats = NarrowStats(missing_embeddings=(total or 0) - len(rows))
     if not rows:
         return stats
