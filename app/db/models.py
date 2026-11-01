@@ -11,6 +11,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     SmallInteger,
@@ -18,6 +19,7 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -275,6 +277,14 @@ class Feedback(Base):
             "kind IN (" + ", ".join(f"'{k}'" for k in FEEDBACK_KINDS) + ")", name="kind"
         ),
         CheckConstraint("source IN ('email', 'app')", name="source"),
+        Index(
+            "uq_feedback_send_pmid_kind",
+            "send_id",
+            "pmid",
+            "kind",
+            unique=True,
+            postgresql_where=text("send_id IS NOT NULL"),
+        ),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
@@ -284,6 +294,10 @@ class Feedback(Base):
     pmid: Mapped[str] = mapped_column(ForeignKey("papers.pmid", ondelete="CASCADE"))
     kind: Mapped[str] = mapped_column(Text)
     source: Mapped[str] = mapped_column(Text)
+    # The weekly email an email action came from; one event per (send, paper, kind).
+    send_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("email_sends.id", ondelete="SET NULL")
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -308,3 +322,21 @@ class ScoreDispute(Base):
     user_score: Mapped[int | None] = mapped_column(SmallInteger)
     comment: Mapped[str] = mapped_column(Text, server_default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EmailSend(Base):
+    """One weekly email (SPEC.md §10). Unique per user and local week, so it is sent once.
+
+    No papers (both picks null) means a "quiet week" email.
+    """
+
+    __tablename__ = "email_sends"
+    __table_args__ = (UniqueConstraint("user_id", "week_of"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    week_of: Mapped[date] = mapped_column(Date)  # Monday of the week, in the user's timezone
+    sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    postmark_message_id: Mapped[str | None] = mapped_column(Text)
+    fresh_pmid: Mapped[str | None] = mapped_column(ForeignKey("papers.pmid", ondelete="SET NULL"))
+    missed_pmid: Mapped[str | None] = mapped_column(ForeignKey("papers.pmid", ondelete="SET NULL"))
