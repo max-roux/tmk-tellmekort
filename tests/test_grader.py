@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import anthropic
 import httpx
+import pytest
 
 from app.db.models import Paper
 from app.grading.grader import (
@@ -146,3 +147,39 @@ def test_estimate_cost_is_batch_priced_and_grows_with_full_text() -> None:
     full = estimate_cost("claude-sonnet-5-5", GradeInput(paper(), "x" * 40_000))
     # 40,000 chars = 10,000 more input tokens (plus the <full_text> tags) at $1 per million.
     assert Decimal("0.0100") <= full - abstract < Decimal("0.0101")
+
+
+def test_batch_status_errors_mean_not_ended_yet_so_the_wait_goes_on() -> None:
+    fake = FakeAnthropic(batch_results=batch_lines())
+    request = httpx.Request("GET", "https://api.anthropic.com/v1/messages/batches/b")
+    outage = [
+        anthropic.APIConnectionError(request=request),
+        anthropic.InternalServerError(
+            "down", response=httpx.Response(503, request=request), body=None
+        ),
+    ]
+    original = fake.messages.batches.retrieve  # type: ignore[attr-defined]
+
+    def flaky(batch_id: str):  # type: ignore[no-untyped-def]
+        if outage:
+            raise outage.pop(0)
+        return original(batch_id)
+
+    fake.messages.batches.retrieve = flaky  # type: ignore[attr-defined]
+    g = grader(fake)
+    assert not g.batch_ended("b") and not g.batch_ended("b")
+    assert g.batch_ended("b")
+
+
+def test_batch_status_client_errors_still_raise() -> None:
+    fake = FakeAnthropic()
+    request = httpx.Request("GET", "https://api.anthropic.com/v1/messages/batches/b")
+
+    def missing(batch_id: str):  # type: ignore[no-untyped-def]
+        raise anthropic.NotFoundError(
+            "no such batch", response=httpx.Response(404, request=request), body=None
+        )
+
+    fake.messages.batches.retrieve = missing  # type: ignore[attr-defined]
+    with pytest.raises(anthropic.NotFoundError):
+        grader(fake).batch_ended("b")

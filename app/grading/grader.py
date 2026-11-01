@@ -5,6 +5,7 @@ GradeFailure. Storage and orchestration live in app.jobs.grade_papers.
 """
 
 import json
+import logging
 from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal
@@ -18,6 +19,8 @@ from app.db.models import Paper
 from app.grading.cost import TokenUsage, cost_usd
 from app.grading.rubric import GRADE_SCHEMA, RUBRIC_TEXT
 from app.grading.validation import GradeData, GradeValidationError, InputSource, validate_grade
+
+log = logging.getLogger(__name__)
 
 MAX_TOKENS = 16_000  # thinking + answer; billed only for what is generated
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
@@ -178,7 +181,20 @@ class Grader:
         return self._client.messages.batches.create(requests=requests).id
 
     def batch_ended(self, batch_id: str) -> bool:
-        return self._client.messages.batches.retrieve(batch_id).processing_status == "ended"
+        """Whether the batch has ended. A network error, rate limit or server error counts
+        as "not yet": the caller keeps polling until its deadline instead of losing the
+        week's grading to one failed status check."""
+        try:
+            batch = self._client.messages.batches.retrieve(batch_id)
+        except anthropic.APIConnectionError as e:
+            log.warning("batch %s status check failed, will retry: %s", batch_id, e)
+            return False
+        except anthropic.APIStatusError as e:
+            if e.status_code != 429 and e.status_code < 500:
+                raise
+            log.warning("batch %s status check got HTTP %s, will retry", batch_id, e.status_code)
+            return False
+        return batch.processing_status == "ended"
 
     def batch_results(self, batch_id: str, items: dict[str, GradeInput]) -> list[GradeResult]:
         """Results keyed by custom_id (= PMID); they arrive in any order."""
