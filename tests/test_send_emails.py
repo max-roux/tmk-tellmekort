@@ -1,5 +1,5 @@
 import re
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, time, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -10,7 +10,10 @@ from app.config import Settings
 from app.db.models import CriterionSettings, EmailSend, User
 from app.email.base import EmailMessage, MailerError
 from app.jobs.send_due_emails import preview, send_due
-from tests.feed_setup import grade, user
+from app.profiles import service
+from app.profiles.topics import ProposedTopic
+from tests.fakes import FakeEmbedder
+from tests.feed_setup import EVEN, PINNED, TOPIC, grade, user
 
 pytestmark = pytest.mark.db
 __all__ = ["user"]  # pytest fixture
@@ -19,6 +22,7 @@ SETTINGS = Settings(  # type: ignore[call-arg]
     _env_file=None, base_url="https://tmk.test", admin_email="admin@example.com"
 )
 SUNDAY = datetime(2026, 11, 1, 12, 0, tzinfo=UTC)  # Monday 06:30 slot of this week has passed
+MONDAY_AT_SLOT = datetime(2026, 11, 2, 5, 35, tzinfo=UTC)  # 06:35 Copenhagen
 MONDAY_EARLY = datetime(2026, 11, 2, 5, 0, tzinfo=UTC)  # 06:00 Copenhagen, before the slot
 # Fixture papers: 42963307 / 42963182 entered 2026-10-30 (fresh), 42949936 on 10-28 (fresh).
 
@@ -112,15 +116,47 @@ def test_inline_reasons_follow_the_users_top_two_weights(db_session: Session, us
     assert "proof_strength because" not in msg.text
 
 
-def test_unexpected_error_releases_the_claim_and_surfaces(db_session: Session, user: User) -> None:
-    class Broken(Mailer):
+def test_one_users_bug_does_not_stop_the_others_and_alerts_the_admin(
+    db_session: Session, user: User
+) -> None:
+    other = add_user(db_session, "second@example.com")
+    e = FakeEmbedder(pinned=PINNED)
+    service.replace_topics(db_session, other.id, [ProposedTopic("Fibula", TOPIC)], "onboarding")
+    service.save_preferences(db_session, other.id, EVEN)
+    assert service.sync_embeddings(db_session, e, other.id, service.coefficients(SETTINGS))
+
+    class BrokenForOne(Mailer):
         def send(self, message: EmailMessage) -> str:
-            raise RuntimeError("bug")
+            if message.to == user.email:
+                raise RuntimeError("template bug")
+            return super().send(message)
 
     grade(db_session, "42963307", 5)
-    with pytest.raises(RuntimeError):
-        send_due(db_session, SETTINGS, Broken(), SUNDAY)
-    assert db_session.scalars(select(EmailSend)).all() == []
+    mailer = BrokenForOne()
+    stats = send_due(db_session, SETTINGS, mailer, MONDAY_AT_SLOT)
+    assert (stats.sent, stats.failed) == (1, 1)
+    assert len(to_user(mailer, other)) == 1
+    (alert,) = [m for m in mailer.sent if m.to == "admin@example.com"]
+    assert "RuntimeError" in alert.text and user.email not in alert.subject
+    claims = db_session.scalars(select(EmailSend.user_id)).all()
+    assert claims == [other.id]  # the failed user's claim is released for the next run
+
+    # The next hourly retry fails the same way, but doesn't alert again.
+    retry = BrokenForOne()
+    assert send_due(db_session, SETTINGS, retry, MONDAY_AT_SLOT + timedelta(hours=1)).failed == 1
+    assert [m for m in retry.sent if m.to == "admin@example.com"] == []
+
+
+def test_a_late_sunday_slot_sends_after_the_week_rolls_over(
+    db_session: Session, user: User
+) -> None:
+    user.send_weekday, user.send_local_time = 6, time(23, 30)
+    db_session.commit()
+    grade(db_session, "42963307", 5)
+    monday_0005_local = datetime(2026, 11, 1, 23, 5, tzinfo=UTC)
+    assert send_due(db_session, SETTINGS, Mailer(), monday_0005_local).sent == 1
+    (send,) = db_session.scalars(select(EmailSend)).all()
+    assert send.week_of == date(2026, 10, 26)  # counted as last week's email
 
 
 def test_preview_renders_without_recording(db_session: Session, user: User) -> None:

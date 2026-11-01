@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from app.domain.picks import Picks, is_due, local_week, select_picks
+from app.domain.picks import Picks, due_slot, local_week, select_picks
 from app.domain.ranking import GradedPaper, RankedPaper
 
 FRESH_SINCE = date(2026, 10, 26)
@@ -64,10 +64,21 @@ def test_local_week_is_monday_in_the_users_timezone() -> None:
     ],
 )
 def test_due_from_the_weekly_slot_onwards(now: datetime, due: bool) -> None:
-    assert is_due(now, CPH, weekday=0, at=time(6, 30)) is due
+    assert (due_slot(now, CPH, weekday=0, at=time(6, 30)) is not None) is due
 
 
 def test_due_respects_summer_time() -> None:
     # Copenhagen is UTC+2 in summer: 06:30 local is 04:30 UTC.
-    assert not is_due(datetime(2026, 6, 1, 4, 29, tzinfo=UTC), CPH, weekday=0, at=time(6, 30))
-    assert is_due(datetime(2026, 6, 1, 4, 30, tzinfo=UTC), CPH, weekday=0, at=time(6, 30))
+    assert due_slot(datetime(2026, 6, 1, 4, 29, tzinfo=UTC), CPH, weekday=0, at=time(6, 30)) is None
+    slot = due_slot(datetime(2026, 6, 1, 4, 30, tzinfo=UTC), CPH, weekday=0, at=time(6, 30))
+    assert slot == datetime(2026, 6, 1, 6, 30, tzinfo=CPH)
+
+
+def test_a_late_sunday_slot_is_still_due_after_the_week_rolls_over() -> None:
+    # Sunday 23:30 Copenhagen; the hourly run at :05 comes next at Monday 00:05 local.
+    monday_0005 = datetime(2026, 11, 1, 23, 5, tzinfo=UTC)
+    slot = due_slot(monday_0005, CPH, weekday=6, at=time(23, 30))
+    assert slot == datetime(2026, 11, 1, 23, 30, tzinfo=CPH)
+    assert local_week(slot, CPH) == date(2026, 10, 26)  # the email is last week's
+    # Days later, last week's slot is no longer due (only this week's, when it comes).
+    assert due_slot(datetime(2026, 11, 4, 12, tzinfo=UTC), CPH, weekday=6, at=time(23, 30)) is None

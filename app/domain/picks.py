@@ -58,11 +58,25 @@ def local_week(now: datetime, tz: ZoneInfo) -> date:
     return local - timedelta(days=local.weekday())
 
 
-def is_due(now: datetime, tz: ZoneInfo, *, weekday: int, at: time) -> bool:
-    """Whether this week's send slot (weekday at local time) has passed.
+# How long last week's slot stays due into the new week. A slot late on Sunday can pass
+# after the last hourly run of the week; without this its email would be skipped.
+CATCH_UP_INTO_NEXT_WEEK = timedelta(hours=6)
 
-    From the slot until the week ends, so a missed hourly run catches up; whether this
-    week's email was already sent is checked separately.
+
+def _slot(week: date, tz: ZoneInfo, weekday: int, at: time) -> datetime:
+    return datetime.combine(week + timedelta(days=weekday), at, tzinfo=tz)
+
+
+def due_slot(now: datetime, tz: ZoneInfo, *, weekday: int, at: time) -> datetime | None:
+    """The send slot (weekday at local time) whose email is due now, if any.
+
+    This week's slot from the moment it passes until the week ends, so a missed hourly
+    run catches up; and last week's slot for a few hours into the new week. Whether that
+    week's email was already sent is checked separately (`local_week(slot)` names it).
     """
-    slot = datetime.combine(local_week(now, tz) + timedelta(days=weekday), at, tzinfo=tz)
-    return now >= slot
+    this_week = local_week(now, tz)
+    slot = _slot(this_week, tz, weekday, at)
+    if now >= slot:
+        return slot
+    last = _slot(this_week - timedelta(days=7), tz, weekday, at)
+    return last if now - last < CATCH_UP_INTO_NEXT_WEEK else None

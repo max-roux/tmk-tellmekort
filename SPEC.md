@@ -291,7 +291,7 @@ After ≥ 10 likes, compare the mean score of liked papers with the mean of show
 ## 10. Weekly email
 
 ### 10.1 Scheduling
-An hourly cron job (`cli.py send-due`) finds onboarded users whose local send slot (weekday and time) has passed this week and who have no `email_sends` row for that week, then builds and sends their email. Being due from the slot onwards, rather than only in the hour after it, means a missed run catches up.
+An hourly cron job (`cli.py send-due`) finds onboarded users whose local send slot (weekday and time) has passed this week and who have no `email_sends` row for that week, then builds and sends their email. Being due from the slot onwards, rather than only in the hour after it, means a missed run catches up. Last week's slot also stays due for 6 hours into the new week, so a slot late on Sunday is not skipped when the week rolls over before the next hourly run. A failure for one user never stops the others: a mail error is retried next hour; any other error (a bug) is logged, retried, and alerts the operator once, on the first attempt after the slot.
 
 ### 10.2 Pick selection (`app/domain/picks.py`)
 1. **Fresh pick**: the top eligible paper by weighted score with `entrez_date` in the last 7 days and never sent to this user.

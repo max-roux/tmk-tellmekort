@@ -19,7 +19,7 @@ from app.accounts.users import is_onboarded
 from app.config import Settings
 from app.db.models import EmailSend, User
 from app.domain.criteria import INTRINSIC_CRITERIA
-from app.domain.picks import Picks, is_due, local_week, select_picks
+from app.domain.picks import Picks, due_slot, local_week, select_picks
 from app.email.actions import ACTIONS, action_link
 from app.email.alerts import alert_admin
 from app.email.base import NAME, EmailMessage, Mailer, MailerError, render
@@ -31,6 +31,8 @@ from app.profiles.service import load_preferences
 
 log = logging.getLogger(__name__)
 
+# The hourly run's first try at a slot; only then does a crash alert the operator.
+FIRST_ATTEMPT = timedelta(hours=1)
 FRESH_DAYS = 7
 
 
@@ -51,20 +53,21 @@ class EmailPaper:
     links: dict[str, str]  # action -> one-tap link
 
 
-def due_users(session: Session, now: datetime) -> list[User]:
-    """Onboarded users whose weekly slot has passed and who have no email this week."""
+def due_users(session: Session, now: datetime) -> list[tuple[User, datetime]]:
+    """Onboarded users with a due slot whose week has no email yet, with that slot."""
     due = []
     for user in session.scalars(select(User).order_by(User.created_at)):
         tz = ZoneInfo(user.timezone)
-        if not is_due(now, tz, weekday=user.send_weekday, at=user.send_local_time):
+        slot = due_slot(now, tz, weekday=user.send_weekday, at=user.send_local_time)
+        if slot is None:
             continue
         sent = session.scalar(
             select(EmailSend.id).where(
-                EmailSend.user_id == user.id, EmailSend.week_of == local_week(now, tz)
+                EmailSend.user_id == user.id, EmailSend.week_of == local_week(slot, tz)
             )
         )
         if sent is None and is_onboarded(session, user):
-            due.append(user)
+            due.append((user, slot))
     return due
 
 
@@ -109,9 +112,9 @@ def _pick(
     return picks, {i.pmid: i for i in ranked}
 
 
-def _claim(session: Session, user: User, now: datetime) -> uuid.UUID | None:
-    """Insert this week's send row; None if another run already has it."""
-    week = local_week(now, ZoneInfo(user.timezone))
+def _claim(session: Session, user: User, slot: datetime, now: datetime) -> uuid.UUID | None:
+    """Insert the send row for the slot's week; None if another run already has it."""
+    week = local_week(slot, ZoneInfo(user.timezone))
     stmt = insert(EmailSend).values(id=uuid.uuid4(), user_id=user.id, week_of=week, sent_at=now)
     send_id = session.execute(stmt.on_conflict_do_nothing().returning(EmailSend.id)).scalar()
     session.commit()
@@ -151,23 +154,34 @@ def preview(session: Session, user: User, settings: Settings, now: datetime) -> 
 
 
 def send_weekly(
-    session: Session, user: User, settings: Settings, mailer: Mailer, now: datetime
+    session: Session, user: User, settings: Settings, mailer: Mailer, now: datetime, slot: datetime
 ) -> Picks | None:
-    """Claim, build and send one user's email. None if not sent (claimed elsewhere or failed)."""
-    send_id = _claim(session, user, now)
+    """Claim, build and send one user's email for `slot`'s week. None if not sent (claimed
+    elsewhere or failed)."""
+    send_id = _claim(session, user, slot, now)
     if send_id is None:
         return None
     try:
         message, picks = _message(session, user, settings, now, send_id)
         message_id = mailer.send(message)
     except Exception as e:
-        # Release the claim so the next hourly run retries; re-raise anything unexpected.
+        # Release the claim so the next hourly run retries. A mail failure is routine; any
+        # other error is a bug: alert the operator, but let the other users' emails go out.
         session.rollback()
         session.execute(delete(EmailSend).where(EmailSend.id == send_id))
         session.commit()
-        if not isinstance(e, MailerError):
-            raise
-        log.error("weekly email to user %s failed, will retry: %s", user.id, e)
+        if isinstance(e, MailerError):
+            log.error("weekly email to user %s failed, will retry: %s", user.id, e)
+            return None
+        log.exception("weekly email to user %s crashed, will retry", user.id)
+        if now - slot < FIRST_ATTEMPT:  # once a week, not on every hourly retry of a bug
+            alert_admin(
+                mailer,
+                settings,
+                "Weekly email failed",
+                f"Building or sending the weekly email for {user.email} raised "
+                f"{type(e).__name__}. It is retried every hour; the log has the traceback.",
+            )
         return None
     send = session.get(EmailSend, send_id)
     assert send is not None
@@ -188,8 +202,8 @@ def send_weekly(
 
 def send_due(session: Session, settings: Settings, mailer: Mailer, now: datetime) -> SendStats:
     stats = SendStats()
-    for user in due_users(session, now):
-        picks = send_weekly(session, user, settings, mailer, now)
+    for user, slot in due_users(session, now):
+        picks = send_weekly(session, user, settings, mailer, now, slot)
         if picks is None:
             stats.failed += 1
             continue
