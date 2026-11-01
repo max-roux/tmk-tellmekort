@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import distinct_on
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.db.models import Grade, Paper, PaperEmbedding, ProfileVector, Topic
+from app.db.models import Grade, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.domain.ranking import (
     GradedPaper,
@@ -140,9 +140,11 @@ def feed(
     today: date,
     limit: int | None = FEED_SIZE,
 ) -> list[FeedItem]:
-    """Top eligible papers of the active window, best first."""
+    """Top eligible papers of the active window, best first. The user's own seed papers are
+    left out: they are how the user described their interests, not news to them."""
     since = today - timedelta(days=settings.active_window_days)
-    rows = _graded_rows(session, Paper.entrez_date >= since)
+    seeds = select(SeedPaper.pmid).where(SeedPaper.user_id == user_id)
+    rows = _graded_rows(session, Paper.entrez_date >= since, Paper.pmid.not_in(seeds))
     rules, graded = _score(session, user_id, settings, rows)
     by_pmid = {p.pmid: (p, g) for p, g in rows}
     return [FeedItem(*by_pmid[r.paper.pmid], r) for r in rank(graded.values(), rules)[:limit]]

@@ -165,7 +165,7 @@ Runs as a Render cron job (`cli.py weekly`), Sundays at 01:00 UTC (Render schedu
 Embed title + abstract for every new paper (`voyage-4`, input_type `document`). Batch up to the provider's limit.
 
 ### 6.3 Narrow
-Papers are embedded with `input_type: document`; the anchor, topics and other query-like texts with `input_type: query`. Compute `narrow_score` = max cosine similarity between the paper and (a) every user's profile vector and each active topic embedding (so one niche topic is not diluted by the rest of a profile) and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). The pool is every paper in the active window that has not been a candidate in an earlier week, so a paper stored late is still scored once. Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Always include papers that already appear in a user's seed list.
+Papers are embedded with `input_type: document`; the anchor, topics and other query-like texts with `input_type: query`. Compute `narrow_score` = max cosine similarity between the paper and (a) every user's profile vector and each active topic embedding (so one niche topic is not diluted by the rest of a profile) and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). The pool is every paper in the active window that has not been a candidate in an earlier week, so a paper stored late is still scored once. Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Users' seed papers are not forced in: they shape the profile (§8.1) but are never recommended back (§8.3), so grading them would only cost money.
 
 ### 6.4 Full text
 For selected papers with a PMCID, fetch the article with PMC `efetch` (JATS XML). (NCBI retired the PMC OA Web Service in August 2026, and BioC returns nothing for recent articles.) A paper is **open access** when its XML carries a Creative Commons licence; set `is_open_access` then. Use the full text only when it is open access *and* the XML includes the body. Strip references, figures, tables and back matter, and truncate to `FULLTEXT_MAX_TOKENS` (default 12,000, estimated at 4 characters per token) keeping Methods and Results first. Otherwise grade from the abstract plus metadata. Record `input_source`. Full text is fetched at grading time and not stored.
@@ -267,6 +267,7 @@ A paper is eligible for a user if all of these hold:
 - Every criterion meets the user's minimum, if one is set.
 - It passes the hard filters: `hide_case_reports`, `study_types`.
 - Its current state for that user is not `read` and not `not_for_me`.
+- It is not one of the user's own seed papers (those describe their interests; they are not news to them).
 
 ### 8.4 Weighted score
 ```

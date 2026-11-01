@@ -79,7 +79,6 @@ def _narrow(session: Session, c: Clients, settings: Settings, today: date) -> di
         limit=settings.grade_limit_per_week,
         anchor_text=load_anchor(),
         profile_vectors=refs.vectors,
-        always_include=refs.seeds,
     )
     return asdict(stats)
 

@@ -1,7 +1,6 @@
 """Narrowing: which new papers are worth grading this week (SPEC.md §6.3). Pure."""
 
 from collections.abc import Mapping, Sequence
-from collections.abc import Set as AbstractSet
 
 import numpy as np
 import numpy.typing as npt
@@ -30,12 +29,11 @@ def narrow_scores(
     return {pmid: float(s) for pmid, s in zip(pmids, best, strict=True)}
 
 
-def select_for_grading(
-    scores: Mapping[str, float], limit: int, always_include: AbstractSet[str] = frozenset()
-) -> set[str]:
-    """Top `limit` papers by score, plus any in `always_include` (users' seed papers).
+def select_for_grading(scores: Mapping[str, float], limit: int) -> set[str]:
+    """Top `limit` papers by score.
 
-    Ties break on PMID, higher (newer) first, so selection is deterministic.
+    Ties break on PMID, higher (newer) first, so selection is deterministic. Users' seed
+    papers are not forced in: they shape the profile, but are never recommended back.
     """
     ranked = sorted(scores, key=lambda pmid: (scores[pmid], pmid), reverse=True)
-    return set(ranked[:limit]) | (always_include & scores.keys())
+    return set(ranked[:limit])

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.accounts.users import add_user
-from app.db.models import ProfileVector, ScoreDispute, User
+from app.db.models import ProfileVector, ScoreDispute, SeedPaper, User
 from app.feed import feedback, queries
 from app.grading.rubric import RUBRIC_VERSION
 from app.jobs.weekly_ingest import store_papers
@@ -98,3 +98,14 @@ def test_feed_is_empty_without_a_profile_vector(db_session: Session) -> None:
     u = add_user(db_session, "new@example.com")
     grade(db_session, "42963182", 5)
     assert queries.feed(db_session, u.id, SETTINGS, TODAY) == []
+
+
+def test_the_users_own_seed_papers_are_never_recommended_back(
+    db_session: Session, user: User
+) -> None:
+    for pmid in ("42963182", "42949936", "42963307"):
+        grade(db_session, pmid, 4)
+    db_session.add(SeedPaper(user_id=user.id, pmid="42963182"))
+    db_session.commit()
+    assert "42963182" not in [i.pmid for i in feed(db_session, user)]
+    assert queries.paper(db_session, user.id, "42963182", SETTINGS) is not None  # still viewable

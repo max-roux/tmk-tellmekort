@@ -4,7 +4,6 @@ Idempotent: re-running in the same week overwrites that week's candidate rows.
 """
 
 from collections.abc import Sequence
-from collections.abc import Set as AbstractSet
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -13,7 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from app.db.models import Candidate, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
+from app.db.models import Candidate, Paper, PaperEmbedding, ProfileVector, Topic
 from app.domain.narrowing import narrow_scores, select_for_grading
 from app.embeddings.base import Embedder
 from app.jobs.grade_papers import currently_graded
@@ -40,19 +39,18 @@ def load_anchor(path: Path = ANCHOR_PATH) -> str:
 @dataclass(frozen=True)
 class UserReferences:
     vectors: list[list[float]]  # profile vectors and active topic embeddings
-    seeds: frozenset[str]  # every user's seed papers
 
 
 def user_references(session: Session, model: str) -> UserReferences:
-    """What users add to narrowing: their profile vectors, each active topic (so a niche
-    topic is not diluted by the rest of a profile), and their seed papers.
+    """What users add to narrowing: their profile vectors and each active topic (so a niche
+    topic is not diluted by the rest of a profile).
     """
     profiles = session.scalars(select(ProfileVector.vector).where(ProfileVector.model == model))
     topics = session.scalars(
         select(Topic.embedding).where(Topic.active, Topic.embedding_model == model)
     )
     vectors = [list(v) for v in [*profiles, *topics] if v is not None]
-    return UserReferences(vectors, frozenset(session.scalars(select(SeedPaper.pmid))))
+    return UserReferences(vectors)
 
 
 def narrow(
@@ -64,7 +62,6 @@ def narrow(
     limit: int,
     anchor_text: str,
     profile_vectors: Sequence[Sequence[float]] = (),
-    always_include: AbstractSet[str] = frozenset(),
 ) -> NarrowStats:
     """Score papers not yet considered in an earlier week and mark the top `limit` for grading.
 
@@ -74,7 +71,7 @@ def narrow(
     still considered once; re-running in the same week re-scores that week's pool.
 
     References are the specialty anchor plus users' profile and topic vectors
-    (`user_references`); `always_include` holds users' seed papers.
+    (`user_references`).
     """
     earlier_weeks = select(Candidate.pmid).where(Candidate.week_of != week)
     pool = Paper.entrez_date >= since, Paper.pmid.not_in(earlier_weeks)
@@ -90,7 +87,7 @@ def narrow(
 
     anchor = embedder.embed([anchor_text], "query").vectors[0]
     scores = narrow_scores({pmid: list(vec) for pmid, vec in rows}, [anchor, *profile_vectors])
-    selected = select_for_grading(scores, limit, always_include)
+    selected = select_for_grading(scores, limit)
     stmt = insert(Candidate).values(
         [
             {

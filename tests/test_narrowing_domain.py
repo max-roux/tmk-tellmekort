@@ -17,12 +17,7 @@ def test_no_references_scores_zero() -> None:
     assert narrow_scores({}, [[1.0]]) == {}
 
 
-def test_select_top_n_with_deterministic_ties_and_seeds() -> None:
+def test_select_top_n_with_deterministic_ties() -> None:
     scores = {"10": 0.9, "11": 0.5, "12": 0.5, "13": 0.1}
     assert select_for_grading(scores, 2) == {"10", "12"}  # tie on 0.5: higher PMID wins
-    assert select_for_grading(scores, 2, always_include={"13", "not-a-candidate"}) == {
-        "10",
-        "12",
-        "13",
-    }
     assert select_for_grading(scores, 10) == set(scores)

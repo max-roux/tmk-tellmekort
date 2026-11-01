@@ -74,11 +74,11 @@ def test_narrow_selects_closest_to_anchor_and_reruns_cleanly(session: Session) -
     assert selected == {"42963182", "42949936"}
     assert session.get(Candidate, ("42746924", WEEK)) is None  # before `since`
 
-    # Seeds are always included; a rerun overwrites the week's rows.
-    narrow(session, e, **OCT, week=WEEK, limit=1, anchor_text="ANCHOR", always_include={"42958619"})
+    # A rerun overwrites the week's rows.
+    narrow(session, e, **OCT, week=WEEK, limit=1, anchor_text="ANCHOR")
     assert count(session, Candidate) == 4
     selected = set(session.scalars(select(Candidate.pmid).where(Candidate.selected_for_grading)))
-    assert selected == {"42963182", "42958619"}
+    assert selected == {"42963182"}
 
 
 def test_narrow_scores_late_arrivals_once(db_session: Session) -> None:
@@ -174,7 +174,6 @@ def test_user_references_feed_narrowing(session: Session) -> None:
 
     refs = user_references(session, "voyage-4")
     assert len(refs.vectors) == 3  # profile vector + 2 topics
-    assert refs.seeds == {"42949936"}
     assert user_references(session, "voyage-5").vectors == []
 
     stats = narrow(
@@ -185,6 +184,5 @@ def test_user_references_feed_narrowing(session: Session) -> None:
         limit=0,
         anchor_text="A",
         profile_vectors=refs.vectors,
-        always_include=refs.seeds,
     )
-    assert stats.selected == 1  # only the seed paper, with limit 0
+    assert stats.selected == 0  # seeds shape the profile but are not forced into grading

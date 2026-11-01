@@ -157,13 +157,12 @@ def narrow_cmd(
             limit=limit or settings.grade_limit_per_week,
             anchor_text=load_anchor(),
             profile_vectors=refs.vectors,
-            always_include=refs.seeds,
         )
     embedder.close()
     typer.echo(
         f"Week of {week}: {stats.candidates} new candidates, "
         f"{stats.selected} selected for grading "
-        f"({len(refs.vectors)} user vectors, {len(refs.seeds)} seed papers)."
+        f"({len(refs.vectors)} user vectors)."
     )
     if stats.missing_embeddings:
         typer.echo(f"{stats.missing_embeddings} new papers have no embedding: run embed.")
