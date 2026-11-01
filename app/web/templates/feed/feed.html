@@ -14,6 +14,16 @@
 {% block content %}
 <div class="front">
   <div class="front-main">
+    {% if suggestion %}
+    {% set name = dict(CRITERIA)[suggestion] %}
+    <aside class="notice suggestion" role="status" aria-label="Weight suggestion">
+      <p>Papers you like score high on {{ name|lower }}. Raise its weight?</p>
+      <div class="row-actions">
+        <form method="post" action="/suggestion/apply"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit" aria-pressed="true">Raise {{ name|lower }}</button></form>
+        <form method="post" action="/suggestion/dismiss"><input type="hidden" name="criterion" value="{{ suggestion }}"><button class="small-button" type="submit">No thanks</button></form>
+      </div>
+    </aside>
+    {% endif %}
     {% if items %}
     {{ lead(items[0]) }}
     {% if items[1:3] %}

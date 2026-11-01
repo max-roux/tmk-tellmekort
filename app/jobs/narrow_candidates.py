@@ -13,10 +13,10 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from app.db.models import Candidate, Grade, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
+from app.db.models import Candidate, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
 from app.domain.narrowing import narrow_scores, select_for_grading
 from app.embeddings.base import Embedder
-from app.grading.rubric import RUBRIC_VERSION
+from app.jobs.grade_papers import currently_graded
 
 ANCHOR_PATH = Path(__file__).parents[1] / "sources" / "specialty_anchor.txt"
 
@@ -119,10 +119,9 @@ def narrow(
 def selected_ungraded(session: Session, limit: int | None = None) -> list[str]:
     """Papers selected for grading in any week that lack a current-version grade, best
     narrowing score first (the order the spend guard keeps them in)."""
-    graded = select(Grade.pmid).where(Grade.rubric_version == RUBRIC_VERSION)
     stmt = (
         select(Candidate.pmid)
-        .where(Candidate.selected_for_grading, Candidate.pmid.not_in(graded))
+        .where(Candidate.selected_for_grading, Candidate.pmid.not_in(currently_graded()))
         .group_by(Candidate.pmid)
         .order_by(func.max(Candidate.narrow_score).desc(), Candidate.pmid.desc())
         .limit(limit)

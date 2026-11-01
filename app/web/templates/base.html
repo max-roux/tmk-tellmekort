@@ -29,6 +29,7 @@
         <li><a href="/library"{% if path == "/library" %} aria-current="page"{% endif %}>Library</a></li>
         <li><a href="/history"{% if path == "/history" %} aria-current="page"{% endif %}>History</a></li>
         <li><a href="/onboarding/topics"{% if path.startswith("/onboarding") %} aria-current="page"{% endif %}>Profile</a></li>
+        <li><a href="/settings"{% if path == "/settings" %} aria-current="page"{% endif %}>Settings</a></li>
         {% if user.is_admin or user.can_calibrate %}<li><a href="/admin/calibrate"{% if path.startswith("/admin/calibrate") %} aria-current="page"{% endif %}>Calibration</a></li>{% endif %}
         {% if user.is_admin %}<li><a href="/admin"{% if path == "/admin" %} aria-current="page"{% endif %}>Admin</a></li>{% endif %}
         <li><form method="post" action="/logout"><button type="submit">Sign out</button></form></li>
@@ -36,7 +37,7 @@
     </nav>
     {% endif %}
     <main id="main">{% block content %}{% endblock %}</main>
-    <footer class="colophon meta">Tell Me Kort <span class="sep">·</span> graded papers in maxillofacial surgery, weekly</footer>
+    <footer class="colophon meta">Tell Me Kort <span class="sep">·</span> graded papers in maxillofacial surgery, weekly <span class="sep">·</span> <a href="/privacy">Privacy note</a></footer>
   </div>
 </body>
 </html>

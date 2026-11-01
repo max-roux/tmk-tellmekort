@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 from app.accounts.users import is_onboarded
 from app.db.models import FEEDBACK_KINDS, Paper, User
 from app.db.session import get_session
+from app.domain.criteria import ALL_CRITERIA
 from app.domain.edition import edition
-from app.feed import feedback, front, queries
+from app.feed import feedback, front, queries, suggestions
 from app.web.deps import SettingsDep
 from app.web.sessions import CurrentUser, RequiredUser
 from app.web.templating import TEMPLATES
@@ -58,8 +59,31 @@ def home(
         "edition": edition(now(), ZoneInfo(user.timezone), len(items)),
         "beat": front.beat(session, user.id),
         "run": front.latest_run(session),
+        "suggestion": suggestions.current_suggestion(session, user.id, settings),
     }
     return TEMPLATES.TemplateResponse(request, "feed/feed.html", context)
+
+
+@router.post("/suggestion/{choice}")
+def answer_suggestion(
+    choice: str,
+    user: RequiredUser,
+    session: SessionDep,
+    criterion: Annotated[str, Form()] = "",
+) -> Response:
+    """Apply or dismiss a weight suggestion; weights only change on an explicit apply."""
+    if choice not in ("apply", "dismiss") or criterion not in ALL_CRITERIA:
+        return HTMLResponse("Unknown suggestion.", status_code=422)
+    (suggestions.apply if choice == "apply" else suggestions.dismiss)(session, user.id, criterion)
+    return RedirectResponse("/", status_code=303)
+
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request, user: CurrentUser, settings: SettingsDep) -> HTMLResponse:
+    """The one-page privacy note (SPEC.md §16); public."""
+    return TEMPLATES.TemplateResponse(
+        request, "privacy.html", {"user": user, "contact": settings.admin_email}
+    )
 
 
 @router.get("/paper/{pmid}", response_class=HTMLResponse)

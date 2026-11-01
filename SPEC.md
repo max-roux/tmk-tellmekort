@@ -2,7 +2,7 @@
 
 Tell Me Kort (team name TMK; formerly the Maxfac Paper Recommender) is a web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
-Status: milestones 1-9 built (see §18). This file is the source of truth; update it when decisions change.
+Status: milestones 1-10 built (see §18); launch steps are in LAUNCH.md. This file is the source of truth; update it when decisions change.
 
 ---
 
@@ -124,7 +124,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **seed_papers**: `user_id`, `pmid`.
 
-**criterion_settings**: `user_id` (PK), `w_pertinence`, `w_proof_strength`, `w_novelty`, `w_depth`, `w_practical_usefulness` (floats 0–5, default 1), `min_pertinence`, `min_proof_strength`, `min_novelty`, `min_depth`, `min_practical_usefulness` (smallint 1–5, nullable = no minimum), `hide_case_reports` (bool, default true), `study_types` (text[], nullable = all).
+**criterion_settings**: `user_id` (PK), `w_pertinence`, `w_proof_strength`, `w_novelty`, `w_depth`, `w_practical_usefulness` (floats 0–5, default 1), `min_pertinence`, `min_proof_strength`, `min_novelty`, `min_depth`, `min_practical_usefulness` (smallint 1–5, nullable = no minimum), `hide_case_reports` (bool, default true), `study_types` (text[], nullable = all), `dismissed_suggestions` (text[]: weight suggestions the user dismissed, §8.5).
 
 **feedback**: `id`, `user_id`, `pmid`, `kind` (`read` | `like` | `not_for_me` | `unlike` | `unread` | `undismiss`, which undoes `not_for_me`), `source` (`email` | `app`), `send_id` (nullable: the email an action came from; unique per `send_id`, `pmid`, `kind`), `created_at`. Append-only; current state is derived from it (§9).
 
@@ -275,7 +275,7 @@ weighted = Σ w_c · s_c / Σ w_c       over the 5 criteria, s_c ∈ 1..5
 Ties are broken by `pertinence_cos`, then the newest `entrez_date`.
 
 ### 8.5 Weight suggestions (never automatic)
-After ≥ 10 likes, compare the mean score of liked papers with the mean of shown-but-not-liked papers on each criterion. If one criterion's gap is ≥ 0.75 and its weight is not already the highest, show a dismissible banner: "Papers you like score high on proof strength. Raise its weight?" with a one-click apply. Never change weights silently.
+After ≥ 10 likes, compare the mean score of liked papers with the mean of shown-but-not-liked papers on each criterion ("shown" = emailed to the user or given any feedback; feed views are not logged). Suggest the criterion with the widest gap if it is ≥ 0.75, its weight is not the sole highest and is below 5 (the default even weights tie every criterion at the top), and the user has not dismissed it: a banner on the feed, "Papers you like score high on proof strength. Raise its weight?" Apply sets it one above the highest weight (at most 5); "No thanks" records the dismissal so it never returns. Never change weights silently.
 
 ---
 
@@ -330,7 +330,8 @@ Server-rendered; actions are plain forms that POST and redirect back to the page
 | `/library` | Liked papers, newest first. |
 | `/history` | Read and dismissed papers, with undo. |
 | `/profile` | Topics (add/edit/deactivate), seed papers, weights (5 sliders), minimums, hard filters. Changes re-rank the feed immediately. |
-| `/settings` | Send day/time, timezone, email address. |
+| `/settings` | Send day/time, timezone, and account deletion. Changing the email address is not offered: it would need verification. |
+| `/privacy` | Public one-page privacy note (§16). |
 | `/admin` | Admin only: the last 5 weekly runs (status, stored, graded, cut by the cap, error), this month's LLM spend vs cap, recent score disputes (model score beside the surgeon's), the calibration agreement table, and a "send test email" button that emails the admin their own weekly email preview (not recorded as a send). |
 
 ### 11.1 Onboarding topic extraction
@@ -373,7 +374,7 @@ Later, disputes (§9) feed periodic recalibration.
 
 ## 13. Regrading
 
-`cli.py regrade --window 90` re-grades every paper in the active window under the current `RUBRIC_VERSION`, with the same spend guard. Old grade rows stay for comparison. Ranking always uses the current version; papers without a current-version grade are ineligible until regraded.
+`cli.py regrade [--window 90]` grades every paper in the window that has only older-version grades, newest first, under the current `RUBRIC_VERSION`, with the same spend guard and alerts as the weekly run. Old grade rows stay for comparison. Ranking always uses the current version; papers without a current-version grade are ineligible until regraded.
 
 ---
 
@@ -401,7 +402,8 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 - Personal data stored: the surgeon's email, name, interests and feedback only. No patient data, ever.
 - Hosted in the EU (Render Frankfurt). Postmark, Anthropic and Voyage receive only paper text, profile text and the email address (Postmark only). List them as sub-processors in a one-page privacy note.
-- Account deletion endpoint: `/settings` → delete removes all of the user's rows.
+- Account deletion endpoint: `/settings` → delete (type "delete" to confirm) removes all of the user's rows (by cascade, plus login attempts by email) and signs them out. Papers and grades are shared and stay.
+- `/privacy` lists what is stored, the sub-processors and what each receives, retention, deletion and the contact (`ADMIN_EMAIL`).
 - Magic links and action tokens are single-purpose, signed and expiring; only their hashes are stored.
 - When `BASE_URL` is `https://`, the web app refuses to start with a missing or placeholder `SECRET_KEY`, or without `POSTMARK_SERVER_TOKEN` and `EMAIL_FROM`, rather than run with forgeable sessions or silently unsent sign-in emails.
 - Rate-limit `/login`: 5 per hour per email and 50 per hour overall. No per-IP limit: behind Render's proxy the client address comes from a header the client can forge, and IPs are personal data we would rather not keep.

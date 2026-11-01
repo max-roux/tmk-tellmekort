@@ -1,9 +1,9 @@
 """User accounts. No self-serve sign-up (SPEC.md §1): the operator adds users."""
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from app.db.models import CriterionSettings, User
+from app.db.models import CriterionSettings, LoginAttempt, User
 
 
 def normalise_email(email: str) -> str:
@@ -44,3 +44,15 @@ def add_user(
 def is_onboarded(session: Session, user: User) -> bool:
     """Onboarding ends by saving criterion settings (SPEC.md §11 step 4)."""
     return session.get(CriterionSettings, user.id) is not None
+
+
+def delete_user(session: Session, user: User) -> None:
+    """Remove the user and every row about them (SPEC.md §16). Commits.
+
+    Their topics, seeds, settings, profile, feedback, disputes, sends and sign-in links go
+    by cascade; login attempts hold only the email, so they are deleted by it. Papers and
+    grades are shared and stay.
+    """
+    session.execute(delete(LoginAttempt).where(LoginAttempt.email == user.email))
+    session.delete(user)
+    session.commit()

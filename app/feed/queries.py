@@ -158,6 +158,15 @@ def paper(session: Session, user_id: uuid.UUID, pmid: str, settings: Settings) -
     return FeedItem(p, g, score_paper(graded[pmid], rules))
 
 
+def scores(
+    session: Session, user_id: uuid.UUID, settings: Settings, pmids: Sequence[str]
+) -> dict[str, dict[str, int]]:
+    """The five scores of each graded paper among `pmids`, as this user sees them."""
+    rows = _graded_rows(session, Paper.pmid.in_(pmids))
+    rules, graded = _score(session, user_id, settings, rows)
+    return {pmid: score_paper(g, rules).scores for pmid, g in graded.items()}
+
+
 def _entries(session: Session, tracked: dict[str, Tracked]) -> list[Entry]:
     """Papers for `tracked`, most recent feedback first."""
     if not tracked:

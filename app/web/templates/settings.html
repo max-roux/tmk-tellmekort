@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Settings · Tell Me Kort{% endblock %}
+{% block content %}
+<h1 class="section-title">Settings</h1>
+<div class="form-page">
+  {% if saved %}<p class="notice" role="status">Saved.</p>{% endif %}
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+  <form method="post" action="/settings" class="settings-form">
+    <h2>Weekly email</h2>
+    <p class="muted small">Sent to {{ user.email }}.</p>
+    <div class="form-row">
+      <span class="numeral row-no" aria-hidden="true">1</span>
+      <div class="stack">
+        <label for="send_weekday" class="field-label">Day</label>
+        <select id="send_weekday" name="send_weekday">
+          {% for name in weekdays %}<option value="{{ loop.index0 }}" {% if loop.index0 == user.send_weekday %}selected{% endif %}>{{ name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <span class="numeral row-no" aria-hidden="true">2</span>
+      <div class="stack">
+        <label for="send_local_time" class="field-label">Time</label>
+        <input id="send_local_time" name="send_local_time" type="time" value="{{ user.send_local_time.strftime('%H:%M') }}" class="short">
+      </div>
+    </div>
+    <div class="form-row">
+      <span class="numeral row-no" aria-hidden="true">3</span>
+      <div class="stack">
+        <label for="timezone" class="field-label">Timezone</label>
+        <select id="timezone" name="timezone">
+          {% for tz in timezones %}<option value="{{ tz }}" {% if tz == user.timezone %}selected{% endif %}>{{ tz }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="actions"><button class="button primary" type="submit">Save</button></div>
+  </form>
+
+  <form method="post" action="/settings/delete" class="settings-form danger-zone">
+    <h2>Delete your account</h2>
+    <p class="small">This removes your topics, seed papers, weights, likes, history, disputes and emails sent, and signs you out. It cannot be undone.</p>
+    <label for="confirm" class="field-label">Type <strong>delete</strong> to confirm</label>
+    <input id="confirm" name="confirm" type="text" autocomplete="off" class="short">
+    <div class="actions"><button class="button danger" type="submit">Delete my account</button></div>
+  </form>
+</div>
+{% endblock %}
