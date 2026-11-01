@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
 
     anthropic_api_key: str = ""
     anthropic_model: str = "claude-sonnet-5-5"
+    grading_effort: Literal["low", "medium", "high", "xhigh", "max"] = "low"
     voyage_api_key: str = ""
     embedding_model: str = "voyage-4"
     ncbi_api_key: str = ""
