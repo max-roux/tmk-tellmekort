@@ -116,8 +116,11 @@ def test_opening_link_does_not_consume_it_and_post_signs_in(
     client.post("/login", data={"email": EMAIL})
     token = token_from(mailer.sent[0])
 
-    page = client.get("/auth")  # what a mail scanner prefetching the link sees
+    page = client.get("/auth")  # what a mail scanner opening the link sees
     assert page.status_code == 200 and 'action="/auth"' in page.text
+    # Nothing submits by itself: a scanner that runs scripts cannot use the link up.
+    assert ".submit()" not in page.text
+    assert '<button class="button" type="submit">Sign in</button>' in page.text
 
     resp = client.post("/auth", data={"t": token}, follow_redirects=False)
     assert resp.status_code == 303

@@ -321,7 +321,7 @@ Server-rendered; actions are plain forms that POST and redirect back to the page
 | Route | Purpose |
 |---|---|
 | `/login` | Enter email → magic link. |
-| `/auth#<token>` | The emailed link. The token is in the URL fragment, so it never reaches the server or its logs. GET only renders a page that POSTs the token (mail scanners that prefetch links cannot use it up); the POST consumes it and sets a session cookie (30-day, httpOnly, secure), then goes to `/onboarding` or `/`. |
+| `/auth#<token>` | The emailed link. The token is in the URL fragment, so it never reaches the server or its logs. GET only renders a page with a "Sign in" button, and the tap POSTs the token, so mail scanners that open links (even ones that run scripts) cannot use it up; the POST consumes it and sets a session cookie (30-day, httpOnly, secure), then goes to `/onboarding` or `/`. |
 | `/onboarding` | Step 1: free-text interests. Step 2: confirm or edit topic chips. Step 3: optional seed PMIDs/DOIs. Step 4: weights and minimums (defaults shown). |
 | `/` (feed) | Top 10 eligible papers by weighted score, read hidden. Each card shows its scores, summary, actions and a "graded from abstract/full text" label. |
 | `/paper/{pmid}` | Full card: all 5 justifications, metadata, actions, dispute control. |

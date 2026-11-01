@@ -1,8 +1,9 @@
 """Sign-in by magic link (SPEC.md §11): /login, /auth, /logout.
 
 The emailed link is BASE_URL/auth#<token>. The token sits in the URL fragment, which
-browsers never send, so it stays out of access logs; and opening the link only renders
-a page that POSTs the token, so mail scanners that prefetch links cannot use it up.
+browsers never send, so it stays out of access logs; and opening the link only shows a
+"Sign in" button whose tap POSTs the token, so mail scanners that open links (even
+running scripts) cannot use it up.
 """
 
 import logging
