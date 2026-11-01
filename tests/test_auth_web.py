@@ -94,10 +94,25 @@ def test_login_rejects_blank_email(client: TestClient) -> None:
     assert client.post("/login", data={"email": "  "}).status_code == 422
 
 
-def test_login_rate_limited_per_email(client: TestClient, db_session: Session) -> None:
+def test_login_limit_per_email_looks_the_same_but_sends_nothing(
+    client: TestClient, db_session: Session, mailer: CapturingMailer
+) -> None:
     add_user(db_session, "surgeon@example.com")
-    codes = [client.post("/login", data={"email": EMAIL}).status_code for _ in range(6)]
-    assert codes == [200] * 5 + [429]
+    pages = [client.post("/login", data={"email": EMAIL}) for _ in range(6)]
+    # The sixth is over the limit: same page (no hint the account exists), no email.
+    assert [p.status_code for p in pages] == [200] * 6
+    assert "Check your email" in pages[5].text
+    assert len(mailer.sent) == 5
+
+
+def test_unknown_addresses_cannot_use_up_sign_in_for_everyone(
+    client: TestClient, db_session: Session, mailer: CapturingMailer
+) -> None:
+    add_user(db_session, "surgeon@example.com")
+    for i in range(magic_links.GLOBAL_RATE_LIMIT + 10):
+        client.post("/login", data={"email": f"bot{i}@spam.example"})
+    client.post("/login", data={"email": EMAIL})
+    assert [m.to for m in mailer.sent] == ["surgeon@example.com"]
 
 
 def test_global_rate_limit_and_window(db_session: Session) -> None:

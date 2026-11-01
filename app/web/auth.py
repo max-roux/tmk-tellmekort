@@ -66,16 +66,11 @@ def login(
             status_code=422,
         )
     now = datetime.now(UTC)
-    if not magic_links.allow_attempt(session, email, now):
-        return TEMPLATES.TemplateResponse(
-            request,
-            "auth/login.html",
-            {"error": "Too many sign-in requests. Try again in an hour.", "email": email},
-            status_code=429,
-        )
-    # Same answer whether or not the address has an account (no account enumeration), and
-    # the email goes out after the response, so response time does not tell either.
-    if (user := get_by_email(session, email)) is not None:
+    # Same page whether the address has an account, and whether it is over the limit:
+    # nothing here tells a visitor which addresses exist. Only addresses with an account
+    # count toward the limits, so strangers' requests cannot use up everyone's sign-ins.
+    user = get_by_email(session, email)
+    if user is not None and magic_links.allow_attempt(session, email, now):
         token = magic_links.issue(session, user, now)
         message = render(
             "magic_link",

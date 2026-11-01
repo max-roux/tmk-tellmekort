@@ -1,8 +1,9 @@
 """Magic-link sign-in (SPEC.md §3, §16): random, single-use, 15-minute tokens.
 
-Only a SHA-256 of each token is stored. Rate limit: 5 requests per hour per email, and
-50 per hour across all emails (a ceiling on the sign-in email we can be made to send).
-There is no per-IP limit: behind Render's proxy the client address is not trustworthy.
+Only a SHA-256 of each token is stored. Rate limit, counted for addresses with an account
+only: 5 requests per hour per email, and 50 per hour across all of them (a ceiling on the
+sign-in email we can be made to send). There is no per-IP limit: behind Render's proxy
+the client address is not trustworthy.
 """
 
 import hashlib
