@@ -2,6 +2,7 @@
 
 import uuid
 
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -15,14 +16,31 @@ _RESHAPES_PROFILE = {"like", "unlike", "not_for_me", "undismiss"}
 
 
 def record(
-    session: Session, user_id: uuid.UUID, pmid: str, kind: str, source: str, settings: Settings
+    session: Session,
+    user_id: uuid.UUID,
+    pmid: str,
+    kind: str,
+    source: str,
+    settings: Settings,
+    send_id: uuid.UUID | None = None,
 ) -> None:
-    """Append one event and refresh the profile vector when it changes. Commits."""
+    """Append one event and refresh the profile vector when it changes. Commits.
+
+    With a `send_id` (an email action) the event is recorded once per send, paper and
+    kind, so a repeated tap changes nothing.
+    """
     if kind not in FEEDBACK_KINDS:
         raise ValueError(f"unknown feedback kind {kind!r}")
-    session.add(Feedback(user_id=user_id, pmid=pmid, kind=kind, source=source))
+    stmt = insert(Feedback).values(
+        user_id=user_id, pmid=pmid, kind=kind, source=source, send_id=send_id
+    )
+    inserted = session.execute(
+        stmt.on_conflict_do_nothing(
+            index_elements=["send_id", "pmid", "kind"], index_where=Feedback.send_id.is_not(None)
+        ).returning(Feedback.id)
+    ).first()
     session.commit()
-    if kind in _RESHAPES_PROFILE:
+    if inserted and kind in _RESHAPES_PROFILE:
         refresh_profile_vector(session, user_id, settings.embedding_model, coefficients(settings))
 
 

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Saving · Maxfac Papers{% endblock %}
+{% block content %}
+<form id="act" method="post" action="/a">
+  <input type="hidden" name="t" id="t">
+  <p class="muted" id="status">Saving…</p>
+  <noscript><p>JavaScript is needed for this link. <button class="button" type="submit">Save</button></p></noscript>
+</form>
+<script>
+  const t = decodeURIComponent(location.hash.slice(1));
+  history.replaceState(null, "", location.pathname);
+  if (t) { document.getElementById("t").value = t; document.getElementById("act").submit(); }
+  else { document.getElementById("status").innerHTML = 'This link is incomplete. <a href="/">Open your feed</a>.'; }
+</script>
+{% endblock %}
