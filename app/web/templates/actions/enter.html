@@ -1,15 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Saving · Maxfac Papers{% endblock %}
+{% block title %}Confirm · Maxfac Papers{% endblock %}
 {% block content %}
-<form id="act" method="post" action="/a">
+<form id="act" method="post" action="/a" class="card stack">
   <input type="hidden" name="t" id="t">
-  <p class="muted" id="status">Saving…</p>
-  <noscript><p>JavaScript is needed for this link. <button class="button" type="submit">Save</button></p></noscript>
+  <p id="status">Tap to confirm.</p>
+  <div><button class="button" type="submit">{{ button }}</button></div>
 </form>
 <script>
+  // Keep the token out of the address bar and history; submitting stays a human tap.
   const t = decodeURIComponent(location.hash.slice(1));
   history.replaceState(null, "", location.pathname);
-  if (t) { document.getElementById("t").value = t; document.getElementById("act").submit(); }
-  else { document.getElementById("status").innerHTML = 'This link is incomplete. <a href="/">Open your feed</a>.'; }
+  if (t) { document.getElementById("t").value = t; }
+  else {
+    document.querySelector("#act button").hidden = true;
+    document.getElementById("status").innerHTML = 'This link is incomplete. <a href="/">Open your feed</a>.';
+  }
 </script>
 {% endblock %}

@@ -304,8 +304,8 @@ Title, journal, year, the label "Fresh this week" or "You may have missed", 5 sc
 Action buttons: **Like**, **Mark read**, **Not for me**, **Open in app**.
 
 ### 10.4 One-tap links
-- `GET /a#<token>` (token in the URL fragment, out of server logs, as for sign-in links) where the token is signed with `itsdangerous` and carries `user_id`, `pmid`, `action`, `send_id`; it expires after 30 days.
-- A GET only renders a confirmation page whose form auto-submits a POST. This keeps email security scanners that prefetch links from recording likes.
+- `GET /a/<action>#<token>` (token in the URL fragment, out of server logs, as for sign-in links; the action in the path only labels the button) where the token is signed with `itsdangerous` and carries `user_id`, `pmid`, `action`, `send_id`; it expires after 30 days.
+- A GET only renders a page with one button ("Like this paper", "Mark as read", "Not for me"); nothing is recorded until the surgeon taps it, which POSTs the token. Email security scanners that open links, even ones that run scripts (e.g. Microsoft Safe Links), therefore record nothing. This costs one extra tap.
 - The POST records the event (idempotent per `send_id` + `action`), then shows "Saved ✓ — open your feed".
 - No login is required for these actions; opening the app itself still requires a session.
 

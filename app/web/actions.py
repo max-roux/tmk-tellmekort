@@ -1,4 +1,4 @@
-"""One-tap email actions (SPEC.md §10.4): GET /a renders a page, POST /a records."""
+"""Email actions (SPEC.md §10.4): GET /a/<action> shows a confirm button, POST /a records."""
 
 from typing import Annotated
 
@@ -17,11 +17,15 @@ router = APIRouter()
 
 SessionDep = Annotated[Session, Depends(get_session)]
 LABELS = {"like": "Liked", "read": "Marked as read", "not_for_me": "Removed from your feed"}
+BUTTONS = {"like": "Like this paper", "read": "Mark as read", "not_for_me": "Not for me"}
 
 
-@router.get("/a", response_class=HTMLResponse)
-def action_page(request: Request) -> HTMLResponse:
-    return TEMPLATES.TemplateResponse(request, "actions/enter.html")
+@router.get("/a/{action}", response_class=HTMLResponse)
+def action_page(request: Request, action: str) -> HTMLResponse:
+    """The button only; the action in the path is for its label, the token decides."""
+    if action not in BUTTONS:
+        return HTMLResponse("Unknown action.", status_code=404)
+    return TEMPLATES.TemplateResponse(request, "actions/enter.html", {"button": BUTTONS[action]})
 
 
 @router.post("/a", response_class=HTMLResponse)

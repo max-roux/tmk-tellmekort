@@ -1,8 +1,10 @@
 """One-tap links in the weekly email (SPEC.md §10.4).
 
-The link is BASE_URL/a#<token>: the token stays in the URL fragment, out of server logs,
-and opening the link only renders a page that POSTs it. Tokens are signed, carry the
-user, paper, action and send, and expire after 30 days. No sign-in is needed.
+The link is BASE_URL/a/<action>#<token>: the token stays in the URL fragment, out of
+server logs, and opening the link only shows a button; nothing is recorded until the
+surgeon taps it, so mail scanners that open links (even running scripts) change nothing.
+Tokens are signed, carry the user, paper, action and send, and expire after 30 days.
+No sign-in is needed.
 """
 
 import uuid
@@ -41,7 +43,7 @@ def action_link(
     settings: Settings, user_id: uuid.UUID, pmid: str, action: str, send_id: uuid.UUID
 ) -> str:
     token = make_token(settings, user_id, pmid, action, send_id)
-    return f"{settings.base_url.rstrip('/')}/a#{token}"
+    return f"{settings.base_url.rstrip('/')}/a/{action}#{token}"
 
 
 def read_token(settings: Settings, token: str, max_age: int = MAX_AGE_S) -> EmailAction | None:

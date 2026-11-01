@@ -47,7 +47,7 @@ def token(user: User, send: EmailSend, action: str = "like") -> str:
 
 def test_link_puts_token_in_fragment(user: User, send: EmailSend) -> None:
     link = actions.action_link(SETTINGS, user.id, PMID, "read", send.id)
-    assert link.startswith("https://maxfac.test/a#") and "?" not in link
+    assert link.startswith("https://maxfac.test/a/read#") and "?" not in link
 
 
 def test_token_roundtrip_and_rejections(user: User, send: EmailSend) -> None:
@@ -64,9 +64,13 @@ def test_token_roundtrip_and_rejections(user: User, send: EmailSend) -> None:
 def test_opening_the_link_records_nothing(
     client: TestClient, db_session: Session, user: User, send: EmailSend
 ) -> None:
-    page = client.get("/a")
+    page = client.get("/a/like")
     assert page.status_code == 200 and 'action="/a"' in page.text
+    # Nothing submits by itself: a scanner that runs scripts still records nothing.
+    assert ".submit()" not in page.text
+    assert '<button class="button" type="submit">Like this paper</button>' in page.text
     assert db_session.scalars(select(Feedback)).all() == []
+    assert client.get("/a/delete").status_code == 404
 
 
 def test_post_records_once_per_send_without_sign_in(

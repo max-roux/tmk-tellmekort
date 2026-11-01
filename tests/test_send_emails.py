@@ -48,7 +48,7 @@ def test_due_user_gets_fresh_and_missed_once_per_week(db_session: Session, user:
     (msg,) = to_user(mailer, user)
     assert "Fresh this week" in msg.text and "You may have missed" in msg.text
     assert msg.text.index("Fresh this week") < msg.text.index("You may have missed")
-    links = re.findall(r"https://maxfac\.test/a#[\w.-]+", msg.html)
+    links = re.findall(r"https://maxfac\.test/a/\w+#[\w.-]+", msg.html)
     assert len(links) == 6  # like, read, not for me for each of 2 papers
     assert "https://maxfac.test/paper/42963307" in msg.html
     row = db_session.scalars(select(EmailSend)).one()
