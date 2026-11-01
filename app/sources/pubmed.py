@@ -15,8 +15,11 @@ from typing import Any
 
 import httpx
 
+from app.sources.pmc import PmcArticle, parse_pmc_xml
+
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 EFETCH_BATCH_SIZE = 200
+PMC_BATCH_SIZE = 20  # full-text XML runs to ~100 KB per article
 # PubMed esearch cannot page past 10,000 results for one query.
 ESEARCH_MAX_RESULTS = 9_999
 SPECIALTY_QUERY_PATH = Path(__file__).with_name("specialty_query.txt")
@@ -323,3 +326,13 @@ class PubMedClient:
             papers.extend(result.papers)
             skipped.extend(result.skipped_no_abstract)
         return ParseResult(papers=papers, skipped_no_abstract=skipped)
+
+    def fetch_pmc(self, pmcids: list[str], max_tokens: int) -> list[PmcArticle]:
+        """Fetch PMC articles (JATS XML) and reduce open-access ones to graded text."""
+        articles: list[PmcArticle] = []
+        ids = [p.removeprefix("PMC") for p in pmcids]
+        for i in range(0, len(ids), PMC_BATCH_SIZE):
+            batch = ids[i : i + PMC_BATCH_SIZE]
+            resp = self._request("efetch.fcgi", {"db": "pmc", "id": ",".join(batch)})
+            articles.extend(parse_pmc_xml(resp.content, max_tokens))
+        return articles
