@@ -77,13 +77,13 @@ typography:
     lineHeight: 1.55
     fontFeature: "lnum"
   label:
-    fontFamily: "Inter, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontFamily: "Libre Franklin, Franklin Gothic Medium, system-ui, sans-serif"
     fontSize: "0.6875rem"
     fontWeight: 500
     lineHeight: 1.6
     letterSpacing: "0.12em"
   button:
-    fontFamily: "Inter, system-ui, -apple-system, Segoe UI, sans-serif"
+    fontFamily: "Libre Franklin, Franklin Gothic Medium, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 600
     letterSpacing: "0.14em"
@@ -165,13 +165,13 @@ components:
 
 Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.
 
-The page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).
+The page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Libre Franklin in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).
 
 The system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.
 
 **Key Characteristics:**
 - One ruled page frame around everything; hairline rules divide stories, rows and columns.
-- Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Inter (tracked-capital apparatus).
+- Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Libre Franklin (tracked-capital apparatus).
 - Square corners everywhere, including checkboxes and range thumbs.
 - One vermilion accent, for rules, frames and large type; a darker vermilion for small text.
 - Phone first: one column, the multi-column grid from 900px, every target at least 44px.
@@ -206,7 +206,7 @@ Under `prefers-color-scheme: dark` the same token names take the `evening-*` val
 
 **Display Font:** Playfair Display (with Iowan Old Style, Georgia, serif)
 **Body Font:** Source Serif 4 (with Iowan Old Style, Georgia, serif)
-**Label Font:** Inter (with system-ui, -apple-system, Segoe UI, sans-serif)
+**Label Font:** Libre Franklin (with Franklin Gothic Medium, system-ui, sans-serif)
 
 **Character:** A high-contrast transitional display face for the voice of the paper, a sturdy text serif with optical sizes for reading, and a neutral grotesque in tracked capitals for the apparatus. Three families, each with one job.
 
@@ -216,7 +216,7 @@ All three are SIL Open Font License, self-hosted as variable WOFF2 in `app/web/s
 
 **Why Source Serif 4.** A text serif drawn for screens, with an optical size axis: `font-optical-sizing: auto` gives the 17px body and the 19px standfirst their own cuts, so small text stays sturdy and larger text gains finesse. Lining figures are set on the body so PMIDs, years and sample sizes align with the Playfair numerals.
 
-**Why Inter in tracked capitals.** Labels, metadata, navigation and buttons are set in Inter at 11 to 12px, uppercase, tracked 0.10 to 0.14em. This is a deliberate, brief-pinned choice: a sans in small capitals reads as the newspaper's furniture (datelines, section heads, the edition line) and keeps every interactive control visually distinct from the serif reading text. The design detector's overused-font finding for Inter is suppressed for this project in `.impeccable/config.json`.
+**Why Libre Franklin in tracked capitals.** Labels, metadata, navigation and buttons are set in Libre Franklin at 11 to 12px, uppercase, tracked 0.10 to 0.14em. Libre Franklin is a revival of Franklin Gothic, the sans newspapers have long used for datelines, kickers and section heads, so the page's furniture reads as print rather than as app chrome, and every interactive control stays visually distinct from the serif reading text. The brief named Libre Franklin; the user chose Libre Franklin on 2026-11-01 after a side-by-side comparison.
 
 ### Hierarchy
 - **Nameplate** (Playfair 900, 17.4% of the masthead's inline size via container units, 0.92, -0.02em): the front page's "Tell Me Kort", set to the full width of the page frame. Front page only.
@@ -230,11 +230,11 @@ All three are SIL Open Font License, self-hosted as variable WOFF2 in `app/web/s
 - **Numeral** (Playfair 400, lining tabular figures, 0.9, -0.02em): scores and counts. Sizes step by importance: 5rem paper page, 4.25rem lead, 2.6rem reasons, 2.25rem second stories, 2.1rem sidebar figures, 2rem briefs on desktop, 1.75rem briefs on phone and index rows, 1.5rem form steps.
 - **Standfirst** (Source Serif 4 400, 1.1875rem to 1.25rem, 1.5, soft ink, max 40rem): the grade's summary under a headline.
 - **Body** (Source Serif 4 400, 1.0625rem, 1.55, lining figures): reading text; forms and notices sit in a 38rem column.
-- **Label** (Inter 500, 0.6875rem, 0.12em, uppercase, 1.6): metadata lines, scorecard criteria, form field labels (600, 0.14em), the edition rule (0.14em), section links (0.10em).
-- **Button** (Inter 600, 0.75rem, 0.14em, uppercase); small buttons at 0.6875rem.
+- **Label** (Libre Franklin 500, 0.6875rem, 0.12em, uppercase, 1.6): metadata lines, scorecard criteria, form field labels (600, 0.14em), the edition rule (0.14em), section links (0.10em).
+- **Button** (Libre Franklin 600, 0.75rem, 0.14em, uppercase); small buttons at 0.6875rem.
 
 ### Named Rules
-**The One Family Per Job Rule.** Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Inter labels (metadata, navigation, buttons, field labels). Never swap a role.
+**The One Family Per Job Rule.** Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Libre Franklin labels (metadata, navigation, buttons, field labels). Never swap a role.
 
 **The Numeral Rule.** Every score is a Playfair numeral with lining tabular figures, set beside the reason or label that explains it. Never a pill, a badge or a coloured chip.
 
@@ -276,14 +276,14 @@ Square corners everywhere (`rounded.none`): buttons, inputs, selects, textareas,
 ### Buttons
 Print-style, square and hairline-framed: they look like boxed type, not pills.
 - **Shape:** square (0px), 1px strong-rule border, at least 44px tall.
-- **Default:** transparent on paper, ink label in Inter 600 capitals, 0.75rem, 0.14em tracking, 0 1.1rem padding.
+- **Default:** transparent on paper, ink label in Libre Franklin 600 capitals, 0.75rem, 0.14em tracking, 0 1.1rem padding.
 - **Primary:** filled ink with a paper label ("Read the paper", confirm pages, form submits). Hover keeps the fill and underlines the label.
 - **Small:** 0.6875rem label, 0 0.8rem padding; used for the like, mark read and not-for-me row. A pressed toggle (`aria-pressed="true"`, e.g. "Liked") fills with ink like a primary.
 - **Hover / Focus:** hover fills with deep newsprint; focus is a 2px vermilion outline offset 2px. Background and colour transition over 120ms ease-out only when the reader allows motion. Disabled is 55% opacity.
 - **Link-like:** a form button set as an underlined inline link, for actions that sit in running text.
 
 ### Stamp
-"Open access" in the meta line: Inter 600 capitals in vermilion text inside a 1px vermilion frame, square, never wrapped onto two lines.
+"Open access" in the meta line: Libre Franklin 600 capitals in vermilion text inside a 1px vermilion frame, square, never wrapped onto two lines.
 
 ### Sidebar boxes
 "Your beat" and "This edition" in the right rail: a 1px vermilion frame, centred content, a tracked-capital heading in vermilion text over a 1px vermilion rule, list items divided by hairlines, and for "This edition" three vermilion numerals (found, screened, graded) with soft-ink labels.
@@ -292,15 +292,15 @@ Print-style, square and hairline-framed: they look like boxed type, not pills.
 The lead story's score: a 1px strong-rule frame holding the big overall numeral with "for you", then the five criteria as label and numeral pairs on hairline rows. On the paper page the overall numeral stands alone in its frame and the five criteria become numbered reasons: a 2.6rem numeral beside the criterion label, its one-line reason, and a "Disagree?" disclosure that opens a small dispute form.
 
 ### Inputs / Fields
-- **Style:** transparent, square; text inputs have a single 1px strong underline, textareas and selects a full 1px frame. Body serif at 1.0625rem; labels above in Inter capitals.
+- **Style:** transparent, square; text inputs have a single 1px strong underline, textareas and selects a full 1px frame. Body serif at 1.0625rem; labels above in Libre Franklin capitals.
 - **Focus:** 2px vermilion outline, offset 2px.
 - **Checkbox:** a square 1.25rem box with a 1px strong rule; checked fills ink inside a 3px paper inset.
 - **Radio:** native, tinted vermilion.
 - **Error:** vermilion-text, semibold; a notice or error block sits between two vermilion rules.
 
 ### Navigation
-- **Masthead:** the front page carries the full nameplate in ink, Playfair 400 with T, M and K in 900 so "TMK" reads out by weight alone, then the edition rule (No., week of, paper count) in Inter capitals between a 3px double rule and a hairline, separated by vermilion dots. Inner pages carry the compact TMK mark.
-- **Section strip:** Front page, Library, History, Profile, Calibration and Admin where allowed, and Sign out, centred between rules in Inter capitals at 0.10em, soft ink at rest, ink on hover. The current section is bold ink with a 2px vermilion underline offset 0.55em. It wraps on a phone; every item is 44px tall.
+- **Masthead:** the front page carries the full nameplate in ink, Playfair 400 with T, M and K in 900 so "TMK" reads out by weight alone, then the edition rule (No., week of, paper count) in Libre Franklin capitals between a 3px double rule and a hairline, separated by vermilion dots. Inner pages carry the compact TMK mark.
+- **Section strip:** Front page, Library, History, Profile, Calibration and Admin where allowed, and Sign out, centred between rules in Libre Franklin capitals at 0.10em, soft ink at rest, ink on hover. The current section is bold ink with a 2px vermilion underline offset 0.55em. It wraps on a phone; every item is 44px tall.
 - **Onboarding steps:** a ruled four-cell strip (two cells on a phone) of numeral and label; the current step is ink, bold, with a vermilion numeral and a 2px vermilion underline.
 
 ### Front-page stories
@@ -317,7 +317,7 @@ Onboarding reads as a numbered printed form: each row is a 2rem vermilion Playfa
 - **Do** set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.
 - **Do** use `accent-text` for any small vermilion text and keep `accent` for rules, frames and large type.
 - **Do** define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.
-- **Do** keep labels, metadata, navigation and buttons in Inter capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.
+- **Do** keep labels, metadata, navigation and buttons in Libre Franklin capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.
 - **Do** make every interactive element at least 44px tall and keep one column below 900px.
 - **Do** self-host every font and asset; the page makes no external requests.
 
@@ -328,4 +328,4 @@ Onboarding reads as a numbered printed form: each row is a 2rem vermilion Playfa
 - **Don't** introduce a second accent hue or fill a button or surface with vermilion.
 - **Don't** set small text in `accent` (#d9472b is 3.5:1 on paper).
 - **Don't** add a kicker or eyebrow line that carries no data; a label above a headline must state a field of the paper, as the study design and sample size line does on the paper page.
-- **Don't** swap the type roles: no Inter headlines, no Playfair labels, no serif buttons.
+- **Don't** swap the type roles: no Libre Franklin headlines, no Playfair labels, no serif buttons.

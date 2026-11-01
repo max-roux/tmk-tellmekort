@@ -677,6 +677,8 @@ th { font-family: var(--font-label); font-size: 0.6875rem; font-weight: 600; let
   color: var(--ink-soft);
 }
 
+.colophon > a { display: inline-flex; align-items: center; min-height: var(--tap); }
+
 /* The edition switch in the colophon. */
 .editions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.25rem; margin: 0.4rem 0 0; }
 .editions-label { margin-right: 0.35rem; }

@@ -348,11 +348,11 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Inter tracked capitals: metadata, scorecard criteria, field labels, edition line, section links."
+        "purpose": "Libre Franklin tracked capitals: metadata, scorecard criteria, field labels, edition line, section links."
       },
       "button": {
         "displayName": "Button",
-        "purpose": "Inter 600 capitals on buttons."
+        "purpose": "Libre Franklin 600 capitals on buttons."
       }
     },
     "shadows": [
@@ -413,13 +413,13 @@
         "role": "body and standfirsts"
       },
       {
-        "family": "Inter",
+        "family": "Libre Franklin",
         "files": [
-          "inter-latin-wght-normal.woff2"
+          "libre-franklin-latin-wght-normal.woff2"
         ],
         "axes": "wght 100-900",
         "license": "OFL",
-        "role": "tracked capitals for labels, metadata, navigation, buttons (brief-pinned; detector overused-font finding suppressed in .impeccable/config.json)"
+        "role": "tracked capitals for labels, metadata, navigation, buttons (Franklin Gothic revival; chosen by the user over Libre Franklin)"
       }
     ]
   },
@@ -430,7 +430,7 @@
       "refersTo": "button",
       "description": "Print-style hairline button, square, capitals label; secondary actions such as 'Scores and reasons'.",
       "html": "<a class=\"ds-button\" href=\"#\">Scores and reasons</a>",
-      "css": ".ds-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; text-decoration: none; cursor: pointer; } .ds-button:hover { background: var(--paper-deep, #e6dfd1); } .ds-button:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } @media (prefers-reduced-motion: no-preference) { .ds-button { transition: background-color 120ms ease-out, color 120ms ease-out; } }"
+      "css": ".ds-button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; text-decoration: none; cursor: pointer; } .ds-button:hover { background: var(--paper-deep, #e6dfd1); } .ds-button:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } @media (prefers-reduced-motion: no-preference) { .ds-button { transition: background-color 120ms ease-out, color 120ms ease-out; } }"
     },
     {
       "name": "Primary Button",
@@ -438,7 +438,7 @@
       "refersTo": "button-primary",
       "description": "Filled ink; 'Read the paper', confirmations and form submits.",
       "html": "<a class=\"ds-button-primary\" href=\"#\">Read the paper</a>",
-      "css": ".ds-button-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--on-ink, #efe9dd); background: var(--ink, #151515); border: 1px solid var(--ink, #151515); border-radius: 0; text-decoration: none; } .ds-button-primary:hover { text-decoration: underline; } .ds-button-primary:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+      "css": ".ds-button-primary { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1.1rem; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.14em; color: var(--on-ink, #efe9dd); background: var(--ink, #151515); border: 1px solid var(--ink, #151515); border-radius: 0; text-decoration: none; } .ds-button-primary:hover { text-decoration: underline; } .ds-button-primary:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
     },
     {
       "name": "Small Toggle Button",
@@ -446,15 +446,15 @@
       "refersTo": "button-small",
       "description": "Like / Mark read / Not for me row; the pressed state fills ink.",
       "html": "<div class=\"ds-row\"><button class=\"ds-small\" aria-pressed=\"true\">Liked</button><button class=\"ds-small\">Mark read</button><button class=\"ds-small\">Not for me</button></div>",
-      "css": ".ds-row { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-small { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.8rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; cursor: pointer; } .ds-small:hover { background: var(--paper-deep, #e6dfd1); } .ds-small[aria-pressed=\"true\"] { background: var(--ink, #151515); color: var(--on-ink, #efe9dd); border-color: var(--ink, #151515); } .ds-small:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+      "css": ".ds-row { display: flex; flex-wrap: wrap; gap: 0.5rem; } .ds-small { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.8rem; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--ink, #151515); background: transparent; border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; cursor: pointer; } .ds-small:hover { background: var(--paper-deep, #e6dfd1); } .ds-small[aria-pressed=\"true\"] { background: var(--ink, #151515); color: var(--on-ink, #efe9dd); border-color: var(--ink, #151515); } .ds-small:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Printed-form blank: a single strong underline, label in Inter capitals above.",
+      "description": "Printed-form blank: a single strong underline, label in Libre Franklin capitals above.",
       "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@example.com\"></label>",
-      "css": ".ds-field { display: block; max-width: 24rem; } .ds-field-label { display: block; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; margin: 0 0 0.35rem; color: var(--ink, #151515); } .ds-input { width: 100%; min-height: 2.75rem; font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 1.0625rem; color: var(--ink, #151515); background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; padding: 0.6rem 0.1rem; } .ds-input::placeholder { color: var(--ink-soft, #55504a); } .ds-input:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
+      "css": ".ds-field { display: block; max-width: 24rem; } .ds-field-label { display: block; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; margin: 0 0 0.35rem; color: var(--ink, #151515); } .ds-input { width: 100%; min-height: 2.75rem; font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 1.0625rem; color: var(--ink, #151515); background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; padding: 0.6rem 0.1rem; } .ds-input::placeholder { color: var(--ink-soft, #55504a); } .ds-input:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
     },
     {
       "name": "Section Strip",
@@ -462,7 +462,7 @@
       "refersTo": "section-link",
       "description": "Centred tracked-capital sections between rules; the current page in bold ink with a vermilion underline.",
       "html": "<nav class=\"ds-sections\"><a href=\"#\" aria-current=\"page\">Front page</a><a href=\"#\">Library</a><a href=\"#\">History</a><a href=\"#\">Profile</a></nav>",
-      "css": ".ds-sections { display: flex; flex-wrap: wrap; justify-content: center; border-top: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-sections a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.5rem; font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.1em; color: var(--ink-soft, #55504a); text-decoration: none; } .ds-sections a:hover { color: var(--ink, #151515); } .ds-sections a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-sections a[aria-current] { color: var(--ink, #151515); font-weight: 700; text-decoration: underline 2px var(--accent, #d9472b); text-underline-offset: 0.55em; }"
+      "css": ".ds-sections { display: flex; flex-wrap: wrap; justify-content: center; border-top: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-sections a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.5rem; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.1em; color: var(--ink-soft, #55504a); text-decoration: none; } .ds-sections a:hover { color: var(--ink, #151515); } .ds-sections a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-sections a[aria-current] { color: var(--ink, #151515); font-weight: 700; text-decoration: underline 2px var(--accent, #d9472b); text-underline-offset: 0.55em; }"
     },
     {
       "name": "Open Access Stamp",
@@ -470,7 +470,7 @@
       "refersTo": "stamp",
       "description": "Small capitals stamp in a vermilion hairline frame, inside the meta line.",
       "html": "<p class=\"ds-meta\">Journal name<span class=\"ds-sep\">·</span>2026<span class=\"ds-sep\">·</span><span class=\"ds-stamp\">Open access</span></p>",
-      "css": ".ds-meta { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; line-height: 1.6; color: var(--ink-soft, #55504a); margin: 0; } .ds-sep { color: var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0 0.25rem; } .ds-stamp { display: inline-block; border: 1px solid var(--accent, #d9472b); color: var(--accent-text, #b23a1f); padding: 0.05rem 0.4rem; font-weight: 600; letter-spacing: 0.14em; white-space: nowrap; }"
+      "css": ".ds-meta { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; line-height: 1.6; color: var(--ink-soft, #55504a); margin: 0; } .ds-sep { color: var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0 0.25rem; } .ds-stamp { display: inline-block; border: 1px solid var(--accent, #d9472b); color: var(--accent-text, #b23a1f); padding: 0.05rem 0.4rem; font-weight: 600; letter-spacing: 0.14em; white-space: nowrap; }"
     },
     {
       "name": "Sidebar Box",
@@ -478,7 +478,7 @@
       "refersTo": "sidebar-box",
       "description": "Right-rail box in a vermilion hairline frame with a tracked-capital heading.",
       "html": "<section class=\"ds-box\"><h2>Your beat</h2><ul><li>Topic one</li><li>Topic two</li><li>Topic three</li></ul></section>",
-      "css": ".ds-box { border: 1px solid var(--accent, #d9472b); padding: 0.9rem 1rem 1rem; text-align: center; max-width: 16.5rem; background: var(--paper, #efe9dd); color: var(--ink, #151515); } .ds-box h2 { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--accent-text, #b23a1f); margin: 0 0 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--accent, #d9472b); } .ds-box ul { list-style: none; margin: 0; padding: 0; } .ds-box li { font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; } .ds-box li + li { border-top: 1px solid var(--rule, rgb(21 21 21 / 0.22)); }"
+      "css": ".ds-box { border: 1px solid var(--accent, #d9472b); padding: 0.9rem 1rem 1rem; text-align: center; max-width: 16.5rem; background: var(--paper, #efe9dd); color: var(--ink, #151515); } .ds-box h2 { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--accent-text, #b23a1f); margin: 0 0 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--accent, #d9472b); } .ds-box ul { list-style: none; margin: 0; padding: 0; } .ds-box li { font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; } .ds-box li + li { border-top: 1px solid var(--rule, rgb(21 21 21 / 0.22)); }"
     },
     {
       "name": "Scorebox",
@@ -486,7 +486,7 @@
       "refersTo": "scorebox",
       "description": "Lead-story score: big Playfair numeral with 'for you' over a hairline scorecard of the five criteria.",
       "html": "<div class=\"ds-scorebox\"><p class=\"ds-overall\"><span class=\"ds-numeral\">4.2</span><span class=\"ds-lbl\">for you</span></p><dl class=\"ds-card\"><div><dt>Criterion one</dt><dd>4</dd></div><div><dt>Criterion two</dt><dd>3</dd></div><div><dt>Criterion three</dt><dd>5</dd></div></dl></div>",
-      "css": ".ds-scorebox { border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); max-width: 17rem; color: var(--ink, #151515); } .ds-overall { display: flex; align-items: baseline; justify-content: center; gap: 0.6rem; margin: 0; padding: 0.9rem 1rem 0.8rem; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-numeral { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: 4.25rem; line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; } .ds-lbl, .ds-card dt { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--ink-soft, #55504a); } .ds-card { margin: 0; padding: 0.15rem 1rem 0.35rem; } .ds-card div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule, rgb(21 21 21 / 0.22)); } .ds-card div:last-child { border-bottom: 0; } .ds-card dt { color: var(--ink, #151515); } .ds-card dd { margin: 0; font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 1.25rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }"
+      "css": ".ds-scorebox { border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); max-width: 17rem; color: var(--ink, #151515); } .ds-overall { display: flex; align-items: baseline; justify-content: center; gap: 0.6rem; margin: 0; padding: 0.9rem 1rem 0.8rem; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-numeral { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: 4.25rem; line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; } .ds-lbl, .ds-card dt { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--ink-soft, #55504a); } .ds-card { margin: 0; padding: 0.15rem 1rem 0.35rem; } .ds-card div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule, rgb(21 21 21 / 0.22)); } .ds-card div:last-child { border-bottom: 0; } .ds-card dt { color: var(--ink, #151515); } .ds-card dd { margin: 0; font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 1.25rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }"
     },
     {
       "name": "Pull Line",
@@ -494,15 +494,15 @@
       "refersTo": "pull",
       "description": "'Why it matters' in Playfair italic under a 2px vermilion rule.",
       "html": "<blockquote class=\"ds-pull\"><p class=\"ds-pull-label\">Why it matters</p><p class=\"ds-pull-text\">The why-it-matters line from the grade.</p></blockquote>",
-      "css": ".ds-pull { margin: 0; padding: 0.9rem 0 0; border-top: 2px solid var(--accent, #d9472b); max-width: 32rem; } .ds-pull-label { font-family: var(--font-label, Inter, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--accent-text, #b23a1f); margin: 0 0 0.35rem; } .ds-pull-text { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-style: italic; font-size: 1.5rem; line-height: 1.3; margin: 0; color: var(--ink, #151515); }"
+      "css": ".ds-pull { margin: 0; padding: 0.9rem 0 0; border-top: 2px solid var(--accent, #d9472b); max-width: 32rem; } .ds-pull-label { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--accent-text, #b23a1f); margin: 0 0 0.35rem; } .ds-pull-text { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-style: italic; font-size: 1.5rem; line-height: 1.3; margin: 0; color: var(--ink, #151515); }"
     }
   ],
   "narrative": {
     "northStar": "The Typeset Weekly",
-    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Inter in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
+    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Libre Franklin in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
     "keyCharacteristics": [
       "One ruled page frame around everything; hairline rules divide stories, rows and columns.",
-      "Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Inter (tracked-capital apparatus).",
+      "Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Libre Franklin (tracked-capital apparatus).",
       "Square corners everywhere, including checkboxes and range thumbs.",
       "One vermilion accent, for rules, frames and large type; a darker vermilion for small text.",
       "Phone first: one column, the multi-column grid from 900px, every target at least 44px."
@@ -525,7 +525,7 @@
       },
       {
         "name": "The One Family Per Job Rule",
-        "body": "Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Inter labels (metadata, navigation, buttons, field labels). Never swap a role.",
+        "body": "Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Libre Franklin labels (metadata, navigation, buttons, field labels). Never swap a role.",
         "section": "typography"
       },
       {
@@ -560,7 +560,7 @@
       "Do set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.",
       "Do use `accent-text` for any small vermilion text and keep `accent` for rules, frames and large type.",
       "Do define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.",
-      "Do keep labels, metadata, navigation and buttons in Inter capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.",
+      "Do keep labels, metadata, navigation and buttons in Libre Franklin capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.",
       "Do make every interactive element at least 44px tall and keep one column below 900px.",
       "Do self-host every font and asset; the page makes no external requests."
     ],
@@ -571,7 +571,7 @@
       "Don't introduce a second accent hue or fill a button or surface with vermilion.",
       "Don't set small text in `accent` (#d9472b is 3.5:1 on paper).",
       "Don't add a kicker or eyebrow line that carries no data; a label above a headline must state a field of the paper, as the study design and sample size line does on the paper page.",
-      "Don't swap the type roles: no Inter headlines, no Playfair labels, no serif buttons."
+      "Don't swap the type roles: no Libre Franklin headlines, no Playfair labels, no serif buttons."
     ]
   }
 }
