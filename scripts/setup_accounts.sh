@@ -257,15 +257,22 @@ SMTP_USERNAME=$(printf %s "$SMTP_USERNAME" | tr -d ' ' | tr '[:upper:]' '[:lower
 while true; do
   ask_secret SMTP_PASSWORD "Paste the app password (spaces are fine):"
   SMTP_PASSWORD=$(printf %s "$SMTP_PASSWORD" | tr -d ' ')
-  if smtp_login "$SMTP_USERNAME"; then printf '  %s✓ Gmail accepts the app password%s\n' "$GREEN" "$RESET"; break; fi
+  if smtp_login "$SMTP_USERNAME"; then
+    printf '  %s✓ Gmail accepts the app password%s\n' "$GREEN" "$RESET"; GMAIL_OK=yes; break
+  fi
   warn "Check the address, and that you pasted the app password, not your normal password."
   confirm "Try again?" || break
 done
-write_env SMTP_HOST "smtp.gmail.com"
-write_env SMTP_PORT "587"
-write_env SMTP_USERNAME "$SMTP_USERNAME"
-write_env SMTP_PASSWORD "$SMTP_PASSWORD"
-write_env EMAIL_FROM "$SMTP_USERNAME"   # the app adds the "Tell Me Kort" display name
+# Write all or nothing: a half-set SMTP config would make local sign-in emails fail.
+if [[ "${GMAIL_OK:-}" == yes ]]; then
+  write_env SMTP_HOST "smtp.gmail.com"
+  write_env SMTP_PORT "587"
+  write_env SMTP_USERNAME "$SMTP_USERNAME"
+  write_env SMTP_PASSWORD "$SMTP_PASSWORD"
+  write_env EMAIL_FROM "$SMTP_USERNAME"   # the app adds the "Tell Me Kort" display name
+else
+  SKIPPED+=("Gmail app password (nothing saved; re-run the wizard to try again)")
+fi
 pause
 
 # ── 3 ─────────────────────────────────────────────────────────────────────
@@ -277,6 +284,8 @@ ADMIN_EMAIL=$(_existing ADMIN_EMAIL || true)
 if [[ -z "$ADMIN_EMAIL" ]]; then
   warn "ADMIN_EMAIL isn't set in $ENV_FILE; skipping the test send."
   SKIPPED+=("test email (set ADMIN_EMAIL first)")
+elif [[ "${GMAIL_OK:-}" != yes ]]; then
+  note "Skipping the test send: Gmail isn't set up yet."
 elif confirm "Send one test email to $ADMIN_EMAIL using the app's own mail code?"; then
   if uv run --quiet python -c '
 from app.config import get_settings

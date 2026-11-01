@@ -88,3 +88,11 @@ def test_mailer_prefers_postmark_then_smtp_then_outbox() -> None:
     assert isinstance(mailer_for(both), PostmarkMailer)
     assert isinstance(mailer_for(only_smtp), SmtpMailer)
     assert isinstance(mailer_for(neither), OutboxMailer)
+
+
+def test_half_set_smtp_falls_back_to_the_outbox() -> None:
+    from app.email import mailer_for
+    from app.email.outbox import OutboxMailer
+
+    half = Settings(_env_file=None, smtp_host="smtp.gmail.com")  # type: ignore[call-arg]
+    assert isinstance(mailer_for(half), OutboxMailer)

@@ -23,7 +23,7 @@ def mailer_for(settings: Settings) -> Mailer:
     """Postmark when configured, else SMTP, else the local outbox folder (development)."""
     if settings.postmark_server_token:
         return _postmark(settings.postmark_server_token, settings.email_from)
-    if settings.smtp_host:
+    if settings.smtp_host and settings.smtp_username and settings.smtp_password:
         return SmtpMailer(
             host=settings.smtp_host,
             port=settings.smtp_port,
@@ -31,5 +31,7 @@ def mailer_for(settings: Settings) -> Mailer:
             password=settings.smtp_password,
             sender=settings.email_from,
         )
-    log.warning("No POSTMARK_SERVER_TOKEN or SMTP_HOST: writing email to the local outbox")
+    log.warning(
+        "No POSTMARK_SERVER_TOKEN or complete SMTP settings: writing email to the local outbox"
+    )
     return OutboxMailer()
