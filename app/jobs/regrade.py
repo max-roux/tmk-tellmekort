@@ -15,19 +15,17 @@ from app.config import Settings
 from app.db.models import Grade, Paper
 from app.email.base import Mailer
 from app.grading.grader import Grader
-from app.grading.rubric import RUBRIC_VERSION
-from app.jobs.grade_papers import Polling
+from app.jobs.grade_papers import Polling, currently_graded
 from app.jobs.weekly_pipeline import BATCH_WAIT, grade_with_guard
 from app.sources.pubmed import PubMedClient
 
 
 def stale_pmids(session: Session, since: date) -> list[str]:
     """Graded papers entered since `since` with no current-version grade, newest first."""
-    current = select(Grade.pmid).where(Grade.rubric_version == RUBRIC_VERSION)
     stmt = (
         select(Paper.pmid)
         .join(Grade, Grade.pmid == Paper.pmid)
-        .where(Paper.entrez_date >= since, Paper.pmid.not_in(current))
+        .where(Paper.entrez_date >= since, Paper.pmid.not_in(currently_graded()))
         .group_by(Paper.pmid, Paper.entrez_date)
         .order_by(Paper.entrez_date.desc(), Paper.pmid.desc())
     )

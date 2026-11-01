@@ -8,7 +8,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Feedback
+from app.db.models import EmailSend, Feedback
 from app.domain.ranking import PaperState, derive_state
 
 
@@ -31,3 +31,11 @@ def paper_states(session: Session, user_id: uuid.UUID) -> dict[str, Tracked]:
         events[pmid].append(kind)
         last[pmid] = at
     return {pmid: Tracked(derive_state(kinds), last[pmid]) for pmid, kinds in events.items()}
+
+
+def emailed_pmids(session: Session, user_id: uuid.UUID) -> set[str]:
+    """Papers sent to the user in any weekly email."""
+    rows = session.execute(
+        select(EmailSend.fresh_pmid, EmailSend.missed_pmid).where(EmailSend.user_id == user_id)
+    )
+    return {pmid for row in rows for pmid in row if pmid}

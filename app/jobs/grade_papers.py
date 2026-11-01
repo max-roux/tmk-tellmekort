@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -47,12 +47,13 @@ class GradeStats:
     usd: Decimal = Decimal(0)
 
 
+def currently_graded() -> Select[str]:
+    """PMIDs with a grade under the current rubric version, as a subquery."""
+    return select(Grade.pmid).where(Grade.rubric_version == RUBRIC_VERSION)
+
+
 def has_current_grade(session: Session, pmids: list[str]) -> set[str]:
-    return set(
-        session.scalars(
-            select(Grade.pmid).where(Grade.pmid.in_(pmids), Grade.rubric_version == RUBRIC_VERSION)
-        )
-    )
+    return set(session.scalars(currently_graded().where(Grade.pmid.in_(pmids))))
 
 
 def store_grade(session: Session, o: GradeOutcome) -> None:

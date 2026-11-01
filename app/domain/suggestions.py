@@ -25,13 +25,15 @@ def suggest_weight(
     """
     if len(liked) < MIN_LIKES or not others:
         return None
-    gaps = {c: fmean(s[c] for s in liked) - fmean(s[c] for s in others) for c in ALL_CRITERIA}
-    candidates = [
-        c
-        for c in ALL_CRITERIA
-        if gaps[c] >= MIN_GAP and _can_raise(c, weights) and c not in dismissed
-    ]
-    return max(candidates, key=lambda c: gaps[c], default=None)
+    gaps = _gaps(liked, others)
+    open_to_raise = [c for c in ALL_CRITERIA if _can_raise(c, weights) and c not in dismissed]
+    wide = [c for c in open_to_raise if gaps[c] >= MIN_GAP]
+    return max(wide, key=lambda c: gaps[c], default=None)
+
+
+def _gaps(liked: Sequence[Scores], others: Sequence[Scores]) -> dict[str, float]:
+    """Mean score of liked papers minus that of the others, per criterion."""
+    return {c: fmean(s[c] for s in liked) - fmean(s[c] for s in others) for c in ALL_CRITERIA}
 
 
 def _can_raise(c: str, weights: Mapping[str, float]) -> bool:

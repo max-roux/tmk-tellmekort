@@ -25,6 +25,7 @@ from app.email.alerts import alert_admin
 from app.email.base import EmailMessage, Mailer, MailerError, render
 from app.feed import queries
 from app.feed.queries import FeedItem
+from app.feed.states import emailed_pmids
 from app.grading.rubric import criterion_labels
 from app.profiles.service import load_preferences
 
@@ -67,13 +68,6 @@ def due_users(session: Session, now: datetime) -> list[User]:
     return due
 
 
-def _sent_pmids(session: Session, user_id: uuid.UUID) -> set[str]:
-    rows = session.execute(
-        select(EmailSend.fresh_pmid, EmailSend.missed_pmid).where(EmailSend.user_id == user_id)
-    )
-    return {pmid for row in rows for pmid in row if pmid}
-
-
 def _top_reasons(item: FeedItem, weights: dict[str, float]) -> list[tuple[str, str]]:
     """Justifications of the two intrinsic criteria the user weights most."""
     names = dict(criterion_labels())
@@ -108,7 +102,7 @@ def _pick(
     ranked = queries.feed(session, user.id, settings, now.date(), limit=None)
     picks = select_picks(
         [i.ranked for i in ranked],
-        sent=_sent_pmids(session, user.id),
+        sent=emailed_pmids(session, user.id),
         fresh_since=now.date() - timedelta(days=FRESH_DAYS),
         cutoff=settings.email_min_weighted,
     )
