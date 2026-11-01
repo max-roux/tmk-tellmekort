@@ -347,3 +347,17 @@ class EmailSend(Base):
     postmark_message_id: Mapped[str | None] = mapped_column(Text)
     fresh_pmid: Mapped[str | None] = mapped_column(ForeignKey("papers.pmid", ondelete="SET NULL"))
     missed_pmid: Mapped[str | None] = mapped_column(ForeignKey("papers.pmid", ondelete="SET NULL"))
+
+
+class PipelineRun(Base):
+    """One weekly pipeline run (SPEC.md §6), for the admin page and alerts."""
+
+    __tablename__ = "pipeline_runs"
+    __table_args__ = (CheckConstraint("status IN ('running', 'ok', 'failed')", name="status"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(Text, server_default="running")
+    stats: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default="{}")
+    error: Mapped[str | None] = mapped_column(Text)

@@ -50,7 +50,10 @@ def db_session(migrated_url: str) -> Iterator[Session]:
     engine = create_engine(migrated_url)
     with engine.begin() as conn:
         conn.execute(
-            text("TRUNCATE papers, users, login_attempts, llm_spend, grading_batches CASCADE")
+            text(
+                "TRUNCATE papers, users, login_attempts, llm_spend, grading_batches, "
+                "pipeline_runs CASCADE"
+            )
         )
     with Session(engine) as session:
         yield session
