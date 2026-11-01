@@ -140,7 +140,7 @@ def test_full_onboarding_flow(
     assert (cs.w_pertinence, cs.w_novelty, cs.w_depth) == (2.0, 0.0, 1.0)
     assert cs.min_proof_strength == 3 and cs.min_depth is None
     assert cs.hide_case_reports is False  # unticked checkbox
-    assert "set up" in client.get("/").text
+    assert "Your feed" in client.get("/").text
 
     again = client.get("/onboarding/weights")
     assert (

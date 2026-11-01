@@ -1,0 +1,49 @@
+{% macro action(pmid, kind, label, next, pressed=None) -%}
+<form method="post" action="/paper/{{ pmid }}/feedback">
+  <input type="hidden" name="kind" value="{{ kind }}">
+  <input type="hidden" name="next" value="{{ next }}">
+  <button class="small-button" type="submit"{% if pressed is not none %} aria-pressed="{{ 'true' if pressed else 'false' }}"{% endif %}>{{ label }}</button>
+</form>
+{%- endmacro %}
+
+{% macro actions(pmid, state, next) -%}
+<div class="row-actions">
+  {% if state.liked %}{{ action(pmid, "unlike", "Liked", next, True) }}{% else %}{{ action(pmid, "like", "Like", next, False) }}{% endif %}
+  {% if state.read %}{{ action(pmid, "unread", "Mark unread", next) }}{% else %}{{ action(pmid, "read", "Mark read", next) }}{% endif %}
+  {% if state.dismissed %}{{ action(pmid, "undismiss", "Undo not for me", next) }}{% else %}{{ action(pmid, "not_for_me", "Not for me", next) }}{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro meta(paper, grade) -%}
+<p class="meta">
+  {{ paper.journal }}{% if paper.pub_date %}, {{ paper.pub_date.year }}{% endif %}
+  {% if grade %} · Graded from {{ "full text" if grade.input_source == "full_text" else "abstract" }}{% endif %}
+  {% if paper.is_open_access %} · <span class="badge">Open access</span>{% endif %}
+</p>
+{%- endmacro %}
+
+{% macro pills(scores) -%}
+<ul class="pills" aria-label="Scores out of 5">
+  {% for key, name in CRITERIA %}<li class="pill">{{ name }} <b>{{ scores[key] }}</b></li>{% endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro card(item, next) -%}
+<article class="card" data-pmid="{{ item.pmid }}">
+  <h2 class="paper-title"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
+  {{ meta(item.paper, item.grade) }}
+  {{ pills(item.ranked.scores) }}
+  <p>{{ item.grade.summary }}</p>
+  <p><strong>Why it matters:</strong> {{ item.grade.why_it_matters }}</p>
+  <p class="small"><a href="{{ item.paper|paper_url }}" rel="noopener" target="_blank">Read the paper</a> · <a href="/paper/{{ item.pmid }}">All scores and reasons</a></p>
+  {{ actions(item.pmid, item.state, next) }}
+</article>
+{%- endmacro %}
+
+{% macro entry(e, next) -%}
+<article class="card" data-pmid="{{ e.pmid }}">
+  <h2 class="paper-title"><a href="{{ '/paper/' ~ e.pmid if e.grade else e.paper|paper_url }}">{{ e.paper.title }}</a></h2>
+  {{ meta(e.paper, e.grade) }}
+  {{ actions(e.pmid, e.state, next) }}
+</article>
+{%- endmacro %}

@@ -1,76 +1,19 @@
 """Feed, library, history, feedback and disputes against a real database."""
 
-from datetime import date
-
 import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.accounts.users import add_user
-from app.config import Settings
-from app.db.models import Grade, ProfileVector, ScoreDispute, User
-from app.domain.criteria import INTRINSIC_CRITERIA
-from app.domain.preferences import Preferences
+from app.db.models import ProfileVector, ScoreDispute, User
 from app.feed import feedback, queries
 from app.grading.rubric import RUBRIC_VERSION
-from app.jobs.embed_papers import embed_papers
 from app.jobs.weekly_ingest import store_papers
-from app.profiles import service
-from app.profiles.topics import ProposedTopic
-from tests.fakes import PUBMED_SAMPLE, FakeEmbedder
+from tests.fakes import PUBMED_SAMPLE
+from tests.feed_setup import SETTINGS, TODAY, grade, user
 
 pytestmark = pytest.mark.db
-
-TODAY = date(2026, 11, 1)
-SETTINGS = Settings(_env_file=None)  # type: ignore[call-arg]
-TOPIC = "fibula flap mandible reconstruction"
-# Paper vectors relative to the single topic direction [1, 0]: cosines 0.99, 0.8, 0.55, 0.1.
-PINNED = {
-    TOPIC: [1.0, 0.0],
-    "Orofacial Cleft Characteristics": [0.99, 0.141],
-    "Pink lipoma": [0.8, 0.6],
-    "How clinicians think": [0.55, 0.835],
-}
-EVEN = Preferences(
-    weights=dict.fromkeys(("pertinence", *INTRINSIC_CRITERIA), 1.0),
-    minimums=dict.fromkeys(("pertinence", *INTRINSIC_CRITERIA)),
-    hide_case_reports=False,
-)
-
-
-def grade(session: Session, pmid: str, score: int, *, rubric: int = RUBRIC_VERSION) -> None:
-    session.add(
-        Grade(
-            pmid=pmid,
-            rubric_version=rubric,
-            model="claude-sonnet-5-5",
-            input_source="abstract",
-            **dict.fromkeys(INTRINSIC_CRITERIA, score),
-            justifications={c: f"{c} because" for c in INTRINSIC_CRITERIA},
-            summary="Summary.",
-            why_it_matters="Why.",
-            study_design="cohort",
-            input_tokens=1,
-            output_tokens=1,
-        )
-    )
-    session.commit()
-
-
-@pytest.fixture
-def user(db_session: Session) -> User:
-    store_papers(db_session, PUBMED_SAMPLE.papers)
-    e = FakeEmbedder(pinned=PINNED)
-    embed_papers(db_session, e)
-    u = add_user(db_session, "surgeon@example.com")
-    service.replace_topics(db_session, u.id, [ProposedTopic("Fibula", TOPIC)], "onboarding")
-    service.save_preferences(db_session, u.id, EVEN)
-    assert service.sync_embeddings(db_session, e, u.id, service.coefficients(SETTINGS))
-    return u
-
-
-def titles(items: list[queries.FeedItem]) -> list[str]:
-    return [i.paper.title.split()[0] for i in items]
+__all__ = ["user"]  # pytest fixture
 
 
 def feed(session: Session, user: User) -> list[queries.FeedItem]:

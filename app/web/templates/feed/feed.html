@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "feed/_macros.html" import card %}
+{% block title %}Your feed · Maxfac Papers{% endblock %}
+{% block content %}
+<h1>Your feed</h1>
+<p class="muted small">The best graded papers of the last 90 days for your profile. Read and dismissed papers move to <a href="/history">History</a>.</p>
+{% for item in items %}
+  {{ card(item, "/") }}
+{% else %}
+  <div class="card">
+    <p><strong>Nothing to show yet.</strong></p>
+    <p class="muted">Papers appear here once they are graded and match your topics. If you just set up your profile, new papers arrive with the weekly run. You can also <a href="/onboarding/topics">broaden your topics</a> or <a href="/onboarding/weights">relax your minimums</a>.</p>
+  </div>
+{% endfor %}
+{% endblock %}

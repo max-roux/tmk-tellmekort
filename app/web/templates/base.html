@@ -38,6 +38,7 @@
     }
     .error { color: var(--warn); font-weight: 600; }
     .stack > * + * { margin-top: .6rem; }
+    .notice { background: var(--accent-soft); border-radius: 8px; padding: .6rem .8rem; }
     label { display: block; font-weight: 600; }
     input[type=email], input[type=text], textarea, select {
       width: 100%; font: inherit; color: var(--ink); background: var(--surface);
@@ -47,7 +48,21 @@
     .button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--line); }
     .linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
     header.top { max-width: 46rem; margin: 0 auto; padding: .75rem 1rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    header.top { flex-wrap: wrap; }
     header.top .brand { font-weight: 700; color: var(--ink); text-decoration: none; }
+    header.top nav a[aria-current] { font-weight: 700; color: var(--ink); }
+    .pills { display: flex; flex-wrap: wrap; gap: .35rem; margin: .6rem 0; padding: 0; list-style: none; }
+    .pill { background: var(--accent-soft); border-radius: 999px; padding: .15rem .6rem; font-size: .8rem; white-space: nowrap; }
+    .pill b { font-variant-numeric: tabular-nums; }
+    .meta { font-size: .85rem; color: var(--muted); margin: .2rem 0 0; }
+    .badge { display: inline-block; border: 1px solid var(--ok); color: var(--ok); border-radius: 4px; padding: 0 .35rem; font-size: .75rem; }
+    .paper-title { font-size: 1.05rem; margin: 0; }
+    .paper-title a { color: var(--ink); text-decoration: none; }
+    .paper-title a:hover { text-decoration: underline; }
+    .row-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+    .row-actions form { margin: 0; }
+    .small-button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: .35rem .7rem; cursor: pointer; }
+    .small-button[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   </style>
   {% block head %}{% endblock %}
 </head>
@@ -55,10 +70,14 @@
   {% if user %}
   <header class="top">
     <a class="brand" href="/">Maxfac Papers</a>
-    <span class="small">
+    <nav class="small" aria-label="Main">
+      <a href="/"{% if nav == "feed" %} aria-current="page"{% endif %}>Feed</a> ·
+      <a href="/library"{% if nav == "library" %} aria-current="page"{% endif %}>Library</a> ·
+      <a href="/history"{% if nav == "history" %} aria-current="page"{% endif %}>History</a> ·
+      <a href="/onboarding/topics">Profile</a> ·
       {% if user.is_admin or user.can_calibrate %}<a href="/admin/calibrate">Calibration</a> · {% endif %}
       <form method="post" action="/logout" style="display:inline"><button class="linklike" type="submit">Sign out</button></form>
-    </span>
+    </nav>
   </header>
   {% endif %}
   <main>{% block content %}{% endblock %}</main>

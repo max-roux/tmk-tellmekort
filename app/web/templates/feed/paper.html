@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "feed/_macros.html" import meta, pills, actions %}
+{% block title %}{{ item.paper.title }} · Maxfac Papers{% endblock %}
+{% block content %}
+<article data-pmid="{{ item.pmid }}">
+  <p class="eyebrow">{{ item.grade.study_design }}{% if item.grade.sample_size %} · n = {{ item.grade.sample_size }}{% endif %}</p>
+  <h1>{{ item.paper.title }}</h1>
+  {{ meta(item.paper, item.grade) }}
+  {{ pills(item.ranked.scores) }}
+  <p>{{ item.grade.summary }}</p>
+  <p><strong>Why it matters:</strong> {{ item.grade.why_it_matters }}</p>
+  <p><a class="button" href="{{ item.paper|paper_url }}" rel="noopener" target="_blank">Read the paper</a></p>
+  {{ actions(item.pmid, item.state, "/paper/" ~ item.pmid) }}
+
+  <h2 id="scores" style="margin-top:2rem">Scores and reasons</h2>
+  {% if noted %}<p class="notice" role="status">Thanks, your view on {{ noted.replace("_", " ") }} is noted. It helps recalibrate the grading.</p>{% endif %}
+  {% for key, name in CRITERIA %}
+  <div class="card">
+    <h3>{{ name }} <span class="muted">{{ item.ranked.scores[key] }}/5</span></h3>
+    <p class="small">{% if key == "pertinence" %}How closely it matches your topics, seed papers and likes (similarity {{ "%.2f"|format(item.ranked.paper.pertinence_cos) }}).{% else %}{{ item.grade.justifications[key] }}{% endif %}</p>
+    <details>
+      <summary class="small">Disagree?</summary>
+      <form method="post" action="/paper/{{ item.pmid }}/dispute" class="stack" style="margin-top:.5rem">
+        <input type="hidden" name="criterion" value="{{ key }}">
+        <label for="score-{{ key }}" class="small">Your score</label>
+        <select id="score-{{ key }}" name="user_score" style="width:auto">
+          <option value="">No score</option>
+          {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+        </select>
+        <label for="comment-{{ key }}" class="small">Why (optional)</label>
+        <textarea id="comment-{{ key }}" name="comment" maxlength="1000" style="min-height:4rem"></textarea>
+        <div><button class="small-button" type="submit">Send</button></div>
+      </form>
+    </details>
+  </div>
+  {% endfor %}
+  <p class="muted small">PMID {{ item.pmid }}{% if item.paper.doi %} · DOI {{ item.paper.doi }}{% endif %}</p>
+</article>
+{% endblock %}

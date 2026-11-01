@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% from "feed/_macros.html" import entry %}
+{% block title %}History · Maxfac Papers{% endblock %}
+{% block content %}
+<h1>History</h1>
+<p class="muted small">Papers you marked read or not for you. Undo to put one back in your feed.</p>
+{% for e in entries %}{{ entry(e, "/history") }}{% else %}<p class="muted">Nothing here yet.</p>{% endfor %}
+{% endblock %}

@@ -137,7 +137,7 @@ def test_onboarded_user_lands_on_home(client: TestClient, db_session: Session) -
     resp = client.post("/auth", data={"t": token}, follow_redirects=False)
     assert resp.headers["location"] == "/"
     home = client.get("/")
-    assert "set up, Ana" in home.text
+    assert "Your feed" in home.text
     assert client.get("/login", follow_redirects=False).status_code == 303
 
 
