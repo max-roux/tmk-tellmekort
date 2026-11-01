@@ -2,7 +2,7 @@
 
 A web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
-Status: milestones 1-7 built (see §18). This file is the source of truth; update it when decisions change.
+Status: milestones 1-8 built (see §18). This file is the source of truth; update it when decisions change.
 
 ---
 
@@ -126,11 +126,11 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **criterion_settings**: `user_id` (PK), `w_pertinence`, `w_proof_strength`, `w_novelty`, `w_depth`, `w_practical_usefulness` (floats 0–5, default 1), `min_pertinence`, `min_proof_strength`, `min_novelty`, `min_depth`, `min_practical_usefulness` (smallint 1–5, nullable = no minimum), `hide_case_reports` (bool, default true), `study_types` (text[], nullable = all).
 
-**feedback**: `id`, `user_id`, `pmid`, `kind` (`read` | `like` | `not_for_me` | `unlike` | `unread` | `undismiss`, which undoes `not_for_me`), `source` (`email` | `app`), `created_at`. Append-only; current state is derived from it (§9).
+**feedback**: `id`, `user_id`, `pmid`, `kind` (`read` | `like` | `not_for_me` | `unlike` | `unread` | `undismiss`, which undoes `not_for_me`), `source` (`email` | `app`), `send_id` (nullable: the email an action came from; unique per `send_id`, `pmid`, `kind`), `created_at`. Append-only; current state is derived from it (§9).
 
 **score_disputes**: `id`, `user_id`, `pmid`, `grade_id`, `criterion`, `user_score` (1–5, nullable), `comment`, `created_at`.
 
-**email_sends**: `id`, `user_id`, `sent_at`, `postmark_message_id`, `fresh_pmid` (nullable), `missed_pmid` (nullable).
+**email_sends**: `id`, `user_id`, `week_of` (Monday of the week in the user's timezone), `sent_at`, `postmark_message_id`, `fresh_pmid` (nullable), `missed_pmid` (nullable; both null = quiet week). Unique on (`user_id`, `week_of`): the row is claimed before sending, so a week's email cannot go twice; a failed send deletes it for the next run to retry.
 
 **profile_vectors**: `user_id` (PK), `model` (embedding model of the vector), `vector`, `updated_at`. Cached; recomputed on any topic, seed or feedback change. No row while nothing is embedded.
 
@@ -289,22 +289,22 @@ After ≥ 10 likes, compare the mean score of liked papers with the mean of show
 ## 10. Weekly email
 
 ### 10.1 Scheduling
-An hourly cron job finds users whose local send time fell in the past hour and who have no `email_sends` row for the current ISO week, then builds and sends their email.
+An hourly cron job (`cli.py send-due`) finds onboarded users whose local send slot (weekday and time) has passed this week and who have no `email_sends` row for that week, then builds and sends their email. Being due from the slot onwards, rather than only in the hour after it, means a missed run catches up.
 
 ### 10.2 Pick selection (`app/domain/picks.py`)
 1. **Fresh pick**: the top eligible paper by weighted score with `entrez_date` in the last 7 days and never sent to this user.
 2. **Missed pick**: the top eligible paper from the active window (90 days), excluding the fresh pick and anything previously sent.
 3. **Quality cutoff**: a pick is sent only if `weighted ≥ EMAIL_MIN_WEIGHTED` (default 3.5).
-4. **Never zero**: if neither pick clears the cutoff, send the single best eligible missed pick anyway. If nothing at all is eligible, send a short "quiet week" email with a link to the feed and alert the admin (that means the profile or query needs attention).
+4. **Never zero**: if neither pick clears the cutoff, send the single best eligible unsent paper anyway, labelled fresh or missed by its date. If nothing at all is eligible, send a short "quiet week" email with a link to the feed and alert the admin (that means the profile or query needs attention).
 5. The email therefore contains 1 or 2 papers.
 
 ### 10.3 Content per paper
-Title, journal, year, the label "Fresh this week" or "You may have missed", 5 score pills with justifications (shown on tap in the app; shown inline in the email for the top 2 criteria by the user's weights), the summary, the why-it-matters line, a link to the paper (DOI → PubMed fallback) and an "Open access" badge when applicable.
+Title, journal, year, the label "Fresh this week" or "You may have missed", 5 score pills with justifications (shown on tap in the app; shown inline in the email for the 2 intrinsic criteria the user weights most; pertinence has no written justification), the summary, the why-it-matters line, a link to the paper (DOI → PubMed fallback) and an "Open access" badge when applicable.
 
 Action buttons: **Like**, **Mark read**, **Not for me**, **Open in app**.
 
 ### 10.4 One-tap links
-- `GET /a/{token}` where the token is signed with `itsdangerous` and carries `user_id`, `pmid`, `action`, `send_id`; it expires after 30 days.
+- `GET /a#<token>` (token in the URL fragment, out of server logs, as for sign-in links) where the token is signed with `itsdangerous` and carries `user_id`, `pmid`, `action`, `send_id`; it expires after 30 days.
 - A GET only renders a confirmation page whose form auto-submits a POST. This keeps email security scanners that prefetch links from recording likes.
 - The POST records the event (idempotent per `send_id` + `action`), then shows "Saved ✓ — open your feed".
 - No login is required for these actions; opening the app itself still requires a session.
@@ -395,7 +395,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 - **Parser tests**: PubMed/PMC XML fixtures, including missing abstracts, missing DOIs and non-OA papers.
 - **Grader tests**: recorded batch responses; validation and retry paths; spend-guard truncation.
 - **Web tests**: FastAPI TestClient for magic-link login, one-tap GET→POST flow (prefetch-safe), idempotency, onboarding.
-- **E2E smoke**: `cli.py send-test --user me` runs the full pipeline on a 10-paper fixture and renders the email to HTML locally.
+- **E2E smoke**: `cli.py send-test EMAIL` renders the email that user would get now to `var/outbox/` (text and HTML) without sending or recording it.
 
 ---
 

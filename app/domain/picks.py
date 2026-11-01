@@ -1,6 +1,6 @@
 """Weekly email picks and send schedule (SPEC.md §10.1-10.2). Pure: `now` comes in."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from collections.abc import Set as AbstractSet
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
@@ -32,16 +32,24 @@ def select_picks(
     unsent = [r for r in ranked if r.paper.pmid not in sent]
     if not unsent:
         return Picks()
-    fresh = next((r for r in unsent if r.paper.entrez_date >= fresh_since), None)
-    missed = next((r for r in unsent if r is not fresh), None)
-    picks = Picks(
-        fresh=fresh if fresh and fresh.weighted >= cutoff else None,
-        missed=missed if missed and missed.weighted >= cutoff else None,
-    )
+    fresh = _first(unsent, lambda r: r.paper.entrez_date >= fresh_since)
+    missed = _first(unsent, lambda r: r is not fresh)
+    picks = Picks(fresh=_clearing(fresh, cutoff), missed=_clearing(missed, cutoff))
     if not picks.quiet:
         return picks
     best = unsent[0]
     return Picks(fresh=best) if best is fresh else Picks(missed=best)
+
+
+def _first(
+    ranked: Sequence[RankedPaper], keep: Callable[[RankedPaper], bool]
+) -> RankedPaper | None:
+    return next((r for r in ranked if keep(r)), None)
+
+
+def _clearing(pick: RankedPaper | None, cutoff: float) -> RankedPaper | None:
+    """The pick if its weighted score reaches the email cutoff."""
+    return pick if pick is not None and pick.weighted >= cutoff else None
 
 
 def local_week(now: datetime, tz: ZoneInfo) -> date:
