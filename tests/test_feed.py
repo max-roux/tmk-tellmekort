@@ -43,8 +43,8 @@ def test_feedback_moves_papers_between_feed_library_and_history(
     feedback.record(db_session, user.id, "42963307", "not_for_me", "app", SETTINGS)
 
     assert [i.pmid for i in feed(db_session, user)] == ["42963182"]  # liked stays in the feed
-    assert [i.pmid for i in queries.library(db_session, user.id)] == ["42963182"]
-    history = queries.history(db_session, user.id)
+    assert [i.pmid for i in queries.shelf(db_session, user.id, "library")] == ["42963182"]
+    history = queries.shelf(db_session, user.id, "history")
     assert {(i.pmid, i.state.read, i.state.dismissed) for i in history} == {
         ("42949936", True, False),
         ("42963307", False, True),
@@ -53,7 +53,7 @@ def test_feedback_moves_papers_between_feed_library_and_history(
     feedback.record(db_session, user.id, "42963307", "undismiss", "app", SETTINGS)
     feedback.record(db_session, user.id, "42949936", "unread", "app", SETTINGS)
     assert len(feed(db_session, user)) == 3
-    assert queries.history(db_session, user.id) == []
+    assert queries.shelf(db_session, user.id, "history") == []
 
 
 def test_like_and_dismiss_reshape_the_profile_vector(db_session: Session, user: User) -> None:

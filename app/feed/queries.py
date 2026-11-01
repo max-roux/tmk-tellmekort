@@ -5,7 +5,7 @@ results back with their papers and grades for display.
 """
 
 import uuid
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 
@@ -164,14 +164,15 @@ def _entries(session: Session, tracked: dict[str, Tracked]) -> list[Entry]:
     return [Entry(papers[p], tracked[p].state, grades.get(p)) for p in order if p in papers]
 
 
-def library(session: Session, user_id: uuid.UUID) -> list[Entry]:
-    """Liked papers."""
-    states = paper_states(session, user_id)
-    return _entries(session, {p: t for p, t in states.items() if t.state.liked})
+# Library: liked papers. History: read or dismissed papers, which the feed hides.
+SHELVES: dict[str, Callable[[PaperState], bool]] = {
+    "library": lambda s: s.liked,
+    "history": lambda s: s.read or s.dismissed,
+}
 
 
-def history(session: Session, user_id: uuid.UUID) -> list[Entry]:
-    """Read or dismissed papers, which the feed hides; each can be undone."""
+def shelf(session: Session, user_id: uuid.UUID, name: str) -> list[Entry]:
+    """The papers on one shelf, most recent feedback first."""
+    keep = SHELVES[name]
     states = paper_states(session, user_id)
-    hidden = {p: t for p, t in states.items() if t.state.read or t.state.dismissed}
-    return _entries(session, hidden)
+    return _entries(session, {p: t for p, t in states.items() if keep(t.state)})

@@ -6,7 +6,7 @@ and each chunk is committed, so an interrupted run resumes where it stopped.
 
 from dataclasses import dataclass
 
-from sqlalchemy import Select, func, or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -22,21 +22,17 @@ class EmbedStats:
     tokens: int = 0
 
 
-def _missing_stmt(model: str) -> Select[Paper]:
-    return (
+def _missing(session: Session, model: str, limit: int, pmids: list[str] | None) -> list[Paper]:
+    stmt = (
         select(Paper)
         .outerjoin(PaperEmbedding, PaperEmbedding.pmid == Paper.pmid)
         .where(or_(PaperEmbedding.pmid.is_(None), PaperEmbedding.model != model))
+        .order_by(Paper.entrez_date.desc(), Paper.pmid)
+        .limit(limit)
     )
-
-
-def _missing(session: Session, model: str, limit: int) -> list[Paper]:
-    stmt = _missing_stmt(model).order_by(Paper.entrez_date.desc(), Paper.pmid).limit(limit)
+    if pmids is not None:
+        stmt = stmt.where(Paper.pmid.in_(pmids))
     return list(session.scalars(stmt))
-
-
-def _missing_among(session: Session, model: str, pmids: list[str]) -> list[Paper]:
-    return list(session.scalars(_missing_stmt(model).where(Paper.pmid.in_(pmids))))
 
 
 def _store(session: Session, embedder: Embedder, papers: list[Paper], stats: EmbedStats) -> None:
@@ -60,16 +56,11 @@ def _store(session: Session, embedder: Embedder, papers: list[Paper], stats: Emb
     stats.tokens += result.tokens
 
 
-def embed_papers(session: Session, embedder: Embedder) -> EmbedStats:
+def embed_papers(
+    session: Session, embedder: Embedder, pmids: list[str] | None = None
+) -> EmbedStats:
+    """Embed papers lacking a current embedding: all of them, or only `pmids`."""
     stats = EmbedStats()
-    while papers := _missing(session, embedder.model, CHUNK):
-        _store(session, embedder, papers, stats)
-    return stats
-
-
-def embed_pmids(session: Session, embedder: Embedder, pmids: list[str]) -> EmbedStats:
-    """Embed just these papers (e.g. new seed papers) if they lack a current embedding."""
-    stats = EmbedStats()
-    if papers := _missing_among(session, embedder.model, pmids):
+    while papers := _missing(session, embedder.model, CHUNK, pmids):
         _store(session, embedder, papers, stats)
     return stats

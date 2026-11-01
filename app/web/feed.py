@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.orm import Session
 
 from app.accounts.users import is_onboarded
-from app.db.models import FEEDBACK_KINDS, Paper
+from app.db.models import FEEDBACK_KINDS, Paper, User
 from app.db.session import get_session
 from app.feed import feedback, queries
 from app.web.deps import SettingsDep
@@ -107,19 +107,18 @@ def dispute(
     return RedirectResponse(f"/paper/{pmid}?noted={criterion}#scores", status_code=303)
 
 
+def _shelf_page(request: Request, user: User, session: Session, name: str) -> HTMLResponse:
+    entries = queries.shelf(session, user.id, name)
+    return TEMPLATES.TemplateResponse(
+        request, f"feed/{name}.html", {"user": user, "entries": entries, "nav": name}
+    )
+
+
 @router.get("/library", response_class=HTMLResponse)
 def library_page(request: Request, user: RequiredUser, session: SessionDep) -> HTMLResponse:
-    return TEMPLATES.TemplateResponse(
-        request,
-        "feed/library.html",
-        {"user": user, "entries": queries.library(session, user.id), "nav": "library"},
-    )
+    return _shelf_page(request, user, session, "library")
 
 
 @router.get("/history", response_class=HTMLResponse)
 def history_page(request: Request, user: RequiredUser, session: SessionDep) -> HTMLResponse:
-    return TEMPLATES.TemplateResponse(
-        request,
-        "feed/history.html",
-        {"user": user, "entries": queries.history(session, user.id), "nav": "history"},
-    )
+    return _shelf_page(request, user, session, "history")

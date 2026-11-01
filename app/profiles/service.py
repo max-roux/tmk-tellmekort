@@ -21,7 +21,7 @@ from app.domain.ranking import ProfileCoefficients, profile_vector
 from app.domain.seeds import SeedRefs
 from app.embeddings.base import Embedder, EmbeddingError
 from app.feed.states import paper_states
-from app.jobs.embed_papers import embed_pmids
+from app.jobs.embed_papers import embed_papers
 from app.jobs.weekly_ingest import store_papers
 from app.profiles.topics import ProposedTopic
 from app.sources.pubmed import PubMedClient
@@ -244,7 +244,7 @@ def sync_embeddings(
     try:
         embed_topics(session, embedder, user_id)
         seeds = list(session.scalars(select(SeedPaper.pmid).where(SeedPaper.user_id == user_id)))
-        embed_pmids(session, embedder, seeds)
+        embed_papers(session, embedder, seeds)
     except EmbeddingError as e:
         session.rollback()
         log.warning("embedding for user %s failed, will retry on cli.py embed: %s", user_id, e)
