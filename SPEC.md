@@ -52,9 +52,9 @@ Status: design agreed, nothing built. This file is the source of truth; update i
 | LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via a JSON schema (`output_config.format`). |
 | Embeddings | Voyage AI `voyage-4` (1024 dims) | Free tier covers the pilot volume. Keep behind an interface so it can be swapped. |
 | Paper source | NCBI E-utilities (PubMed + PMC `efetch`) | Register an API key (10 req/s). Send `tool` and `email` params. |
-| Email | Postmark (transactional), subdomain of the ApS domain with SPF + DKIM | Free plan covers the pilot. |
+| Email | Postmark (transactional), subdomain of the ApS domain with SPF + DKIM | Free plan covers the pilot. Without `POSTMARK_SERVER_TOKEN` (local development) emails are written to a gitignored `var/outbox/` folder instead. |
 | Hosting | Render, Frankfurt region: web service (Starter), Postgres (Basic), cron jobs | All data in the EU. |
-| Auth | Magic link by email | Signed, single-use, 15 min expiry. |
+| Auth | Magic link by email | Random token, single-use, 15 min expiry; only its hash is stored. |
 | Signed links | `itsdangerous` | For one-tap email actions and magic links. |
 | Tests | pytest, with recorded fixtures for PubMed / Anthropic / Voyage / Postmark | No live API calls in CI. |
 | Tooling | `uv`, `ruff`, `mypy` (strict on `app/domain`) | |
@@ -120,7 +120,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **grades**: `id`, `pmid`, `rubric_version` (int), `model` (text), `input_source` (`full_text` | `abstract`), `proof_strength`, `novelty`, `depth`, `practical_usefulness` (smallint 1–5 each), `justifications` (jsonb: one line per criterion), `summary` (2–3 sentences), `why_it_matters` (one sentence), `study_design` (text, extracted), `sample_size` (int, nullable), `input_tokens`, `output_tokens`, `created_at`. Unique on (`pmid`, `rubric_version`, `model`). **The current grade** = the latest row for the current `RUBRIC_VERSION`.
 
-**topics**: `id`, `user_id`, `label` (e.g. "Orthognathic surgery: virtual surgical planning"), `description`, `embedding` (vector), `source` (`onboarding` | `manual`), `active` (bool).
+**topics**: `id`, `user_id`, `label` (e.g. "Orthognathic surgery: virtual surgical planning"), `description`, `embedding` (vector, nullable until embedded), `embedding_model`, `source` (`onboarding` | `manual`), `active` (bool), `created_at`.
 
 **seed_papers**: `user_id`, `pmid`.
 
@@ -132,11 +132,13 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **email_sends**: `id`, `user_id`, `sent_at`, `postmark_message_id`, `fresh_pmid` (nullable), `missed_pmid` (nullable).
 
-**profile_vectors**: `user_id` (PK), `vector`, `updated_at`. Cached; recomputed on any topic or feedback change.
+**profile_vectors**: `user_id` (PK), `model` (embedding model of the vector), `vector`, `updated_at`. Cached; recomputed on any topic, seed or feedback change. No row while nothing is embedded.
 
 **llm_spend**: `month` (date), `usd` (numeric). Updated after every batch.
 
 **magic_links**: `token_hash`, `user_id`, `expires_at`, `used_at`.
+
+**login_attempts**: `id`, `email`, `ip_hash` (HMAC of the IP with `SECRET_KEY`), `created_at`. For the `/login` rate limit; rows older than an hour are pruned.
 
 **calibration_items**: `id`, `pmid`, `rubric_version`, `surgeon_scores` (jsonb), `model_scores` (jsonb), `created_at`.
 
@@ -161,7 +163,7 @@ Runs as a Render cron job, Sunday 02:00 Europe/Copenhagen. Every step is idempot
 Embed title + abstract for every new paper (`voyage-4`, input_type `document`). Batch up to the provider's limit.
 
 ### 6.3 Narrow
-Papers are embedded with `input_type: document`; the anchor, topics and other query-like texts with `input_type: query`. Compute `narrow_score` = max cosine similarity between the paper and (a) every active user's profile vector and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Always include papers that already appear in a user's seed list.
+Papers are embedded with `input_type: document`; the anchor, topics and other query-like texts with `input_type: query`. Compute `narrow_score` = max cosine similarity between the paper and (a) every user's profile vector and each active topic embedding (so one niche topic is not diluted by the rest of a profile) and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Always include papers that already appear in a user's seed list.
 
 ### 6.4 Full text
 For selected papers with a PMCID, fetch the article with PMC `efetch` (JATS XML). (NCBI retired the PMC OA Web Service in August 2026, and BioC returns nothing for recent articles.) A paper is **open access** when its XML carries a Creative Commons licence; set `is_open_access` then. Use the full text only when it is open access *and* the XML includes the body. Strip references, figures, tables and back matter, and truncate to `FULLTEXT_MAX_TOKENS` (default 12,000, estimated at 4 characters per token) keeping Methods and Results first. Otherwise grade from the abstract plus metadata. Record `input_source`. Full text is fetched at grading time and not stored.
@@ -319,7 +321,7 @@ Server-rendered with HTMX for in-place updates. Must work well on a phone.
 | Route | Purpose |
 |---|---|
 | `/login` | Enter email → magic link. |
-| `/auth/{token}` | Consumes the magic link and sets a session cookie (30-day, httpOnly, secure). |
+| `/auth#<token>` | The emailed link. The token is in the URL fragment, so it never reaches the server or its logs. GET only renders a page that POSTs the token (mail scanners that prefetch links cannot use it up); the POST consumes it and sets a session cookie (30-day, httpOnly, secure), then goes to `/onboarding` or `/`. |
 | `/onboarding` | Step 1: free-text interests. Step 2: confirm or edit topic chips. Step 3: optional seed PMIDs/DOIs. Step 4: weights and minimums (defaults shown). |
 | `/` (feed) | Top 10 eligible papers by weighted score, read hidden. Each card shows its scores, summary, actions and a "graded from abstract/full text" label. |
 | `/paper/{pmid}` | Full card: all 5 justifications, metadata, actions, dispute control. |
@@ -330,14 +332,18 @@ Server-rendered with HTMX for in-place updates. Must work well on a phone.
 | `/admin` | Admin only: last ingest run stats, spend vs cap, disputes, calibration report, "send test email" button. |
 
 ### 11.1 Onboarding topic extraction
-The free text goes to Sonnet (normal API, not batch) with a tool `propose_topics` → 4–12 topics, each with `label` and a 1–2 sentence `description` written in PubMed vocabulary. The user confirms or edits them; each confirmed topic's description is embedded. Seed PMIDs/DOIs are resolved via `esearch`/`efetch`; DOIs are resolved through esearch `[doi]`.
+The free text goes to Sonnet (normal API, not batch) with JSON-schema output (as for grading: forced tool use is not available on this model) → 4–12 topics, each with `label` and a 1–2 sentence `description` written in PubMed vocabulary. The free text itself is not stored. The user confirms or edits them; each confirmed topic's description is embedded. Seed PMIDs/DOIs/PubMed links are resolved via `esearch`/`efetch`; DOIs are resolved through esearch `[doi]`. Seeds without an abstract are not used (nothing to embed).
+
+Without `ANTHROPIC_API_KEY`, or if the call fails, the surgeon types topics by hand. Embedding is best effort: if Voyage is unavailable, topics and seeds are saved unembedded and `cli.py embed` embeds them and refreshes profile vectors later.
+
+Users are added by the operator (`cli.py users add EMAIL [--admin]`); `cli.py users link EMAIL` prints a sign-in link without sending email.
 
 ---
 
 ## 12. Calibration (before launch)
 
 1. `cli.py calibrate sample --n 20` picks 20 recent candidates stratified by study design.
-2. The surgeon grades them blind on `/admin/calibrate` against the rubric text (model scores hidden). Until admin login exists (milestone 6), access is a signed link from `cli.py calibrate link` (30-day expiry, token in the URL fragment so it never reaches server logs, then an httpOnly cookie). `cli.py calibrate grade` grades the set and snapshots the model's scores into `calibration_items`.
+2. The surgeon grades them blind on `/admin/calibrate` against the rubric text (model scores hidden). Signed-in admins have access; a surgeon without an admin account uses a signed link from `cli.py calibrate link` (30-day expiry, token in the URL fragment so it never reaches server logs, then an httpOnly cookie). `cli.py calibrate grade` grades the set and snapshots the model's scores into `calibration_items`.
 3. `cli.py calibrate report` shows, per criterion: exact agreement, agreement within ±1, quadratic-weighted kappa, and the papers with the biggest disagreements alongside the model's justifications.
 4. Revise the rubric wording, bump `RUBRIC_VERSION`, rerun on the same 20 (`calibrate grade` creates rows for the new version and carries the surgeon's scores forward).
 5. **Launch bar**: within-±1 agreement ≥ 80% on every criterion, and ≥ 90% on proof strength.
@@ -368,7 +374,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`.
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`, `PROFILE_COEF_TOPICS=1.0`, `PROFILE_COEF_SEEDS=1.0`, `PROFILE_COEF_LIKED=0.5`, `PROFILE_COEF_NOT_FOR_ME=0.3` (§8.1).
 
 ---
 
