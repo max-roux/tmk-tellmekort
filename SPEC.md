@@ -49,7 +49,7 @@ Status: design agreed, nothing built. This file is the source of truth; update i
 | Web | FastAPI + Jinja2 templates + HTMX | Server-rendered, no SPA build step. |
 | DB | Postgres 16 + `pgvector` | Embeddings stored in the DB. |
 | ORM / migrations | SQLAlchemy 2.x + Alembic | |
-| LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via tool use. |
+| LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via a JSON schema (`output_config.format`). |
 | Embeddings | Voyage AI `voyage-4` (1024 dims) | Free tier covers the pilot volume. Keep behind an interface so it can be swapped. |
 | Paper source | NCBI E-utilities (PubMed + PMC Open Access) | Register an API key (10 req/s). Send `tool` and `email` params. |
 | Email | Postmark (transactional), subdomain of the ApS domain with SPF + DKIM | Free plan covers the pilot. |
@@ -140,6 +140,8 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **calibration_items**: `id`, `pmid`, `rubric_version`, `surgeon_scores` (jsonb), `model_scores` (jsonb), `created_at`.
 
+**grading_batches**: `id` (Anthropic batch id, PK), `rubric_version`, `model`, `pmids` (text[]), `input_sources` (jsonb: pmid → source), `submitted_at`, `ended_at` (nullable), `status` (`submitted` | `collected` | `failed`). Lets a re-run resume an open batch instead of paying for a new one.
+
 ---
 
 ## 6. Weekly ingest pipeline
@@ -175,12 +177,14 @@ Before submitting, estimate cost from token counts. If `llm_spend` for the month
 ## 7. Grading
 
 ### 7.1 Call shape
-- Model `claude-sonnet-5-5`, temperature 0, via Batch API.
+- Model `claude-sonnet-5-5` via Batch API. No `temperature`: the API rejects sampling parameters since version 2026-10-21.
+- Adaptive thinking at effort `GRADING_EFFORT` (default `low`); calibration (§12) sets the final level. Thinking tokens bill as output.
 - System prompt = the rubric (§7.3); mark it with prompt caching.
 - User content = metadata block (title, journal, publication types, MeSH terms, dates) + `<abstract>` + optional `<full_text>`.
-- Force a single tool call `record_grade` whose JSON schema is §7.2.
+- Structured outputs (`output_config.format`, JSON schema §7.2) guarantee schema-valid JSON. (Sonnet 5.5 rejects forced tool calls, so no `record_grade` tool.)
+- A refusal (`stop_reason: "refusal"`) counts as a failed item. The individual retry (§6.5) runs synchronously with server-side `fallbacks: "default"`, which the Batch API does not accept; the grade records the model that actually answered.
 
-### 7.2 Output schema (`record_grade`)
+### 7.2 Output schema
 
 ```json
 {
@@ -364,7 +368,7 @@ Each regrade of the 90-day window costs ~$10–25 one-off. Re-check list prices 
 
 ## 15. Config (env vars)
 
-`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`.
+`DATABASE_URL`, `SECRET_KEY`, `BASE_URL`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `GRADING_EFFORT=low`, `VOYAGE_API_KEY`, `EMBEDDING_MODEL=voyage-4`, `NCBI_API_KEY`, `NCBI_EMAIL`, `NCBI_TOOL`, `POSTMARK_SERVER_TOKEN`, `EMAIL_FROM`, `ADMIN_EMAIL`, `GRADE_LIMIT_PER_WEEK=100`, `FULLTEXT_MAX_TOKENS=12000`, `LLM_MONTHLY_CAP_USD=30`, `PERTINENCE_GATE=0.30`, `EMAIL_MIN_WEIGHTED=3.5`, `ACTIVE_WINDOW_DAYS=90`.
 
 ---
 
