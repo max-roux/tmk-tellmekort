@@ -9,7 +9,7 @@ from app.accounts.users import add_user
 from app.config import Settings
 from app.db.models import CriterionSettings, EmailSend, User
 from app.email.base import EmailMessage, MailerError
-from app.jobs.send_due_emails import send_due
+from app.jobs.send_due_emails import preview, send_due
 from tests.feed_setup import grade, user
 
 pytestmark = pytest.mark.db
@@ -121,8 +121,6 @@ def test_unexpected_error_releases_the_claim_and_surfaces(db_session: Session, u
 
 
 def test_preview_renders_without_recording(db_session: Session, user: User) -> None:
-    from app.jobs.send_due_emails import preview
-
     grade(db_session, "42963307", 5)
     message = preview(db_session, user, SETTINGS, SUNDAY)
     assert "Fresh this week" in message.text
