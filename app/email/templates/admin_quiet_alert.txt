@@ -1,0 +1,3 @@
+Quiet week: nothing was eligible for {{ user.email }}.
+
+Their profile or the specialty query needs attention.

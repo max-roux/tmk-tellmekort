@@ -48,6 +48,13 @@ class Paper(Base):
     is_open_access: Mapped[bool] = mapped_column(Boolean, server_default="false")
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    @property
+    def url(self) -> str:
+        """The publisher's page via DOI, else PubMed."""
+        if self.doi:
+            return f"https://doi.org/{self.doi}"
+        return f"https://pubmed.ncbi.nlm.nih.gov/{self.pmid}/"
+
 
 class Grade(Base):
     """The 4 intrinsic scores for one paper under one rubric version + model (SPEC.md §5)."""

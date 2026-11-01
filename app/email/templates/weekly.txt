@@ -1,0 +1,21 @@
+{% for p in papers %}== {{ p.label }} ==
+
+{{ p.item.paper.title }}
+{{ p.item.paper.journal }}{% if p.item.paper.pub_date %}, {{ p.item.paper.pub_date.year }}{% endif %}{% if p.item.paper.is_open_access %} · Open access{% endif %}
+
+Scores: {% for key, name in criteria %}{{ name }} {{ p.item.ranked.scores[key] }}{% if not loop.last %} · {% endif %}{% endfor %}
+{% for name, reason in p.reasons %}
+{{ name }}: {{ reason }}{% endfor %}
+
+{{ p.item.grade.summary }}
+
+Why it matters: {{ p.item.grade.why_it_matters }}
+
+Read the paper: {{ p.item.paper.url }}
+Open in app: {{ base }}/paper/{{ p.item.pmid }}
+Like: {{ p.links.like }}
+Mark read: {{ p.links.read }}
+Not for me: {{ p.links.not_for_me }}
+
+{% endfor %}--
+Your feed: {{ base }}/

@@ -134,7 +134,11 @@ def _score(
 
 
 def feed(
-    session: Session, user_id: uuid.UUID, settings: Settings, today: date, limit: int = FEED_SIZE
+    session: Session,
+    user_id: uuid.UUID,
+    settings: Settings,
+    today: date,
+    limit: int | None = FEED_SIZE,
 ) -> list[FeedItem]:
     """Top eligible papers of the active window, best first."""
     since = today - timedelta(days=settings.active_window_days)

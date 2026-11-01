@@ -79,6 +79,11 @@ class CriterionGuide:
     notes: list[str]
 
 
+def criterion_labels() -> list[tuple[str, str]]:
+    """(key, display name) for the five criteria, pertinence first."""
+    return [("pertinence", "Pertinence")] + [(g.key, g.name) for g in criterion_guides()]
+
+
 def criterion_guides() -> list[CriterionGuide]:
     """The rubric scales, parsed from RUBRIC_TEXT, for showing to the surgeon."""
     guides: list[CriterionGuide] = []

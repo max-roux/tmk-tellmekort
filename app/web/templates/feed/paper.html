@@ -9,7 +9,7 @@
   {{ pills(item.ranked.scores) }}
   <p>{{ item.grade.summary }}</p>
   <p><strong>Why it matters:</strong> {{ item.grade.why_it_matters }}</p>
-  <p><a class="button" href="{{ item.paper|paper_url }}" rel="noopener" target="_blank">Read the paper</a></p>
+  <p><a class="button" href="{{ item.paper.url }}" rel="noopener" target="_blank">Read the paper</a></p>
   {{ actions(item.pmid, item.state, "/paper/" ~ item.pmid) }}
 
   <h2 id="scores" style="margin-top:2rem">Scores and reasons</h2>
