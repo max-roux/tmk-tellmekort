@@ -1,39 +1,60 @@
 {% extends "base.html" %}
-{% from "feed/_macros.html" import meta, pills, actions %}
-{% block title %}{{ item.paper.title }} · Maxfac Papers{% endblock %}
+{% from "feed/_macros.html" import meta, actions, score %}
+{% block title %}{{ item.paper.title }} · Tell Me Kort{% endblock %}
 {% block content %}
-<article data-pmid="{{ item.pmid }}">
-  <p class="eyebrow">{{ item.grade.study_design }}{% if item.grade.sample_size %} · n = {{ item.grade.sample_size }}{% endif %}</p>
-  <h1>{{ item.paper.title }}</h1>
-  {{ meta(item.paper, item.grade) }}
-  {{ pills(item.ranked.scores) }}
-  <p>{{ item.grade.summary }}</p>
-  <p><strong>Why it matters:</strong> {{ item.grade.why_it_matters }}</p>
-  <p><a class="button" href="{{ item.paper.url }}" rel="noopener" target="_blank">Read the paper</a></p>
-  {{ actions(item.pmid, item.state, "/paper/" ~ item.pmid) }}
+<article class="feature" data-pmid="{{ item.pmid }}">
+  <header class="feature-head">
+    <p class="label">{{ item.grade.study_design }}{% if item.grade.sample_size %} · n = {{ item.grade.sample_size }}{% endif %}</p>
+    <h1 class="feature-title">{{ item.paper.title }}</h1>
+    {{ meta(item.paper, item.grade) }}
+  </header>
 
-  <h2 id="scores" style="margin-top:2rem">Scores and reasons</h2>
-  {% if noted %}<p class="notice" role="status">Thanks, your view on {{ noted.replace("_", " ") }} is noted. It helps recalibrate the grading.</p>{% endif %}
-  {% for key, name in CRITERIA %}
-  <div class="card">
-    <h3>{{ name }} <span class="muted">{{ item.ranked.scores[key] }}/5</span></h3>
-    <p class="small">{% if key == "pertinence" %}How closely it matches your topics, seed papers and likes (similarity {{ "%.2f"|format(item.ranked.paper.pertinence_cos) }}).{% else %}{{ item.grade.justifications[key] }}{% endif %}</p>
-    <details>
-      <summary class="small">Disagree?</summary>
-      <form method="post" action="/paper/{{ item.pmid }}/dispute" class="stack" style="margin-top:.5rem">
-        <input type="hidden" name="criterion" value="{{ key }}">
-        <label for="score-{{ key }}" class="small">Your score</label>
-        <select id="score-{{ key }}" name="user_score" style="width:auto">
-          <option value="">No score</option>
-          {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
-        </select>
-        <label for="comment-{{ key }}" class="small">Why (optional)</label>
-        <textarea id="comment-{{ key }}" name="comment" maxlength="1000" style="min-height:4rem"></textarea>
-        <div><button class="small-button" type="submit">Send</button></div>
-      </form>
-    </details>
+  <div class="feature-body">
+    <div class="feature-score">
+      <p class="overall"><span class="numeral">{{ score(item.ranked.weighted) }}</span><span class="label">for you</span></p>
+    </div>
+    <div class="feature-text">
+      <p class="feature-standfirst">{{ item.grade.summary }}</p>
+      <blockquote class="pull">
+        <p class="label">Why it matters</p>
+        <p>{{ item.grade.why_it_matters }}</p>
+      </blockquote>
+      <div class="story-foot">
+        <a class="button primary" href="{{ item.paper.url }}" rel="noopener" target="_blank">Read the paper</a>
+      </div>
+      {{ actions(item.pmid, item.state, "/paper/" ~ item.pmid) }}
+    </div>
   </div>
-  {% endfor %}
-  <p class="muted small">PMID {{ item.pmid }}{% if item.paper.doi %} · DOI {{ item.paper.doi }}{% endif %}</p>
+
+  <section class="reasons" aria-labelledby="scores">
+    <h2 class="briefs-head" id="scores">Scores and reasons</h2>
+    {% if noted %}<p class="notice" role="status">Thanks, your view on {{ noted.replace("_", " ") }} is noted. It helps recalibrate the grading.</p>{% endif %}
+    <ol class="reason-list">
+      {% for key, name in CRITERIA %}
+      <li class="reason">
+        <span class="numeral" aria-label="{{ item.ranked.scores[key] }} out of 5">{{ item.ranked.scores[key] }}</span>
+        <div>
+          <h3 class="field-label">{{ name }}</h3>
+          <p>{% if key == "pertinence" %}How closely it matches your topics, seed papers and likes (similarity {{ "%.2f"|format(item.ranked.paper.pertinence_cos) }}).{% else %}{{ item.grade.justifications[key] }}{% endif %}</p>
+          <details class="dispute">
+            <summary>Disagree?</summary>
+            <form method="post" action="/paper/{{ item.pmid }}/dispute" class="stack">
+              <input type="hidden" name="criterion" value="{{ key }}">
+              <label for="score-{{ key }}" class="field-label">Your score</label>
+              <select id="score-{{ key }}" name="user_score">
+                <option value="">No score</option>
+                {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+              </select>
+              <label for="comment-{{ key }}" class="field-label">Why (optional)</label>
+              <textarea id="comment-{{ key }}" name="comment" maxlength="1000" rows="3"></textarea>
+              <div><button class="small-button" type="submit">Send</button></div>
+            </form>
+          </details>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+  <p class="meta feature-ids">PMID {{ item.pmid }}{% if item.paper.doi %}<span class="sep">·</span>DOI {{ item.paper.doi }}{% endif %}</p>
 </article>
 {% endblock %}

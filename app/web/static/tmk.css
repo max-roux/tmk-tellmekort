@@ -209,7 +209,7 @@ p:last-child { margin-bottom: 0; }
 }
 
 .pull { margin: 0; padding: 0.9rem 0 0; border-top: 2px solid var(--accent); }
-.pull p {
+.pull p:not(.label) {
   font-family: var(--font-display);
   font-style: italic;
   font-size: clamp(1.3rem, 3.6vw, 1.6rem);
@@ -324,6 +324,51 @@ p:last-child { margin-bottom: 0; }
   .brief .numeral { grid-row: auto; grid-column: 1; order: -1; font-size: 2rem; padding: 0 0 0.35rem; }
   .brief .meta { grid-column: 1; }
 }
+
+/* ---------- Paper page: a feature article ---------- */
+
+.feature { max-width: 52rem; margin: 0 auto; }
+.feature-head { text-align: center; padding: 0.5rem 0 1.5rem; border-bottom: var(--hair) solid var(--rule); }
+.feature-title { font-size: clamp(1.9rem, 6.5vw, 3rem); line-height: 1.08; margin: 0.35rem auto 0; max-width: 26ch; }
+.feature-body { display: grid; gap: 1.5rem; padding: 1.75rem 0 2rem; }
+.feature-score .overall { border: var(--hair) solid var(--rule-strong); margin: 0; }
+.feature-score .numeral { font-size: 5rem; }
+.feature-standfirst { font-size: 1.25rem; line-height: 1.5; }
+.feature-text .pull { margin: 1.5rem 0 0; }
+.feature-text .row-actions { margin-top: 0.75rem; }
+@media (min-width: 900px) {
+  .feature-body { grid-template-columns: 12rem minmax(0, 1fr); gap: 2.5rem; align-items: start; }
+  .feature-score .overall { flex-direction: column; align-items: center; padding: 1.25rem 1rem 1rem; }
+}
+
+.reason-list { list-style: none; margin: 0; padding: 0; }
+.reason {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 1.1rem 0 1rem;
+  border-bottom: var(--hair) solid var(--rule);
+}
+.reason .numeral { font-size: 2.6rem; text-align: center; }
+.reason .field-label { margin: 0.2rem 0 0.35rem; }
+.reason p { margin: 0; }
+.dispute { margin-top: 0.25rem; }
+.dispute summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  cursor: pointer;
+  font-family: var(--font-label);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.dispute[open] summary { color: var(--ink); }
+.dispute form { padding: 0.5rem 0 0.75rem; max-width: 28rem; }
+.dispute textarea { min-height: 5rem; }
+.feature-ids { text-align: center; margin-top: 1.5rem; }
 
 /* ---------- Front page grid ---------- */
 

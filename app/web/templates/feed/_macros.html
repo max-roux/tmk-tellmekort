@@ -81,8 +81,3 @@
 </li>
 {%- endmacro %}
 
-{% macro pills(scores) -%}
-<ul class="pills" aria-label="Scores out of 5">
-  {% for key, name in CRITERIA %}<li class="pill">{{ name }} <b>{{ scores[key] }}</b></li>{% endfor %}
-</ul>
-{%- endmacro %}
