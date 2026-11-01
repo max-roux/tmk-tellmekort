@@ -13,7 +13,6 @@ from app.jobs.grade_papers import (
     Polling,
     grade_batch,
     grade_sync,
-    ungraded_pmids,
 )
 from app.jobs.weekly_ingest import store_papers
 from app.sources.pubmed import parse_pubmed_xml
@@ -55,12 +54,6 @@ def count(session: Session, model: type) -> int:
 def spend(session: Session) -> Decimal:
     row = session.get(LlmSpend, date(2026, 11, 1))
     return row.usd if row else Decimal(0)
-
-
-def test_ungraded_newest_first(session: Session) -> None:
-    pmids = ungraded_pmids(session, limit=10)
-    assert len(pmids) == 5
-    assert pmids[-1] == "42746924"  # oldest entrez date in the fixture
 
 
 def test_grade_sync_stores_grade_and_spend_and_is_idempotent(session: Session) -> None:

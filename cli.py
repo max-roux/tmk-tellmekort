@@ -2,7 +2,7 @@
 
 import logging
 import random
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated
 
 import anthropic
@@ -14,6 +14,7 @@ from app.config import get_settings
 from app.db.models import Grade
 from app.db.session import get_engine
 from app.domain.criteria import INTRINSIC_CRITERIA
+from app.embeddings.voyage import VoyageEmbedder
 from app.grading.grader import Grader
 from app.grading.rubric import RUBRIC_VERSION
 from app.jobs.calibration import (
@@ -22,7 +23,10 @@ from app.jobs.calibration import (
     create_sample,
     grade_set,
 )
-from app.jobs.grade_papers import grade_batch, grade_sync, ungraded_pmids
+from app.jobs.embed_papers import embed_papers
+from app.jobs.full_text import fetch_full_texts
+from app.jobs.grade_papers import grade_batch, grade_sync
+from app.jobs.narrow_candidates import load_anchor, narrow, selected_ungraded, week_of
 from app.jobs.weekly_ingest import ingest as run_ingest
 from app.sources.pubmed import PubMedClient, load_specialty_query
 from app.web.access import make_link
@@ -43,26 +47,43 @@ def _grader() -> Grader:
     return Grader(client, model=settings.anthropic_model, effort=settings.grading_effort)
 
 
-@cli.command()
-def ingest(
-    days: Annotated[int, typer.Option(help="Entrez-date window, ending on --until.")] = 7,
-    backfill: Annotated[
-        bool, typer.Option(help="Fetch the whole active window (ACTIVE_WINDOW_DAYS).")
-    ] = False,
-    until: Annotated[
-        datetime | None, typer.Option(formats=["%Y-%m-%d"], help="Last day (default today UTC).")
-    ] = None,
-) -> None:
-    """Fetch papers from PubMed with the specialty query and store them."""
+def _pubmed() -> PubMedClient:
+    settings = get_settings()
+    return PubMedClient(
+        api_key=settings.ncbi_api_key, email=settings.ncbi_email, tool=settings.ncbi_tool
+    )
+
+
+def _embedder() -> VoyageEmbedder:
+    settings = get_settings()
+    if not settings.voyage_api_key:
+        typer.echo("VOYAGE_API_KEY is not set (add it to .env).", err=True)
+        raise typer.Exit(1)
+    return VoyageEmbedder(api_key=settings.voyage_api_key, model=settings.embedding_model)
+
+
+def _window(days: int, backfill: bool, until: datetime | None) -> tuple[date, date]:
     settings = get_settings()
     end = until.date() if until else datetime.now(UTC).date()
     span = settings.active_window_days if backfill else days
-    start = end - timedelta(days=span - 1)
+    return end - timedelta(days=span - 1), end
+
+
+DaysOpt = Annotated[int, typer.Option(help="Entrez-date window, ending on --until.")]
+BackfillOpt = Annotated[
+    bool, typer.Option(help="Cover the whole active window (ACTIVE_WINDOW_DAYS).")
+]
+UntilOpt = Annotated[
+    datetime | None, typer.Option(formats=["%Y-%m-%d"], help="Last day (default today UTC).")
+]
+
+
+@cli.command()
+def ingest(days: DaysOpt = 7, backfill: BackfillOpt = False, until: UntilOpt = None) -> None:
+    """Fetch papers from PubMed with the specialty query and store them."""
+    start, end = _window(days, backfill, until)
     typer.echo(f"Ingesting entrez dates {start} .. {end}")
-    client = PubMedClient(
-        api_key=settings.ncbi_api_key, email=settings.ncbi_email, tool=settings.ncbi_tool
-    )
-    with client, Session(get_engine()) as session:
+    with _pubmed() as client, Session(get_engine()) as session:
         stats = run_ingest(session, client, load_specialty_query(), start, end)
     typer.echo(
         f"Found {stats.found}, already stored {stats.already_stored}, "
@@ -71,14 +92,55 @@ def ingest(
 
 
 @cli.command()
+def embed() -> None:
+    """Embed every paper that has no embedding from the current model."""
+    embedder = _embedder()
+    with Session(get_engine()) as session:
+        stats = embed_papers(session, embedder)
+    embedder.close()
+    typer.echo(f"Embedded {stats.embedded} papers ({stats.tokens} tokens).")
+
+
+@cli.command("narrow")
+def narrow_cmd(
+    days: DaysOpt = 7,
+    backfill: BackfillOpt = False,
+    until: UntilOpt = None,
+    limit: Annotated[
+        int | None, typer.Option(help="Papers to select (default GRADE_LIMIT_PER_WEEK).")
+    ] = None,
+) -> None:
+    """Score papers in the window against the specialty anchor and select the top N."""
+    settings = get_settings()
+    start, end = _window(days, backfill, until)
+    embedder = _embedder()
+    week = week_of(datetime.now(UTC).date())
+    with Session(get_engine()) as session:
+        stats = narrow(
+            session,
+            embedder,
+            start=start,
+            end=end,
+            week=week,
+            limit=limit or settings.grade_limit_per_week,
+            anchor_text=load_anchor(),
+        )
+    embedder.close()
+    typer.echo(
+        f"Week of {week}: {stats.candidates} candidates ({start} .. {end}), "
+        f"{stats.selected} selected for grading."
+    )
+    if stats.missing_embeddings:
+        typer.echo(f"{stats.missing_embeddings} papers in the window have no embedding: run embed.")
+
+
+@cli.command()
 def grade(
     pmids: Annotated[list[str] | None, typer.Argument(help="PMIDs to grade synchronously.")] = None,
     batch: Annotated[
-        bool, typer.Option(help="Grade the newest ungraded papers via the Batches API.")
+        bool, typer.Option(help="Grade papers selected by narrow via the Batches API.")
     ] = False,
-    limit: Annotated[
-        int | None, typer.Option(help="Max papers for --batch (default GRADE_LIMIT_PER_WEEK).")
-    ] = None,
+    limit: Annotated[int | None, typer.Option(help="Max papers for --batch.")] = None,
 ) -> None:
     """Grade papers with the current rubric. Already-graded papers are skipped."""
     if not pmids and not batch:
@@ -87,13 +149,17 @@ def grade(
     settings = get_settings()
     grader = _grader()
     today = datetime.now(UTC).date()
-    with Session(get_engine()) as session:
+    with Session(get_engine()) as session, _pubmed() as pubmed:
+        todo = selected_ungraded(session, limit) if batch else (pmids or [])
+        texts = fetch_full_texts(session, pubmed, todo, settings.fulltext_max_tokens)
+        typer.echo(
+            f"Grading {len(todo)} papers with rubric v{RUBRIC_VERSION} "
+            f"({len(texts)} from open-access full text)..."
+        )
         if batch:
-            todo = ungraded_pmids(session, limit or settings.grade_limit_per_week)
-            typer.echo(f"Batch-grading {len(todo)} papers with rubric v{RUBRIC_VERSION}...")
-            stats = grade_batch(session, grader, todo, today)
+            stats = grade_batch(session, grader, todo, today, full_texts=texts)
         else:
-            stats = grade_sync(session, grader, pmids or [], today)
+            stats = grade_sync(session, grader, todo, today, full_texts=texts)
             for g in session.scalars(
                 select(Grade).where(
                     Grade.pmid.in_(pmids or []), Grade.rubric_version == RUBRIC_VERSION

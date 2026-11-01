@@ -47,9 +47,13 @@ GradeResult = GradeOutcome | GradeFailure
 class GradeInput:
     paper: Paper
     full_text: str | None = None
+    # Set when parsing batch results, where the text sent is recorded but not kept.
+    source: InputSource | None = None
 
     @property
     def input_source(self) -> InputSource:
+        if self.source is not None:
+            return self.source
         return "full_text" if self.full_text else "abstract"
 
 

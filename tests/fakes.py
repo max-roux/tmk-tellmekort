@@ -1,13 +1,16 @@
 """In-memory stand-ins for the Anthropic client, returning SDK model objects from fixtures."""
 
+import hashlib
 import json
 from collections.abc import Iterator
 from typing import Any
 
+import numpy as np
 from anthropic.types import Message
 from anthropic.types.beta import BetaMessage
 from anthropic.types.messages import MessageBatch, MessageBatchIndividualResponse
 
+from app.embeddings.base import Embeddings
 from tests.conftest import FIXTURES
 
 ANTHROPIC = FIXTURES / "anthropic"
@@ -103,3 +106,28 @@ class FakeAnthropic:
 
 def as_message(d: dict[str, Any]) -> Message:
     return Message.model_validate(d)
+
+
+class FakeEmbedder:
+    """Deterministic vectors: pinned per text substring, else a hash-seeded random unit vector."""
+
+    def __init__(self, model: str = "voyage-4", pinned: dict[str, list[float]] | None = None):
+        self._model = model
+        self.pinned = pinned or {}
+        self.calls: list[tuple[int, str]] = []
+
+    @property
+    def model(self) -> str:
+        return self._model
+
+    def _vector(self, text: str) -> list[float]:
+        for key, vec in self.pinned.items():
+            if key in text:
+                return vec + [0.0] * (1024 - len(vec))
+        seed = int.from_bytes(hashlib.sha256(text.encode()).digest()[:4], "big")
+        v = np.random.default_rng(seed).normal(size=1024)
+        return list(v / np.linalg.norm(v))
+
+    def embed(self, texts: list[str], input_type: str) -> Embeddings:
+        self.calls.append((len(texts), input_type))
+        return Embeddings(vectors=[self._vector(t) for t in texts], tokens=10 * len(texts))
