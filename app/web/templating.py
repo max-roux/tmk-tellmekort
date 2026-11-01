@@ -16,6 +16,17 @@ def asset_version() -> str:
     return digest.hexdigest()[:10]
 
 
+def display_title(title: str) -> str:
+    """A paper title for display: PubMed brackets titles translated from another language."""
+    inner = title.strip()
+    end = "]." if inner.endswith("].") else "]"
+    if inner.startswith("[") and inner.endswith(end) and inner.count("[") == 1:
+        inner = inner[1 : -len(end)]
+        return inner if inner.endswith((".", "?", "!")) else inner + "."
+    return title
+
+
 TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "templates")
 TEMPLATES.env.globals["CRITERIA"] = criterion_labels()
 TEMPLATES.env.globals["ASSET_VERSION"] = asset_version()
+TEMPLATES.env.filters["headline"] = display_title

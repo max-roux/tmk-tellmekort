@@ -32,7 +32,7 @@
 
 {% macro lead(item) -%}
 <article class="lead" data-pmid="{{ item.pmid }}">
-  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
+  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title | headline }}</a></h2>
   <p class="standfirst">{{ item.grade.summary }}</p>
   {{ meta(item.paper, item.grade) }}
   <div class="lead-body">
@@ -57,7 +57,7 @@
 
 {% macro second(item) -%}
 <article class="second" data-pmid="{{ item.pmid }}">
-  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h2>
+  <h2 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title | headline }}</a></h2>
   <p class="standfirst">{{ item.grade.summary }}</p>
   {{ meta(item.paper, item.grade) }}
   <p class="mini-score"><span class="numeral">{{ score(item.ranked.weighted) }}</span><span class="label">for you</span></p>
@@ -67,7 +67,7 @@
 
 {% macro brief(item) -%}
 <li class="brief" data-pmid="{{ item.pmid }}">
-  <h3 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title }}</a></h3>
+  <h3 class="headline"><a href="/paper/{{ item.pmid }}">{{ item.paper.title | headline }}</a></h3>
   {{ meta(item.paper, item.grade, source=False) }}
   <span class="numeral" aria-label="{{ score(item.ranked.weighted) }} for you">{{ score(item.ranked.weighted) }}</span>
 </li>
@@ -75,7 +75,7 @@
 
 {% macro entry(e, next) -%}
 <li data-pmid="{{ e.pmid }}">
-  <h2 class="headline"><a href="{{ '/paper/' ~ e.pmid if e.grade else e.paper.url }}">{{ e.paper.title }}</a></h2>
+  <h2 class="headline"><a href="{{ '/paper/' ~ e.pmid if e.grade else e.paper.url }}">{{ e.paper.title | headline }}</a></h2>
   {{ meta(e.paper, e.grade) }}
   {{ actions(e.pmid, e.state, next) }}
 </li>

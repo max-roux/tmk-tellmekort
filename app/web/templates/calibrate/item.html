@@ -4,7 +4,7 @@
 <p class="pager meta"><a href="/admin/calibrate">All papers</a><span>Paper {{ position }} of {{ total }}</span></p>
 
 <article class="feature calib-paper">
-  <h1 class="feature-title">{{ paper.title }}</h1>
+  <h1 class="feature-title">{{ paper.title | headline }}</h1>
   <p class="meta">
     {{ paper.journal.split(" : ")[0] }}{% if paper.pub_date %}<span class="sep">·</span>{{ paper.pub_date.year }}{% endif %}<span class="sep">·</span>{{ paper.pub_types | join(", ") }}
   </p>

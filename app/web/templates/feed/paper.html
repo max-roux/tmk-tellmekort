@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% from "feed/_macros.html" import meta, actions, score %}
-{% block title %}{{ item.paper.title }} · Tell Me Kort{% endblock %}
+{% block title %}{{ item.paper.title | headline }} · Tell Me Kort{% endblock %}
 {% block content %}
 <article class="feature" data-pmid="{{ item.pmid }}">
   <header class="feature-head">
     <p class="label">{{ item.grade.study_design }}{% if item.grade.sample_size %} · n = {{ item.grade.sample_size }}{% endif %}</p>
-    <h1 class="feature-title">{{ item.paper.title }}</h1>
+    <h1 class="feature-title">{{ item.paper.title | headline }}</h1>
     {{ meta(item.paper, item.grade) }}
   </header>
 

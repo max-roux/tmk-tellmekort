@@ -17,7 +17,7 @@ The model's scores are hidden until you are done; afterwards we compare them.</p
   {% for item, paper in rows %}
   <li>
     <span class="numeral n">{{ loop.index }}</span>
-    <a href="/admin/calibrate/{{ item.id }}">{{ paper.title }}</a>
+    <a href="/admin/calibrate/{{ item.id }}">{{ paper.title | headline }}</a>
     {% if item.surgeon_scores %}<span class="meta status done">Graded</span>{% else %}<span class="meta status">To do</span>{% endif %}
   </li>
   {% endfor %}

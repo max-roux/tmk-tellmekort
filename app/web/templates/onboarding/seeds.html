@@ -28,7 +28,7 @@
 <ul class="seed-list">
   {% for p in seeds %}
   <li>
-    <span><a href="https://pubmed.ncbi.nlm.nih.gov/{{ p.pmid }}/" rel="noopener" target="_blank">{{ p.title }}</a><br><span class="meta">{{ p.journal.split(" : ")[0] }}<span class="sep">·</span>{{ p.entrez_date.year }}</span></span>
+    <span><a href="https://pubmed.ncbi.nlm.nih.gov/{{ p.pmid }}/" rel="noopener" target="_blank">{{ p.title | headline }}</a><br><span class="meta">{{ p.journal.split(" : ")[0] }}<span class="sep">·</span>{{ p.entrez_date.year }}</span></span>
     <form method="post" action="/onboarding/seeds/remove"><input type="hidden" name="pmid" value="{{ p.pmid }}"><button class="linklike small" type="submit" aria-label="Remove {{ p.title }}">Remove</button></form>
   </li>
   {% endfor %}
