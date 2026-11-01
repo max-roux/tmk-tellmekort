@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-01T10:55:54Z",
+  "generatedAt": "2026-11-01T12:22:51Z",
   "title": "Design System: Tell Me Kort",
   "extensions": {
     "colorMeta": {
@@ -87,6 +87,23 @@
         "note": "Alpha over the paper; ramp is of the base ink.",
         "mode": "light (CSS --rule)"
       },
+      "rule-mid": {
+        "role": "neutral",
+        "displayName": "Cell Rule",
+        "canonical": "rgb(21 21 21 / 0.45)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "light (CSS --rule-mid)"
+      },
       "rule-strong": {
         "role": "neutral",
         "displayName": "Strong Rule",
@@ -168,7 +185,7 @@
           "#cac9c8",
           "#efeeed"
         ],
-        "mode": "dark, prefers-color-scheme (CSS --paper)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --paper)"
       },
       "evening-paper-deep": {
         "role": "neutral",
@@ -184,7 +201,7 @@
           "#cac9c7",
           "#efeeed"
         ],
-        "mode": "dark, prefers-color-scheme (CSS --paper-deep)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --paper-deep)"
       },
       "evening-ink": {
         "role": "neutral",
@@ -201,7 +218,7 @@
           "#f6eedc"
         ],
         "contrast": "13.7:1 on evening paper",
-        "mode": "dark, prefers-color-scheme (CSS --ink)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --ink)"
       },
       "evening-ink-soft": {
         "role": "neutral",
@@ -218,7 +235,7 @@
           "#f5eee0"
         ],
         "contrast": "7.5:1 on evening paper",
-        "mode": "dark, prefers-color-scheme (CSS --ink-soft)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --ink-soft)"
       },
       "evening-rule": {
         "role": "neutral",
@@ -235,7 +252,24 @@
           "#f6eedc"
         ],
         "note": "Alpha over the paper; ramp is of the base ink.",
-        "mode": "dark, prefers-color-scheme (CSS --rule)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --rule)"
+      },
+      "evening-rule-mid": {
+        "role": "neutral",
+        "displayName": "Evening Cell Rule",
+        "canonical": "rgb(237 229 211 / 0.4)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#44423d",
+          "#646159",
+          "#868278",
+          "#aaa598",
+          "#cfc9b9",
+          "#f6eedc"
+        ],
+        "note": "Alpha over the paper; ramp is of the base ink.",
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --rule-mid)"
       },
       "evening-rule-strong": {
         "role": "neutral",
@@ -252,7 +286,7 @@
           "#f6eedc"
         ],
         "note": "Alpha over the paper; ramp is of the base ink.",
-        "mode": "dark, prefers-color-scheme (CSS --rule-strong)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --rule-strong)"
       },
       "evening-accent": {
         "role": "primary",
@@ -269,7 +303,7 @@
           "#ffd3bb"
         ],
         "contrast": "5.0:1 on evening paper",
-        "mode": "dark, prefers-color-scheme (CSS --accent)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --accent)"
       },
       "evening-accent-text": {
         "role": "primary",
@@ -286,7 +320,7 @@
           "#ffd4bc"
         ],
         "contrast": "6.0:1 on evening paper",
-        "mode": "dark, prefers-color-scheme (CSS --accent-text)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --accent-text)"
       },
       "evening-on-ink": {
         "role": "neutral",
@@ -302,33 +336,37 @@
           "#cac9c8",
           "#efeeed"
         ],
-        "mode": "dark, prefers-color-scheme (CSS --on-ink)"
+        "mode": "evening: data-theme=dark, or prefers-color-scheme dark without data-theme=light (CSS --on-ink)"
       }
     },
     "typographyMeta": {
-      "nameplate": {
-        "displayName": "Nameplate",
-        "purpose": "Front-page 'Tell Me Kort', full width of the frame; all ink, weight 400 with T, M, K at 900."
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Small 'Tell Me Kort' at the top of every page; all ink, weight 400 with T, M, K at 900."
       },
-      "section-title": {
-        "displayName": "Section Title",
-        "purpose": "Inner section fronts: Library, History, Calibration, Admin, Not found."
+      "section-word": {
+        "displayName": "Section Word",
+        "purpose": "The page's name in Libre Franklin 900 capitals (THIS WEEK, LIBRARY, HISTORY, PROFILE, SETTINGS, CALIBRATION, ADMIN, PRIVACY, WELCOME, NOT FOUND); the loudest type on the page."
       },
       "headline-lead": {
         "displayName": "Lead Headline",
-        "purpose": "Lead story and paper-page feature title."
+        "purpose": "Front-page lead; the paper page's feature title uses clamp(1.9rem, 6.5vw, 3rem)."
       },
       "headline-second": {
         "displayName": "Second Headline",
-        "purpose": "Second stories (#2-3)."
+        "purpose": "Second stories (#2-3), centred."
       },
       "headline-index": {
         "displayName": "Index Headline",
         "purpose": "Library, history and listing rows."
       },
+      "headline-story": {
+        "displayName": "Story Headline",
+        "purpose": "Short stories (#4-7), left-set."
+      },
       "headline-brief": {
         "displayName": "Brief Headline",
-        "purpose": "Briefs (#4-10)."
+        "purpose": "Briefs (#8-10), centred."
       },
       "pull": {
         "displayName": "Pull Line",
@@ -336,19 +374,23 @@
       },
       "numeral": {
         "displayName": "Numeral",
-        "purpose": "Scores and counts; 5rem on the paper page down to 1.5rem in form steps."
+        "purpose": "Scores and counts; 5rem on the paper page, 4.5rem on the lead plate and big-numeral cell, down to 1.5rem in form steps."
       },
       "standfirst": {
         "displayName": "Standfirst",
-        "purpose": "The grade's summary under a headline, soft ink."
+        "purpose": "The grade's summary on the paper page, soft ink."
       },
       "body": {
         "displayName": "Body",
         "purpose": "Reading text, Source Serif 4 with optical sizes."
       },
+      "dek": {
+        "displayName": "Dek",
+        "purpose": "The grade's summary in a front-page cell, Libre Franklin 400, soft ink, clamped to four lines."
+      },
       "label": {
         "displayName": "Label",
-        "purpose": "Libre Franklin tracked capitals: metadata, scorecard criteria, field labels, edition line, section links."
+        "purpose": "Libre Franklin tracked capitals: metadata, plate criteria, field labels, edition line, section links."
       },
       "button": {
         "displayName": "Button",
@@ -378,17 +420,12 @@
       {
         "name": "steps",
         "value": "640px",
-        "purpose": "Onboarding step strip goes from two cells to four."
+        "purpose": "Onboarding step strip goes from two cells to four; the score plate puts the overall score beside its bars."
       },
       {
         "name": "grid",
         "value": "900px",
-        "purpose": "The column grid: front-page rail, two second stories, three brief cells, paper-page score column, frame margins."
-      },
-      {
-        "name": "wide",
-        "value": "1200px",
-        "purpose": "Briefs go to four cells."
+        "purpose": "The four-column front-page grid of ruled cells, paper-page score column, frame margins."
       }
     ],
     "fonts": [
@@ -400,7 +437,7 @@
         ],
         "axes": "wght 400-900",
         "license": "OFL",
-        "role": "nameplate (400 with 900 initials), section titles (900), headlines and numerals (400), pull lines (400 italic)"
+        "role": "wordmark (400 with 900 initials), headlines and numerals (400), pull lines (400 italic)"
       },
       {
         "family": "Source Serif 4",
@@ -410,7 +447,7 @@
         ],
         "axes": "wght 200-900, optical sizing auto",
         "license": "OFL",
-        "role": "body and standfirsts"
+        "role": "body and paper-page standfirst"
       },
       {
         "family": "Libre Franklin",
@@ -419,7 +456,7 @@
         ],
         "axes": "wght 100-900",
         "license": "OFL",
-        "role": "tracked capitals for labels, metadata, navigation, buttons (Franklin Gothic revival; chosen by the user over Libre Franklin)"
+        "role": "tracked capitals for labels, metadata, navigation, buttons; 900 capitals for the section word; 400 for front-page deks (Franklin Gothic revival; chosen by the user after a side-by-side comparison)"
       }
     ]
   },
@@ -457,12 +494,28 @@
       "css": ".ds-field { display: block; max-width: 24rem; } .ds-field-label { display: block; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; margin: 0 0 0.35rem; color: var(--ink, #151515); } .ds-input { width: 100%; min-height: 2.75rem; font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 1.0625rem; color: var(--ink, #151515); background: transparent; border: 0; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-radius: 0; padding: 0.6rem 0.1rem; } .ds-input::placeholder { color: var(--ink-soft, #55504a); } .ds-input:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; }"
     },
     {
+      "name": "Masthead",
+      "kind": "nav",
+      "refersTo": "section-word",
+      "description": "Small wordmark on a strong rule, then the big section word in Libre Franklin 900 capitals; the front page adds the edition rule.",
+      "html": "<header class=\"ds-masthead\"><div class=\"ds-wm-row\"><a class=\"ds-wordmark\" href=\"#\"><b>T</b>ell <b>M</b>e <b>K</b>ort</a></div><h1 class=\"ds-word\">This week</h1><p class=\"ds-edition\"><span>No. 44</span><span class=\"ds-dot\">·</span><span>Week of 26 October</span><span class=\"ds-dot\">·</span><span>10 papers in this edition</span></p></header>",
+      "css": ".ds-masthead { text-align: center; container-type: inline-size; color: var(--ink, #151515); } .ds-wm-row { border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0.5rem 0 0.4rem; } .ds-wordmark { display: inline-block; padding: 0.65rem 0.5rem; font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: 1.5rem; line-height: 1; letter-spacing: -0.01em; color: inherit; text-decoration: none; } .ds-wordmark b { font-weight: 900; } .ds-wordmark:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-word { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); font-weight: 900; font-size: min(7.5rem, 11.5cqi); line-height: 0.9; letter-spacing: -0.01em; text-transform: uppercase; margin: 0; padding: 0.45em 0 0.3em; } .ds-edition { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.14em; border-top: 3px double var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0.55rem 0; margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.15rem 0.6rem; } .ds-dot { color: var(--accent, #d9472b); }"
+    },
+    {
       "name": "Section Strip",
       "kind": "nav",
       "refersTo": "section-link",
       "description": "Centred tracked-capital sections between rules; the current page in bold ink with a vermilion underline.",
       "html": "<nav class=\"ds-sections\"><a href=\"#\" aria-current=\"page\">Front page</a><a href=\"#\">Library</a><a href=\"#\">History</a><a href=\"#\">Profile</a></nav>",
       "css": ".ds-sections { display: flex; flex-wrap: wrap; justify-content: center; border-top: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-sections a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 0.5rem; font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.1em; color: var(--ink-soft, #55504a); text-decoration: none; } .ds-sections a:hover { color: var(--ink, #151515); } .ds-sections a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-sections a[aria-current] { color: var(--ink, #151515); font-weight: 700; text-decoration: underline 2px var(--accent, #d9472b); text-underline-offset: 0.55em; }"
+    },
+    {
+      "name": "Edition Switch",
+      "kind": "nav",
+      "refersTo": "edition-switch",
+      "description": "Footer form: Auto, Morning, Evening; posts to /theme, the current edition bold ink with a vermilion underline.",
+      "html": "<form class=\"ds-editions\"><span>Edition</span><button type=\"button\" aria-pressed=\"true\">Auto</button><button type=\"button\" aria-pressed=\"false\">Morning</button><button type=\"button\" aria-pressed=\"false\">Evening</button></form>",
+      "css": ".ds-editions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 0.25rem; font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--ink-soft, #55504a); } .ds-editions span { margin-right: 0.35rem; } .ds-editions button { min-height: 2.75rem; padding: 0 0.6rem; background: none; border: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink-soft, #55504a); cursor: pointer; } .ds-editions button:hover { color: var(--ink, #151515); } .ds-editions button:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-editions button[aria-pressed=\"true\"] { color: var(--ink, #151515); font-weight: 700; text-decoration: underline 2px var(--accent, #d9472b); text-underline-offset: 0.55em; }"
     },
     {
       "name": "Open Access Stamp",
@@ -473,20 +526,20 @@
       "css": ".ds-meta { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; line-height: 1.6; color: var(--ink-soft, #55504a); margin: 0; } .ds-sep { color: var(--rule-strong, rgb(21 21 21 / 0.85)); padding: 0 0.25rem; } .ds-stamp { display: inline-block; border: 1px solid var(--accent, #d9472b); color: var(--accent-text, #b23a1f); padding: 0.05rem 0.4rem; font-weight: 600; letter-spacing: 0.14em; white-space: nowrap; }"
     },
     {
-      "name": "Sidebar Box",
+      "name": "Boxes",
       "kind": "card",
-      "refersTo": "sidebar-box",
-      "description": "Right-rail box in a vermilion hairline frame with a tracked-capital heading.",
-      "html": "<section class=\"ds-box\"><h2>Your beat</h2><ul><li>Topic one</li><li>Topic two</li><li>Topic three</li></ul></section>",
-      "css": ".ds-box { border: 1px solid var(--accent, #d9472b); padding: 0.9rem 1rem 1rem; text-align: center; max-width: 16.5rem; background: var(--paper, #efe9dd); color: var(--ink, #151515); } .ds-box h2 { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--accent-text, #b23a1f); margin: 0 0 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--accent, #d9472b); } .ds-box ul { list-style: none; margin: 0; padding: 0; } .ds-box li { font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; } .ds-box li + li { border-top: 1px solid var(--rule, rgb(21 21 21 / 0.22)); }"
+      "refersTo": "box-red",
+      "description": "The front page's fourth column: 'Your beat' in a red-text box and 'This edition' in an inverted ink box.",
+      "html": "<div class=\"ds-boxes\"><section class=\"ds-box ds-box-red\"><h2>Your beat</h2><ul><li>Orthognathic surgery</li><li>Mandibular reconstruction</li></ul><a href=\"#\">Edit topics</a></section><section class=\"ds-box ds-box-ink\"><h2>This edition</h2><div class=\"ds-figs\"><div><span class=\"ds-n\">412</span><span class=\"ds-l\">found</span></div><div><span class=\"ds-n\">88</span><span class=\"ds-l\">screened</span></div><div><span class=\"ds-n\">31</span><span class=\"ds-l\">graded</span></div></div></section></div>",
+      "css": ".ds-boxes { display: grid; gap: 1rem; max-width: 16rem; } .ds-box { border: 1px solid var(--accent, #d9472b); padding: 0.9rem 1rem 1rem; text-align: center; background: var(--paper, #efe9dd); } .ds-box h2 { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.14em; color: var(--accent-text, #b23a1f); margin: 0 0 0.6rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--accent, #d9472b); } .ds-box ul { list-style: none; margin: 0; padding: 0; } .ds-box li { font-family: var(--font-body, 'Source Serif 4', Georgia, serif); font-size: 0.9375rem; line-height: 1.35; padding: 0.4rem 0; } .ds-box-red, .ds-box-red li, .ds-box-red a { color: var(--accent-text, #b23a1f); } .ds-box-red li + li { border-top: 1px solid var(--accent, #d9472b); } .ds-box-red a { display: inline-flex; align-items: center; min-height: 2.75rem; font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.12em; } .ds-box-red a:hover { text-decoration: underline; } .ds-box-red a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-box-ink { background: var(--ink, #151515); border-color: var(--ink, #151515); color: var(--paper, #efe9dd); } .ds-box-ink h2 { color: var(--paper, #efe9dd); border-bottom-color: var(--paper, #efe9dd); } .ds-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; } .ds-figs div { display: flex; flex-direction: column; align-items: center; } .ds-n { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 2.1rem; line-height: 0.9; font-variant-numeric: lining-nums tabular-nums; } .ds-l { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.1em; margin-top: 0.4rem; }"
     },
     {
-      "name": "Scorebox",
+      "name": "Score Plate",
       "kind": "custom",
-      "refersTo": "scorebox",
-      "description": "Lead-story score: big Playfair numeral with 'for you' over a hairline scorecard of the five criteria.",
-      "html": "<div class=\"ds-scorebox\"><p class=\"ds-overall\"><span class=\"ds-numeral\">4.2</span><span class=\"ds-lbl\">for you</span></p><dl class=\"ds-card\"><div><dt>Criterion one</dt><dd>4</dd></div><div><dt>Criterion two</dt><dd>3</dd></div><div><dt>Criterion three</dt><dd>5</dd></div></dl></div>",
-      "css": ".ds-scorebox { border: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); max-width: 17rem; color: var(--ink, #151515); } .ds-overall { display: flex; align-items: baseline; justify-content: center; gap: 0.6rem; margin: 0; padding: 0.9rem 1rem 0.8rem; border-bottom: 1px solid var(--rule-strong, rgb(21 21 21 / 0.85)); } .ds-numeral { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: 4.25rem; line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; } .ds-lbl, .ds-card dt { font-family: var(--font-label, Libre Franklin, system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; color: var(--ink-soft, #55504a); } .ds-card { margin: 0; padding: 0.15rem 1rem 0.35rem; } .ds-card div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.4rem 0; border-bottom: 1px solid var(--rule, rgb(21 21 21 / 0.22)); } .ds-card div:last-child { border-bottom: 0; } .ds-card dt { color: var(--ink, #151515); } .ds-card dd { margin: 0; font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 1.25rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }"
+      "refersTo": "score-plate",
+      "description": "The lead's picture: the weighted score beside five criterion bars on a flat deep-newsprint panel, inside a ruled cell.",
+      "html": "<article class=\"ds-cell\"><figure class=\"ds-plate\"><p class=\"ds-overall\"><span class=\"ds-num\">4.2</span><span class=\"ds-for\">for you</span></p><dl class=\"ds-bars\"><div style=\"--s: 5\"><dt>Pertinence</dt><dd><span class=\"ds-bar\"></span><span class=\"ds-v\">5</span></dd></div><div style=\"--s: 4\"><dt>Proof strength</dt><dd><span class=\"ds-bar\"></span><span class=\"ds-v\">4</span></dd></div><div style=\"--s: 3\"><dt>Novelty</dt><dd><span class=\"ds-bar\"></span><span class=\"ds-v\">3</span></dd></div><div style=\"--s: 4\"><dt>Depth</dt><dd><span class=\"ds-bar\"></span><span class=\"ds-v\">4</span></dd></div><div style=\"--s: 5\"><dt>Practical usefulness</dt><dd><span class=\"ds-bar\"></span><span class=\"ds-v\">5</span></dd></div></dl></figure><h2 class=\"ds-hl\"><a href=\"#\">Headline of the lead paper</a></h2><p class=\"ds-dek\">The grade's summary, set as a short sans dek.</p></article>",
+      "css": ".ds-cell { padding: 0.25rem 1.1rem 1.4rem 0; border-right: 1px solid var(--rule-mid, rgb(21 21 21 / 0.45)); border-bottom: 1px solid var(--rule-mid, rgb(21 21 21 / 0.45)); max-width: 40rem; color: var(--ink, #151515); } .ds-plate { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1rem 1.75rem; align-items: center; background: var(--paper-deep, #e6dfd1); padding: 1.1rem 1.25rem 1.25rem; margin: 0 0 1.25rem; } .ds-overall { display: flex; align-items: baseline; gap: 0.6rem; margin: 0; } .ds-num { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 4.5rem; line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; } .ds-for, .ds-bars dt { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); text-transform: uppercase; font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.12em; } .ds-for { color: var(--ink-soft, #55504a); } .ds-bars { margin: 0; display: grid; gap: 0.45rem; } .ds-bars div { display: grid; grid-template-columns: 11.5rem minmax(0, 1fr) 1.25rem; gap: 0.75rem; align-items: center; } .ds-bars dt { white-space: nowrap; } .ds-bars dd { display: contents; } .ds-bar { position: relative; height: 0.6rem; border-bottom: 1px solid var(--rule-mid, rgb(21 21 21 / 0.45)); } .ds-bar::before { content: ''; position: absolute; inset: 0 auto 0 0; width: calc(var(--s) * 20%); background: var(--ink, #151515); } .ds-v { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-size: 1.125rem; line-height: 1; text-align: right; font-variant-numeric: lining-nums tabular-nums; } .ds-hl { font-family: var(--font-display, 'Playfair Display', Georgia, serif); font-weight: 400; font-size: clamp(1.9rem, 4.2vw, 3rem); line-height: 1.08; text-align: center; margin: 0; } .ds-hl a { color: inherit; text-decoration: none; } .ds-hl a:hover { text-decoration: underline; text-decoration-thickness: 1px; } .ds-hl a:focus-visible { outline: 2px solid var(--accent, #d9472b); outline-offset: 2px; } .ds-dek { font-family: var(--font-label, 'Libre Franklin', system-ui, sans-serif); font-size: 0.875rem; line-height: 1.5; color: var(--ink-soft, #55504a); text-align: center; margin: 0.6rem 0 0; }"
     },
     {
       "name": "Pull Line",
@@ -499,18 +552,19 @@
   ],
   "narrative": {
     "northStar": "The Typeset Weekly",
-    "overview": "Tell Me Kort is a weekly newspaper with one reader. The ranked feed is this week's front page: a full-width nameplate, an edition rule (number, week, paper count), a section strip, a lead story, two second stories, a ruled field of briefs, and a right rail of framed sidebar boxes. Every surface sits inside one thin ruled page frame on warm newsprint, and structure is drawn with rules, not with fills, cards or shadows. The structure follows Tablet magazine's section fronts; the restraint follows a calm editorial page: generous whitespace, one accent, a comfortable reading size.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation. Labels, metadata, navigation and buttons share one voice, Libre Franklin in small tracked capitals, which keeps the apparatus of the page distinct from the reading text. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the system setting).\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows. It is server-rendered with plain forms; the look is made entirely from type, rules and two surface tones.",
+    "overview": "Tell Me Kort is a weekly newspaper with one reader, set after Tablet magazine's section fronts. Every page opens the same way: a small \"Tell Me Kort\" wordmark on a ruled line, then, where the page has one, a huge section word in heavy grotesque capitals (THIS WEEK, LIBRARY, HISTORY, PROFILE, SETTINGS, CALIBRATION, ADMIN, PRIVACY, WELCOME, NOT FOUND). The front page follows its word with the edition rule (number, week, paper count) and then a dense grid of ruled cells: the lead with its score plate, a red-text box and an inverted ink box beside it, two second stories, four short stories, three briefs and a big-numeral cell. Every surface sits inside one thin ruled page frame on warm newsprint; structure is drawn with rules, and the only resting fills are the score plates and the ink box.\n\nThe page is quiet so the papers can speak. Scores are set as big Playfair numerals beside their reasons, because a number without its reason is not a recommendation; on the front page the five criteria stand beside the score as ink bars, where Tablet would run a photograph. Labels, metadata, navigation and buttons share one voice, Libre Franklin in small tracked capitals; the same family, at Black weight, announces the section word. There are two editions of the same paper: the light morning edition and the dark evening edition, chosen by the reader in every page's footer (Auto follows the device).\n\nThe system refuses the card-list feed: no rounded cards, no score pills, no rounded buttons, no drop shadows, and no vertical side rail. It is server-rendered with plain forms; the look is made from type, rules, two surface tones and one inverted box.",
     "keyCharacteristics": [
-      "One ruled page frame around everything; hairline rules divide stories, rows and columns.",
-      "Three self-hosted OFL families with fixed roles: Playfair Display (nameplate, headlines, numerals), Source Serif 4 (reading text), Libre Franklin (tracked-capital apparatus).",
-      "Square corners everywhere, including checkboxes and range thumbs.",
-      "One vermilion accent, for rules, frames and large type; a darker vermilion for small text.",
-      "Phone first: one column, the multi-column grid from 900px, every target at least 44px."
+      "Small wordmark, big section word: the name is quiet and identical on every page; the section word is the loudest type.",
+      "One ruled page frame around everything; front-page cells are closed by rules on their right and bottom, never by a side rail.",
+      "Three self-hosted OFL families with fixed roles: Playfair Display (wordmark, headlines, numerals), Source Serif 4 (reading text), Libre Franklin (tracked-capital apparatus, the section word and front-page deks).",
+      "Square corners everywhere, including checkboxes, range thumbs, plates and boxes.",
+      "One vermilion accent, for rules, frames, large type and the red-text box; a darker vermilion for small text.",
+      "Phone first: one column, the four-column grid from 900px, every target at least 44px."
     ],
     "rules": [
       {
         "name": "The One Vermilion Rule",
-        "body": "Vermilion is the only hue. It draws rules, frames and large numerals and marks state; it never fills a surface or a button.",
+        "body": "Vermilion is the only hue. It draws rules, frames and large numerals, sets the words of the red-text box and marks state; it never fills a surface or a button.",
         "section": "colors"
       },
       {
@@ -520,44 +574,55 @@
       },
       {
         "name": "The Two Editions Rule",
-        "body": "Every colour is a custom property on `:root` with a morning and an evening value; components never hard-code a colour, so both editions come from the same rules.",
+        "body": "Every colour is a custom property on `:root` with a morning and an evening value; components never hard-code a colour, so both editions come from the same rules. The evening values live in two blocks (the reader's choice and the device's preference) that must stay identical.",
         "section": "colors"
       },
       {
+        "name": "The Small Name, Big Word Rule",
+        "body": "The wordmark is small and the same on every page; the section word is the loudest type on the page. Never grow the wordmark into a nameplate, and never set a section word in Playfair.",
+        "section": "typography"
+      },
+      {
         "name": "The One Family Per Job Rule",
-        "body": "Playfair speaks (nameplate, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, summaries), Libre Franklin labels (metadata, navigation, buttons, field labels). Never swap a role.",
+        "body": "Playfair speaks (wordmark, headlines, numerals, pull lines), Source Serif reads (body, standfirsts, forms), Libre Franklin labels and announces (metadata, navigation, buttons, field labels, the section word, front-page deks). Never swap a role.",
         "section": "typography"
       },
       {
         "name": "The Numeral Rule",
-        "body": "Every score is a Playfair numeral with lining tabular figures, set beside the reason or label that explains it. Never a pill, a badge or a coloured chip.",
+        "body": "Every score is a Playfair numeral with lining tabular figures, set beside the reason, label or bar that explains it. Never a pill, a badge or a coloured chip.",
         "section": "typography"
       },
       {
         "name": "The Data Label Rule",
-        "body": "A tracked-capital label above or beside content names a field of the data (\"Why it matters\", \"for you\", \"Scores and reasons\") or carries the data itself. The paper page's line above the feature title, the grade's study design and sample size (\"<study design> · n = <sample size>\"), is intentional and pinned by the brief and SPEC.md §11.2. Never invent a kicker or eyebrow line that carries no data.",
+        "body": "A tracked-capital label above or beside content names a field of the data (\"Why it matters\", \"for you\", \"Your beat\", \"This edition\", \"Scores and reasons\") or carries the data itself. The paper page's line above the feature title, the grade's study design and sample size (\"<study design> · n = <sample size>\"), is intentional: pinned by the brief and SPEC.md §11.2, and kept by the user on 2026-11-01 after the finish review questioned it. Never invent a kicker or eyebrow line that carries no data.",
         "section": "typography"
       },
       {
+        "name": "The Ruled Cell Rule",
+        "body": "On the front page, each cell is closed by a 1px `rule-mid` on its right and bottom, like Tablet's section fronts. No vertical side rail, no main-column-plus-rail split, no rule on a cell's left.",
+        "section": "layout"
+      },
+      {
         "name": "The 900 Rule",
-        "body": "One column below 900px, the column grid from 900px. Same content order at every width; nothing is hidden on a phone.",
+        "body": "One column below 900px, the four-column grid from 900px. Nothing is hidden on a phone.",
         "section": "layout"
       },
       {
         "name": "The 44 Rule",
-        "body": "Every link, button, toggle, summary, select and checkbox row is at least 44px tall (`tap`), including the section strip, the skip link and the compact mark. No horizontal scroll at 375px.",
+        "body": "Every link, button, toggle, summary, select and checkbox row is at least 44px tall (`tap`), including the wordmark, the section strip, the edition switch, box links and the skip link. No horizontal scroll at 375px.",
         "section": "layout"
       },
       {
         "name": "The Ruled, Not Raised Rule",
-        "body": "Separate things with a rule, never with a shadow, a fill or a floating card.",
+        "body": "Separate things with a rule, never with a shadow or a floating card. The score plate (standing where Tablet runs a photograph) and the inverted ink box are the only resting fills, and both lie flat on the page.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do draw every division with a rule: 1px `rule` between items, 1px `rule-strong` for frames and controls, 2px `accent` above a pull line.",
-      "Do keep every corner square (0px), including form controls.",
-      "Do set every score as a Playfair 400 numeral with lining tabular figures, next to the label or reason that explains it.",
+      "Do open every page with the small wordmark, and give each section its own section word in Libre Franklin 900 capitals.",
+      "Do draw every division with a rule: 1px `rule` between items, 1px `rule-mid` on the right and bottom of front-page cells, 1px `rule-strong` for frames and controls, 2px `accent` above a pull line.",
+      "Do keep every corner square (0px), including form controls, plates and boxes.",
+      "Do set every score as a Playfair 400 numeral with lining tabular figures, next to the label, reason or bar that explains it.",
       "Do use `accent-text` for any small vermilion text and keep `accent` for rules, frames and large type.",
       "Do define colours only as `:root` custom properties with morning and evening values, and keep AA contrast in both editions.",
       "Do keep labels, metadata, navigation and buttons in Libre Franklin capitals at 0.6875rem to 0.75rem, tracked 0.10em to 0.14em.",
@@ -565,13 +630,14 @@
       "Do self-host every font and asset; the page makes no external requests."
     ],
     "donts": [
-      "Don't add JavaScript; plain forms that POST and redirect carry every action.",
-      "Don't round a corner, fill a resting card, or add an elevation shadow.",
+      "Don't add JavaScript; plain forms that POST and redirect carry every action, including the edition switch.",
+      "Don't round a corner or add an elevation shadow, and don't fill a resting surface other than the score plate and the inverted ink box.",
+      "Don't add a vertical side rail or split the front page into a main column and a rail; it is a grid of ruled cells.",
       "Don't put a score in a pill, badge or coloured chip.",
       "Don't introduce a second accent hue or fill a button or surface with vermilion.",
       "Don't set small text in `accent` (#d9472b is 3.5:1 on paper).",
       "Don't add a kicker or eyebrow line that carries no data; a label above a headline must state a field of the paper, as the study design and sample size line does on the paper page.",
-      "Don't swap the type roles: no Libre Franklin headlines, no Playfair labels, no serif buttons."
+      "Don't swap the type roles: no Libre Franklin story headlines (the section word is the one Libre Franklin display line), no Playfair labels, no serif buttons."
     ]
   }
 }
