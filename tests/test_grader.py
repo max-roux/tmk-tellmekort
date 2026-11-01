@@ -123,3 +123,13 @@ def test_batch_submit_and_results_by_custom_id() -> None:
     assert "invalid grade" in results["42963182"].reason  # type: ignore[union-attr]
     assert results["42949936"].reason == "errored: overloaded_error"  # type: ignore[union-attr]
     assert results["42963307"].reason == "expired"  # type: ignore[union-attr]
+
+
+def test_parses_recorded_live_response() -> None:
+    """A real claude-sonnet-5-5 response (2026-11-01), structured output + low effort."""
+    recorded = message("message_grade_recorded.json")
+    r = parse_message(as_message(recorded), GradeInput(paper("42963182")), batch=False)
+    assert isinstance(r, GradeOutcome), r
+    assert r.model == "claude-sonnet-5-5"
+    assert all(1 <= s <= 5 for s in r.data.scores.values())
+    assert r.usage.cache_read > 0  # rubric system prompt served from cache

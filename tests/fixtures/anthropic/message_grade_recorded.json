@@ -1,0 +1,47 @@
+{
+  "id": "msg_recorded",
+  "container": null,
+  "content": [
+    {
+      "text": "{\"study_design\":\"retrospective single-centre case series\",\"sample_size\":22,\"proof_strength\":{\"score\":1,\"justification\":\"Small uncontrolled retrospective series of 22 VWS patients from one centre, with no comparison group and no genetic confirmation.\"},\"novelty\":{\"score\":2,\"justification\":\"Adds phenotype data for an Asian population, but mostly confirms known VWS features such as lip pits and cleft variability; L-A-P mapping is a minor extension.\"},\"depth\":{\"score\":2,\"justification\":\"Descriptive percentages only, in a small sample, with no genetic testing, no outcomes and no statistics. Abstract-only grading, and the study period contains an apparent date error (September 2026).\"},\"practical_usefulness\":{\"score\":2,\"justification\":\"Mainly of academic interest. It reinforces looking for lip pits and submucous clefts, but offers no actionable change in management.\"},\"summary\":\"Retrospective review of 5528 cleft patients at one Japanese dental hospital identified 22 with Van der Woude syndrome. Lower lip pits were present in 86.4%, and cleft lip and palate was the most common cleft type (59.1%). All 19 overt clefts were complete, and 13.6% had submucous cleft palate. 59.1% had no documented family history.\",\"why_it_matters\":\"It reminds surgeons to look for lip pits and submucous cleft palate in cleft patients, including those with no family history, to support diagnosis and genetic counselling.\"}",
+      "type": "text"
+    }
+  ],
+  "diagnostics": null,
+  "model": "claude-sonnet-5-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 1930,
+    "inference_geo": "global",
+    "input_tokens": 763,
+    "iterations": [
+      {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 1930,
+        "input_tokens": 763,
+        "model": null,
+        "output_tokens": 494,
+        "type": "message"
+      }
+    ],
+    "output_tokens": 494,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "service_tier": "standard",
+    "speed": "standard"
+  }
+}
