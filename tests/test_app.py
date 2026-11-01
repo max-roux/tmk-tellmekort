@@ -21,7 +21,7 @@ def _client_with_session(session: MagicMock) -> TestClient:
 def test_home_renders() -> None:
     resp = _client_with_session(MagicMock()).get("/")
     assert resp.status_code == 200
-    assert "Maxfac Papers" in resp.text
+    assert "<title>Tell Me Kort</title>" in resp.text and "Sign in" in resp.text
 
 
 def test_healthz_ok() -> None:

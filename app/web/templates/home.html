@@ -1,6 +1,13 @@
 {% extends "base.html" %}
+{% block masthead %}
+<header class="masthead">
+  {% include "_nameplate.html" %}
+  <div class="edition" aria-hidden="true"></div>
+</header>
+{% endblock %}
 {% block content %}
-<h1>Maxfac Papers</h1>
-<p>One or two graded research papers in maxillofacial surgery, every week, picked for you.</p>
-<p><a class="button" href="/login">Sign in</a></p>
+<div class="column welcome">
+  <p>One or two research papers every week, picked for your interests and graded on proof strength, novelty, depth and practical use, each score with its reason.</p>
+  <p><a class="button primary" href="/login">Sign in</a></p>
+</div>
 {% endblock %}

@@ -4,83 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>{% block title %}Maxfac Papers{% endblock %}</title>
-  <style>
-    :root {
-      --bg: #f7f5f0; --surface: #ffffff; --ink: #1d2026; --muted: #5c6370;
-      --line: #dcd8cf; --accent: #1f5f8b; --accent-ink: #ffffff; --accent-soft: #e4eef5;
-      --ok: #2f6b3a; --warn: #9a3b26;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #15171b; --surface: #1e2127; --ink: #e8e6e1; --muted: #a2a8b3;
-        --line: #343841; --accent: #7fb3d9; --accent-ink: #10202c; --accent-soft: #22323f;
-        --ok: #8fc79a; --warn: #e79a85;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; background: var(--bg); color: var(--ink);
-      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    main { max-width: 46rem; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
-    h1, h2, h3 { line-height: 1.25; margin: 0 0 .5rem; }
-    h1 { font-size: 1.5rem; } h2 { font-size: 1.2rem; } h3 { font-size: 1.05rem; }
-    a { color: var(--accent); }
-    .muted { color: var(--muted); }
-    .small { font-size: .875rem; }
-    .eyebrow { font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin: 0 0 .25rem; }
-    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1rem 1.1rem; margin: 0 0 1rem; }
-    .button {
-      display: inline-block; background: var(--accent); color: var(--accent-ink); border: 0;
-      border-radius: 8px; padding: .7rem 1.2rem; font: inherit; font-weight: 600;
-      text-decoration: none; cursor: pointer;
-    }
-    .error { color: var(--warn); font-weight: 600; }
-    .stack > * + * { margin-top: .6rem; }
-    .notice { background: var(--accent-soft); border-radius: 8px; padding: .6rem .8rem; }
-    label { display: block; font-weight: 600; }
-    input[type=email], input[type=text], textarea, select {
-      width: 100%; font: inherit; color: var(--ink); background: var(--surface);
-      border: 1px solid var(--line); border-radius: 8px; padding: .6rem .7rem;
-    }
-    textarea { min-height: 8rem; resize: vertical; }
-    .button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--line); }
-    .linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
-    header.top { max-width: 46rem; margin: 0 auto; padding: .75rem 1rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
-    header.top { flex-wrap: wrap; }
-    header.top .brand { font-weight: 700; color: var(--ink); text-decoration: none; }
-    header.top nav a[aria-current] { font-weight: 700; color: var(--ink); }
-    .pills { display: flex; flex-wrap: wrap; gap: .35rem; margin: .6rem 0; padding: 0; list-style: none; }
-    .pill { background: var(--accent-soft); border-radius: 999px; padding: .15rem .6rem; font-size: .8rem; white-space: nowrap; }
-    .pill b { font-variant-numeric: tabular-nums; }
-    .meta { font-size: .85rem; color: var(--muted); margin: .2rem 0 0; }
-    .badge { display: inline-block; border: 1px solid var(--ok); color: var(--ok); border-radius: 4px; padding: 0 .35rem; font-size: .75rem; }
-    .paper-title { font-size: 1.05rem; margin: 0; }
-    .paper-title a { color: var(--ink); text-decoration: none; }
-    .paper-title a:hover { text-decoration: underline; }
-    .row-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
-    .row-actions form { margin: 0; }
-    .small-button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: .35rem .7rem; cursor: pointer; }
-    .small-button[aria-pressed=true] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-  </style>
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Tell Me Kort{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23efe9dd'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='25' letter-spacing='-1' fill='%23151515'%3ETMK%3C/text%3E%3Crect x='9' y='47' width='46' height='3' fill='%23d9472b'/%3E%3C/svg%3E">
+  <link rel="preload" href="/static/fonts/playfair-display-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/source-serif-4-latin-standard-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/tmk.css">
   {% block head %}{% endblock %}
 </head>
 <body>
-  {% if user %}
-  <header class="top">
-    <a class="brand" href="/">Maxfac Papers</a>
-    <nav class="small" aria-label="Main">
-      <a href="/"{% if nav == "feed" %} aria-current="page"{% endif %}>Feed</a> ·
-      <a href="/library"{% if nav == "library" %} aria-current="page"{% endif %}>Library</a> ·
-      <a href="/history"{% if nav == "history" %} aria-current="page"{% endif %}>History</a> ·
-      <a href="/onboarding/topics">Profile</a> ·
-      {% if user.is_admin %}<a href="/admin">Admin</a> · {% endif %}
-      {% if user.is_admin or user.can_calibrate %}<a href="/admin/calibrate">Calibration</a> · {% endif %}
-      <form method="post" action="/logout" style="display:inline"><button class="linklike" type="submit">Sign out</button></form>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="page">
+    {% block masthead %}
+    <header class="masthead compact">
+      <a class="mark" href="/" aria-label="Tell Me Kort, front page">TMK</a>
+    </header>
+    {% endblock %}
+    {% if user %}
+    {% set path = request.url.path %}
+    <nav class="sections" aria-label="Sections">
+      <ul>
+        <li><a href="/"{% if path == "/" %} aria-current="page"{% endif %}>Front page</a></li>
+        <li><a href="/library"{% if path == "/library" %} aria-current="page"{% endif %}>Library</a></li>
+        <li><a href="/history"{% if path == "/history" %} aria-current="page"{% endif %}>History</a></li>
+        <li><a href="/onboarding/topics"{% if path.startswith("/onboarding") %} aria-current="page"{% endif %}>Profile</a></li>
+        {% if user.is_admin or user.can_calibrate %}<li><a href="/admin/calibrate"{% if path.startswith("/admin/calibrate") %} aria-current="page"{% endif %}>Calibration</a></li>{% endif %}
+        {% if user.is_admin %}<li><a href="/admin"{% if path == "/admin" %} aria-current="page"{% endif %}>Admin</a></li>{% endif %}
+        <li><form method="post" action="/logout"><button type="submit">Sign out</button></form></li>
+      </ul>
     </nav>
-  </header>
-  {% endif %}
-  <main>{% block content %}{% endblock %}</main>
+    {% endif %}
+    <main id="main">{% block content %}{% endblock %}</main>
+    <footer class="colophon meta">Tell Me Kort <span class="sep">·</span> graded papers in maxillofacial surgery, weekly</footer>
+  </div>
 </body>
 </html>
