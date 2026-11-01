@@ -4,6 +4,7 @@ Any change to RUBRIC_TEXT or GRADE_SCHEMA must bump RUBRIC_VERSION: grades are
 keyed by version, and ranking only uses grades for the current one.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 RUBRIC_VERSION = 1
@@ -67,6 +68,44 @@ main result with numbers where given.
 - why_it_matters: 1 sentence on what a practising maxillofacial surgeon could do \
 differently because of this paper.
 """
+
+
+@dataclass(frozen=True)
+class CriterionGuide:
+    key: str
+    name: str
+    description: str
+    levels: dict[int, str]  # 5..1
+    notes: list[str]
+
+
+def criterion_guides() -> list[CriterionGuide]:
+    """The rubric scales, parsed from RUBRIC_TEXT, for showing to the surgeon."""
+    guides: list[CriterionGuide] = []
+    for section in RUBRIC_TEXT.split("\n## ")[1:]:
+        heading, _, body = section.partition("\n")
+        if heading.strip() == "Other fields":
+            continue
+        lines = [ln.strip() for ln in body.strip().splitlines()]
+        levels: dict[int, str] = {}
+        notes: list[str] = []
+        for ln in lines[1:]:
+            item = ln.removeprefix("- ")
+            score, sep, text = item.partition(": ")
+            if sep and score.isdigit():
+                levels[int(score)] = text
+            else:
+                notes.append(item)
+        guides.append(
+            CriterionGuide(
+                key=heading.strip().lower().replace(" ", "_"),
+                name=heading.strip(),
+                description=lines[0],
+                levels=levels,
+                notes=notes,
+            )
+        )
+    return guides
 
 
 def _criterion() -> dict[str, Any]:
