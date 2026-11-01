@@ -238,7 +238,7 @@ All three are SIL Open Font License, self-hosted as variable WOFF2 in `app/web/s
 
 **The Numeral Rule.** Every score is a Playfair numeral with lining tabular figures, set beside the reason or label that explains it. Never a pill, a badge or a coloured chip.
 
-**The Data Label Rule.** A tracked-capital label above or beside content names a field of the data ("Why it matters", "for you", "Scores and reasons") or carries the data itself. The paper page's line above the feature title, the grade's study design and sample size ("<study design> · n = <sample size>"), is intentional and pinned by the brief and SPEC.md §11.2. Never invent a kicker or eyebrow line that carries no data.
+**The Data Label Rule.** A tracked-capital label above or beside content names a field of the data ("Why it matters", "for you", "Scores and reasons") or carries the data itself. The paper page's line above the feature title, the grade's study design and sample size ("<study design> · n = <sample size>"), is intentional: pinned by the brief and SPEC.md §11.2, and kept by the user on 2026-11-01 after the finish review questioned it. Never invent a kicker or eyebrow line that carries no data.
 
 ## Layout
 
