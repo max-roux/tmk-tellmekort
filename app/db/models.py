@@ -99,3 +99,21 @@ class GradingBatch(Base):
     )
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[str] = mapped_column(Text, server_default="submitted")
+
+
+class CalibrationItem(Base):
+    """One paper in the calibration set under one rubric version (SPEC.md §12).
+
+    surgeon_scores: {criterion: 1-5, "comment": str}, entered blind; carried forward when
+    the rubric version changes. model_scores: {criterion: 1-5} from the grade for that version.
+    """
+
+    __tablename__ = "calibration_items"
+    __table_args__ = (UniqueConstraint("pmid", "rubric_version"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID, primary_key=True, default=uuid.uuid4)
+    pmid: Mapped[str] = mapped_column(ForeignKey("papers.pmid", ondelete="CASCADE"))
+    rubric_version: Mapped[int] = mapped_column(Integer)
+    surgeon_scores: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    model_scores: Mapped[dict[str, int] | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
