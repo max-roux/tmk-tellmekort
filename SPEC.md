@@ -51,7 +51,7 @@ Status: design agreed, nothing built. This file is the source of truth; update i
 | ORM / migrations | SQLAlchemy 2.x + Alembic | |
 | LLM | Anthropic API, model `claude-sonnet-5-5` | Grading via **Message Batches API** (50% off). Structured output via a JSON schema (`output_config.format`). |
 | Embeddings | Voyage AI `voyage-4` (1024 dims) | Free tier covers the pilot volume. Keep behind an interface so it can be swapped. |
-| Paper source | NCBI E-utilities (PubMed + PMC Open Access) | Register an API key (10 req/s). Send `tool` and `email` params. |
+| Paper source | NCBI E-utilities (PubMed + PMC `efetch`) | Register an API key (10 req/s). Send `tool` and `email` params. |
 | Email | Postmark (transactional), subdomain of the ApS domain with SPF + DKIM | Free plan covers the pilot. |
 | Hosting | Render, Frankfurt region: web service (Starter), Postgres (Basic), cron jobs | All data in the EU. |
 | Auth | Magic link by email | Signed, single-use, 15 min expiry. |
@@ -116,7 +116,7 @@ All timestamps UTC. All IDs UUID unless noted.
 
 **paper_embeddings**: `pmid` (PK/FK), `model`, `vector` (vector(1024)), `created_at`. Embedded text = title + abstract.
 
-**candidates**: `pmid`, `week_of` (date), `narrow_score` (float), `selected_for_grading` (bool). One row per paper per ingest week, for auditability.
+**candidates**: `pmid`, `week_of` (date: Monday of the ISO week the narrowing ran), `narrow_score` (float), `selected_for_grading` (bool). One row per paper per ingest week, for auditability; re-running narrowing in the same week overwrites that week's rows.
 
 **grades**: `id`, `pmid`, `rubric_version` (int), `model` (text), `input_source` (`full_text` | `abstract`), `proof_strength`, `novelty`, `depth`, `practical_usefulness` (smallint 1–5 each), `justifications` (jsonb: one line per criterion), `summary` (2–3 sentences), `why_it_matters` (one sentence), `study_design` (text, extracted), `sample_size` (int, nullable), `input_tokens`, `output_tokens`, `created_at`. Unique on (`pmid`, `rubric_version`, `model`). **The current grade** = the latest row for the current `RUBRIC_VERSION`.
 
@@ -161,10 +161,10 @@ Runs as a Render cron job, Sunday 02:00 Europe/Copenhagen. Every step is idempot
 Embed title + abstract for every new paper (`voyage-4`, input_type `document`). Batch up to the provider's limit.
 
 ### 6.3 Narrow
-Compute `narrow_score` = max cosine similarity between the paper and (a) every active user's profile vector and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Always include papers that already appear in a user's seed list.
+Papers are embedded with `input_type: document`; the anchor, topics and other query-like texts with `input_type: query`. Compute `narrow_score` = max cosine similarity between the paper and (a) every active user's profile vector and (b) a fixed **specialty anchor** vector (embedding of a paragraph describing the whole OMFS field, so new users aren't starved). Select the top `GRADE_LIMIT_PER_WEEK` (default 100) for grading. Always include papers that already appear in a user's seed list.
 
 ### 6.4 Full text
-For selected papers with a PMCID in the PMC Open Access subset, fetch full text (PMC `efetch` XML or the BioC API), strip references and figure captions, and truncate to `FULLTEXT_MAX_TOKENS` (default 12,000) keeping Methods and Results first. Otherwise grade from the abstract plus metadata. Record `input_source`.
+For selected papers with a PMCID, fetch the article with PMC `efetch` (JATS XML). (NCBI retired the PMC OA Web Service in August 2026, and BioC returns nothing for recent articles.) A paper is **open access** when its XML carries a Creative Commons licence; set `is_open_access` then. Use the full text only when it is open access *and* the XML includes the body. Strip references, figures, tables and back matter, and truncate to `FULLTEXT_MAX_TOKENS` (default 12,000, estimated at 4 characters per token) keeping Methods and Results first. Otherwise grade from the abstract plus metadata. Record `input_source`. Full text is fetched at grading time and not stored.
 
 ### 6.5 Grade
 Submit one Message Batch with one request per paper (see §7). Poll until it finishes (batches usually complete well within an hour; timeout after 24 h with an alert). Parse results, validate them (§7.4), and store them in `grades`. Failed or invalid items are retried once individually, then logged and skipped.
