@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Settings · Maxfac Papers{% endblock %}
+{% block content %}
+<h1>Settings</h1>
+{% if saved %}<p class="notice" role="status">Saved.</p>{% endif %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+<form method="post" action="/settings" class="card stack">
+  <h2>Weekly email</h2>
+  <p class="muted small">Sent to {{ user.email }}.</p>
+  <label for="send_weekday">Day</label>
+  <select id="send_weekday" name="send_weekday">
+    {% for name in weekdays %}<option value="{{ loop.index0 }}" {% if loop.index0 == user.send_weekday %}selected{% endif %}>{{ name }}</option>{% endfor %}
+  </select>
+  <label for="send_local_time">Time</label>
+  <input id="send_local_time" name="send_local_time" type="time" value="{{ user.send_local_time.strftime('%H:%M') }}" style="width:auto">
+  <label for="timezone">Timezone</label>
+  <select id="timezone" name="timezone">
+    {% for tz in timezones %}<option value="{{ tz }}" {% if tz == user.timezone %}selected{% endif %}>{{ tz }}</option>{% endfor %}
+  </select>
+  <div><button class="button" type="submit">Save</button></div>
+</form>
+
+<form method="post" action="/settings/delete" class="card stack">
+  <h2>Delete your account</h2>
+  <p class="small">This removes your topics, seed papers, weights, likes, history, disputes and emails sent, and signs you out. It cannot be undone.</p>
+  <label for="confirm">Type <strong>delete</strong> to confirm</label>
+  <input id="confirm" name="confirm" type="text" autocomplete="off" style="max-width:12rem">
+  <div><button class="button" type="submit" style="background:var(--warn)">Delete my account</button></div>
+</form>
+<p class="small"><a href="/privacy">Privacy note</a></p>
+{% endblock %}
