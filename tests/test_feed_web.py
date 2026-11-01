@@ -58,12 +58,9 @@ def test_feed_shows_ranked_cards_with_scores_and_actions(client: TestClient) -> 
 def test_front_page_carries_the_edition_line_and_sidebar_boxes(
     client: TestClient, db_session: Session
 ) -> None:
+    stats = {"ingest": {"found": 240}, "narrow": {"candidates": 180}, "grade": {"graded": 97}}
     db_session.add(
-        PipelineRun(
-            started_at=datetime(2026, 10, 25, 1, tzinfo=UTC),
-            status="ok",
-            stats={"ingest": {"found": 240}, "narrow": {"candidates": 180}, "grade": {"graded": 97}},
-        )
+        PipelineRun(started_at=datetime(2026, 10, 25, 1, tzinfo=UTC), status="ok", stats=stats)
     )
     db_session.commit()
     html = client.get("/").text
