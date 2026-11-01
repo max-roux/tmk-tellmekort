@@ -15,6 +15,7 @@ from app.domain.criteria import ALL_CRITERIA
 from app.domain.edition import edition
 from app.feed import feedback, front, queries, suggestions
 from app.web.deps import SettingsDep
+from app.web.redirects import local_path
 from app.web.sessions import CurrentUser, RequiredUser
 from app.web.templating import TEMPLATES
 
@@ -29,13 +30,6 @@ def now() -> datetime:
 
 def today() -> date:
     return now().date()
-
-
-def _local_path(target: str, fallback: str) -> str:
-    """Only same-site paths, so `next` cannot send the user elsewhere."""
-    if target.startswith("/") and not target.startswith("//") and "\\" not in target:
-        return target
-    return fallback
 
 
 def _not_found(request: Request, user: object) -> HTMLResponse:
@@ -119,7 +113,7 @@ def give_feedback(
     if session.get(Paper, pmid) is None:
         return _not_found(request, user)
     feedback.record(session, user.id, pmid, kind, "app", settings)
-    return RedirectResponse(_local_path(next, f"/paper/{pmid}"), status_code=303)
+    return RedirectResponse(local_path(next, f"/paper/{pmid}"), status_code=303)
 
 
 @router.post("/paper/{pmid}/dispute")
