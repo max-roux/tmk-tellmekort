@@ -6,6 +6,7 @@ from sqlalchemy.exc import OperationalError
 
 from app.db.session import get_session
 from app.main import create_app
+from app.web.templating import asset_version
 
 
 def _client_with_session(session: MagicMock) -> TestClient:
@@ -44,3 +45,8 @@ def test_static_serves_self_hosted_fonts_and_tokens() -> None:
     assert css.status_code == 200 and "--accent: #d9472b" in css.text
     font = client.get("/static/fonts/source-serif-4-latin-standard-normal.woff2")
     assert font.status_code == 200 and font.content[:4] == b"wOF2"
+
+
+def test_stylesheets_carry_a_content_version() -> None:
+    html = _client_with_session(MagicMock()).get("/").text
+    assert f"/static/tmk.css?v={asset_version()}" in html

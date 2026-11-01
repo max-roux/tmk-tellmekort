@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request
@@ -12,8 +11,7 @@ from app.config import Settings, get_settings
 from app.db.session import get_session
 from app.web import actions, admin, auth, calibrate, feed, onboarding
 from app.web.sessions import LoginRequiredError
-
-STATIC_DIR = Path(__file__).parent / "web" / "static"
+from app.web.templating import STATIC_DIR
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
