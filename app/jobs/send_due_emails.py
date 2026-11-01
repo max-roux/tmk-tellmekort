@@ -21,6 +21,7 @@ from app.db.models import EmailSend, User
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.domain.picks import Picks, is_due, local_week, select_picks
 from app.email.actions import ACTIONS, action_link
+from app.email.alerts import alert_admin
 from app.email.base import EmailMessage, Mailer, MailerError, render
 from app.feed import queries
 from app.feed.queries import FeedItem
@@ -148,17 +149,6 @@ def _message(
     return message, picks
 
 
-def _alert_admin(mailer: Mailer, settings: Settings, user: User) -> None:
-    if not settings.admin_email:
-        log.warning("quiet week for user %s and no ADMIN_EMAIL to alert", user.id)
-        return
-    alert = render("admin_quiet_alert", "Quiet week for a user", settings.admin_email, user=user)
-    try:
-        mailer.send(alert)
-    except MailerError as e:
-        log.error("admin alert failed: %s", e)
-
-
 def preview(session: Session, user: User, settings: Settings, now: datetime) -> EmailMessage:
     """The email `user` would get now, without recording a send (its buttons won't work)."""
     message, _ = _message(session, user, settings, now, uuid.uuid4())
@@ -191,7 +181,13 @@ def send_weekly(
     send.missed_pmid = picks.missed.paper.pmid if picks.missed else None
     session.commit()
     if picks.quiet:
-        _alert_admin(mailer, settings, user)
+        alert_admin(
+            mailer,
+            settings,
+            "Quiet week for a user",
+            f"Quiet week: nothing was eligible for {user.email}.\n"
+            "Their profile or the specialty query needs attention.",
+        )
     return picks
 
 
