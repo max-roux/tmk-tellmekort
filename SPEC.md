@@ -445,3 +445,4 @@ Each milestone is shippable and demoable.
 - Default send time Monday 06:30 Copenhagen; the surgeon can change it in settings.
 - Numeric thresholds (pertinence gate, email cutoff, embedding coefficients, calibration launch bar) are starting values, to be tuned on real data.
 - Liking and reading are independent states.
+- Pertinence thresholds are one fixed scale for all users (each user's cosines are their own). A per-user relative scale was considered and deferred: revisit if several users with profiles of different breadth get consistently flat or thin feeds.
