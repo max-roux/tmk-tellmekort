@@ -1,6 +1,6 @@
-# SPEC — Maxfac Paper Recommender (MVP)
+# SPEC — Tell Me Kort (MVP)
 
-A web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
+Tell Me Kort (team name TMK; formerly the Maxfac Paper Recommender) is a web app that sends a maxillofacial surgeon 1–2 research papers by email every week and keeps a ranked in-app feed of suggestions. Every paper is graded by an LLM on quality criteria; the surgeon picks topics, weights the criteria, and refines the profile by liking, reading and dismissing papers.
 
 Status: milestones 1-9 built (see §18). This file is the source of truth; update it when decisions change.
 
@@ -339,6 +339,23 @@ The free text goes to Sonnet (normal API, not batch) with JSON-schema output (as
 Without `ANTHROPIC_API_KEY`, or if the call fails, the surgeon types topics by hand. Embedding is best effort: if Voyage is unavailable, topics and seeds are saved unembedded and `cli.py embed` embeds them and refreshes profile vectors later.
 
 Users are added by the operator (`cli.py users add EMAIL [--admin]`); `cli.py users link EMAIL` prints a sign-in link without sending email.
+
+
+### 11.2 Visual design
+
+The web app reads as a typeset weekly newspaper called **Tell Me Kort**. Structure follows Tablet magazine's section fronts (masthead, column grid, hairline rules, boxed sidebars, big numerals); restraint follows a calm editorial page (whitespace, one accent, a comfortable reading size). DESIGN.md records the shipped system.
+
+- **Constraints**: server-rendered Jinja2, plain forms, no JavaScript added, no build step, no external requests. Fonts are self-hosted WOFF2 under `app/web/static/fonts/`, served by a `/static` mount.
+- **Phone first**: one column by default; the multi-column grid starts at 900px. Tap targets of at least 44px, no horizontal scroll at 375px.
+- **Identity**: the front page carries the full nameplate "Tell Me Kort" with T, M and K in vermilion, so "TMK" reads out of the name, and under it an edition rule between hairlines: `No. <ISO week> · Week of <Monday> · <n> papers in this edition`, from data passed to the template (never the clock inside a template). Inner pages, the tight phone header and the inline SVG favicon use the compact mark "TMK". Every title, the email From name and the email subjects say Tell Me Kort.
+- **Type** (OFL, self-hosted): Playfair Display for the nameplate, headlines and numerals; Source Serif 4 (optical sizes) for body text; Inter in tracked capitals for labels, metadata, navigation and buttons.
+- **Colour**: CSS custom properties on `:root`. Light "morning edition": newsprint `#EFE9DD`, ink `#151515`, hairlines in ink at low opacity, vermilion `#D9472B` for rules and large type and `#B23A1F` for small text. Dark "evening edition" (`prefers-color-scheme: dark`): warm charcoal paper, cream ink, the vermilion lightened to pass AA. One accent only; AA contrast in both.
+- **Layout**: a thin ruled page frame; a section strip under the masthead (Front page · Library · History · Profile, plus Calibration and Admin where allowed, and Sign out) between hairlines, the current page in bold ink with a vermilion underline.
+- **Front page**: the lead story (#1) with a large headline, the summary as standfirst, "Why it matters" as a pull line, a big overall-score numeral and a boxed five-criterion scorecard; second stories (#2–3) in two columns; briefs (#4–10) as a ruled list. Sidebar boxes in a vermilion hairline frame: **Your beat** (the user's active topics) and **This edition** (papers screened and graded, from the latest pipeline run's stats). The numeral is the weighted score already on the ranked item. On a phone the same order stacks.
+- **Paper page**: set like a feature: study design · n, headline, meta line, big numeral, standfirst, a print-style "Read the paper" button, then "Scores and reasons" as five ruled entries with the dispute control.
+- **Library and History**: an index listing with hairline separators. Auth, one-tap actions, onboarding (a numbered printed form), calibration, admin, empty and error states share the frame, compact masthead and type.
+- **Components**: square corners everywhere; buttons have a hairline border and a capitals label, pressed or primary is filled ink; inputs are square with a vermilion focus ring; "Open access" is a small capitals stamp with a vermilion border.
+- **Out of scope**: the weekly email's styling (a later change); only its From name and subjects are renamed.
 
 ---
 
