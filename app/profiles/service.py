@@ -15,10 +15,12 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.db.models import CriterionSettings, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
+from app.domain.criteria import ALL_CRITERIA
 from app.domain.preferences import Preferences
 from app.domain.ranking import ProfileCoefficients, profile_vector
 from app.domain.seeds import SeedRefs
 from app.embeddings.base import Embedder, EmbeddingError
+from app.feed.states import paper_states
 from app.jobs.embed_papers import embed_pmids
 from app.jobs.weekly_ingest import store_papers
 from app.profiles.topics import ProposedTopic
@@ -147,6 +149,19 @@ def remove_seed(session: Session, user_id: uuid.UUID, pmid: str) -> None:
 # --------------------------------------------------------------------------- preferences
 
 
+def load_preferences(session: Session, user_id: uuid.UUID) -> Preferences:
+    """The user's saved preferences, or the defaults (all weights 1, no minimums)."""
+    row = session.get(CriterionSettings, user_id) or CriterionSettings(
+        **{f"w_{c}": 1.0 for c in ALL_CRITERIA}, hide_case_reports=True
+    )
+    return Preferences(
+        weights={c: getattr(row, f"w_{c}") for c in ALL_CRITERIA},
+        minimums={c: getattr(row, f"min_{c}") for c in ALL_CRITERIA},
+        hide_case_reports=row.hide_case_reports,
+        study_types=frozenset(row.study_types) if row.study_types is not None else None,
+    )
+
+
 def save_preferences(session: Session, user_id: uuid.UUID, prefs: Preferences) -> None:
     values: dict[str, object] = {
         **{f"w_{c}": w for c, w in prefs.weights.items()},
@@ -161,14 +176,27 @@ def save_preferences(session: Session, user_id: uuid.UUID, prefs: Preferences) -
 # --------------------------------------------------------------------------- profile vector
 
 
+def _paper_vectors(session: Session, pmids: list[str], model: str) -> list[list[float]]:
+    if not pmids:
+        return []
+    rows = session.scalars(
+        select(PaperEmbedding.vector).where(
+            PaperEmbedding.pmid.in_(pmids), PaperEmbedding.model == model
+        )
+    )
+    return [list(v) for v in rows]
+
+
 def refresh_profile_vector(
     session: Session, user_id: uuid.UUID, model: str, coefs: ProfileCoefficients
 ) -> bool:
     """Recompute the cached profile vector from embeddings of `model`. Commits.
 
-    Returns False (and drops any cached vector) when nothing is embedded yet. Liked and
-    not-for-me terms join in milestone 7, with feedback.
+    Returns False (and drops any cached vector) when nothing is embedded yet.
     """
+    states = paper_states(session, user_id)
+    liked = [p for p, t in states.items() if t.state.liked]
+    dismissed = [p for p, t in states.items() if t.state.dismissed]
     topics = session.scalars(
         select(Topic.embedding).where(
             Topic.user_id == user_id, Topic.active, Topic.embedding_model == model
@@ -182,6 +210,8 @@ def refresh_profile_vector(
     vector = profile_vector(
         topics=[list(v) for v in topics if v is not None],
         seeds=[list(v) for v in seeds],
+        liked=_paper_vectors(session, liked, model),
+        not_for_me=_paper_vectors(session, dismissed, model),
         coefficients=coefs,
     )
     if vector is None:
