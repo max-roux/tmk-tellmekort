@@ -8,18 +8,13 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import PipelineRun, Topic
+from app.db.models import PipelineRun
+from app.profiles.service import active_topics
 
 
 def beat(session: Session, user_id: uuid.UUID) -> list[str]:
     """The labels of the user's active topics, in the order they were added."""
-    return list(
-        session.scalars(
-            select(Topic.label)
-            .where(Topic.user_id == user_id, Topic.active)
-            .order_by(Topic.created_at, Topic.label)
-        )
-    )
+    return [t.label for t in active_topics(session, user_id)]
 
 
 @dataclass(frozen=True)
