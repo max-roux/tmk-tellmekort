@@ -86,44 +86,55 @@ def _narrow(session: Session, c: Clients, settings: Settings, today: date) -> di
 
 def _budget(
     session: Session,
-    c: Clients,
+    grader: Grader,
     settings: Settings,
     today: date,
     todo: list[str],
     texts: dict[str, str],
 ) -> Budget:
-    """Which of `todo` (best narrowing score first) to grade under the monthly cap."""
+    """Which of `todo` (in priority order) to grade under the monthly cap."""
     papers = {p.pmid: p for p in session.scalars(select(Paper).where(Paper.pmid.in_(todo)))}
     estimates = [
-        (pmid, estimate_cost(c.grader.model, GradeInput(papers[pmid], texts.get(pmid))))
+        (pmid, estimate_cost(grader.model, GradeInput(papers[pmid], texts.get(pmid))))
         for pmid in todo
     ]
     cap = Decimal(str(settings.llm_monthly_cap_usd))
     return fit_budget(estimates, spent=month_spend(session, today), cap=cap)
 
 
-def _grade(
-    session: Session, c: Clients, settings: Settings, today: date, poll: Polling
+def grade_with_guard(
+    session: Session,
+    pubmed: PubMedClient,
+    grader: Grader,
+    mailer: Mailer,
+    settings: Settings,
+    today: date,
+    todo: list[str],
+    poll: Polling,
 ) -> dict[str, Any]:
-    todo = selected_ungraded(session)
-    texts = fetch_full_texts(session, c.pubmed, todo, settings.fulltext_max_tokens)
-    budget = _budget(session, c, settings, today, todo, texts)
+    """Grade `todo` (priority order) by batch under the spend guard (SPEC.md §6.6).
+
+    Fetches open-access full text, keeps what fits under the cap, alerts the admin when
+    the cap cuts grading short or spend crosses 80% of it.
+    """
+    texts = fetch_full_texts(session, pubmed, todo, settings.fulltext_max_tokens)
+    budget = _budget(session, grader, settings, today, todo, texts)
     if budget.truncated:
         alert_admin(
-            c.mailer,
+            mailer,
             settings,
             "Spend cap reached: grading cut short",
-            f"Grading {len(budget.kept)} of {len(todo)} papers this week to stay under "
+            f"Grading {len(budget.kept)} of {len(todo)} papers to stay under "
             f"LLM_MONTHLY_CAP_USD={settings.llm_monthly_cap_usd}. The other "
             f"{len(budget.dropped)} wait for next month or a higher cap.",
         )
     before = month_spend(session, today)
-    stats = grade_batch(session, c.grader, budget.kept, today, poll=poll, full_texts=texts)
+    stats = grade_batch(session, grader, budget.kept, today, poll=poll, full_texts=texts)
     after = month_spend(session, today)
     cap = Decimal(str(settings.llm_monthly_cap_usd))
     if crossed_alert_line(before, after, cap):
         alert_admin(
-            c.mailer,
+            mailer,
             settings,
             "LLM spend passed 80% of the monthly cap",
             f"${after:.2f} of ${cap:.2f} spent this month.",
@@ -159,7 +170,19 @@ def run_weekly(
         ("ingest", lambda: _ingest(session, c, today)),
         ("embed", lambda: _embed(session, c, settings)),
         ("narrow", lambda: _narrow(session, c, settings, today)),
-        ("grade", lambda: _grade(session, c, settings, today, poll)),
+        (
+            "grade",
+            lambda: grade_with_guard(
+                session,
+                c.pubmed,
+                c.grader,
+                c.mailer,
+                settings,
+                today,
+                selected_ungraded(session),
+                poll,
+            ),
+        ),
     ]
     try:
         for name, step in steps:

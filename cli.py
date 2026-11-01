@@ -38,6 +38,7 @@ from app.jobs.narrow_candidates import (
     user_references,
     week_of,
 )
+from app.jobs.regrade import regrade
 from app.jobs.send_due_emails import preview, send_due
 from app.jobs.weekly_ingest import ingest as run_ingest
 from app.jobs.weekly_pipeline import Clients, run_weekly
@@ -338,6 +339,32 @@ def weekly() -> None:
     typer.echo(
         f"Done: stored {run.stats['ingest']['stored']} papers, graded {grade['graded']} "
         f"(dropped by the cap {grade['dropped']}), ${grade['month_usd']:.2f} spent this month."
+    )
+
+
+@cli.command("regrade")
+def regrade_cmd(
+    window: Annotated[
+        int | None, typer.Option(help="Days back to regrade (default ACTIVE_WINDOW_DAYS).")
+    ] = None,
+) -> None:
+    """Grade papers in the window that only have grades from older rubric versions."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    settings = get_settings()
+    days = window or settings.active_window_days
+    with Session(get_engine()) as session, _pubmed() as pubmed:
+        stats = regrade(
+            session,
+            pubmed,
+            _grader(),
+            mailer_for(settings),
+            settings,
+            datetime.now(UTC).date(),
+            window_days=days,
+        )
+    typer.echo(
+        f"Rubric v{RUBRIC_VERSION}, last {days} days: {stats['todo']} stale, graded "
+        f"{stats['graded']} (cut by the cap {stats['dropped']}), ${stats['usd']:.2f}."
     )
 
 
