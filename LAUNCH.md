@@ -10,7 +10,7 @@ marked **(Render shell)** run in the `maxfac-web` service's Shell tab on Render,
 - [ ] **Voyage AI** API key. Add a payment method: without one, Voyage limits requests to
       about 3 a minute.
 - [ ] **NCBI** API key and a contact email (https://account.ncbi.nlm.nih.gov/settings/).
-- [ ] **Email (MVP: Gmail)**: create a dedicated Gmail account for the app, turn on 2-Step
+- [ ] **Email (MVP: Gmail)**: use your own Gmail (a dedicated account is safer), turn on 2-Step
       Verification, then create an App password (Google Account → Security → App passwords).
       `SMTP_USERNAME` is the address, `SMTP_PASSWORD` the 16-character app password,
       `EMAIL_FROM` the same address (the app adds the "Tell Me Kort" name). `scripts/setup_accounts.sh`

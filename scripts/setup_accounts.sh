@@ -243,17 +243,15 @@ pause
 
 
 # ── 2 ─────────────────────────────────────────────────────────────────────
-stage "Gmail: an account and an app password for sending"
-say "For the MVP the app sends its emails through a Gmail account: free, no domain needed."
-say "Use a NEW account just for the app: its app password can read and send that mailbox."
-open_url "https://accounts.google.com/signup"
-step "Create the account (e.g. maxfacpapers@gmail.com). Skip if you already made one."
-pause "Press Enter when you're signed in to it."
-open_url "https://myaccount.google.com/signinoptions/twosv"
-step "Turn on 2-Step Verification (Google requires it for app passwords)."
-pause "Press Enter when it's on."
+stage "Gmail: an app password for sending"
+say "For the MVP the app sends its emails from your own Gmail: free, no domain needed."
+say "You need one thing from Google: an 'app password', a 16-letter password just for this app."
+note "You can revoke it any time on the same page; your normal password never leaves Google."
 open_url "https://myaccount.google.com/apppasswords"
-step "Name it 'Maxfac Papers' → Create → copy the 16-letter password (shown once)."
+step "Sign in with your Gmail if asked."
+step "If Google says app passwords aren't available, turn on 2-Step Verification first:"
+say  "  myaccount.google.com → Security → 2-Step Verification, then reopen the link above."
+step "Type the name 'Maxfac Papers' → Create → copy the 16-letter password (shown once)."
 ask SMTP_USERNAME "The Gmail address:"
 SMTP_USERNAME=$(printf %s "$SMTP_USERNAME" | tr -d ' ' | tr '[:upper:]' '[:lower:]')
 while true; do
