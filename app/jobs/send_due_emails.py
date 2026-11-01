@@ -159,6 +159,12 @@ def _alert_admin(mailer: Mailer, settings: Settings, user: User) -> None:
         log.error("admin alert failed: %s", e)
 
 
+def preview(session: Session, user: User, settings: Settings, now: datetime) -> EmailMessage:
+    """The email `user` would get now, without recording a send (its buttons won't work)."""
+    message, _ = _message(session, user, settings, now, uuid.uuid4())
+    return message
+
+
 def send_weekly(
     session: Session, user: User, settings: Settings, mailer: Mailer, now: datetime
 ) -> Picks | None:

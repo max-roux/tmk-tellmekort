@@ -16,6 +16,9 @@ from app.config import get_settings
 from app.db.models import Grade, ProfileVector, User
 from app.db.session import get_engine
 from app.domain.criteria import INTRINSIC_CRITERIA
+from app.email import mailer_for
+from app.email.outbox import DEFAULT_DIR as OUTBOX_DIR
+from app.email.outbox import OutboxMailer
 from app.embeddings.voyage import VoyageEmbedder
 from app.grading.grader import Grader
 from app.grading.rubric import RUBRIC_VERSION
@@ -35,6 +38,7 @@ from app.jobs.narrow_candidates import (
     user_references,
     week_of,
 )
+from app.jobs.send_due_emails import preview, send_due
 from app.jobs.weekly_ingest import ingest as run_ingest
 from app.profiles.service import coefficients, embed_topics, refresh_all_profiles
 from app.sources.pubmed import PubMedClient, load_specialty_query
@@ -310,6 +314,38 @@ def users_link(email: str) -> None:
             raise typer.Exit(1)
         token = magic_links.issue(session, user, datetime.now(UTC))
     typer.echo(login_link(get_settings(), token))
+
+
+def _production_ready() -> None:
+    if problems := get_settings().production_problems():
+        typer.echo("Refusing to send: " + "; ".join(problems), err=True)
+        raise typer.Exit(1)
+
+
+@cli.command("send-due")
+def send_due_cmd() -> None:
+    """Send the weekly email to every user whose slot has passed (run hourly)."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    _production_ready()
+    settings = get_settings()
+    with Session(get_engine()) as session:
+        stats = send_due(session, settings, mailer_for(settings), datetime.now(UTC))
+    typer.echo(f"Sent {stats.sent} ({stats.quiet} quiet weeks), failed {stats.failed}.")
+    if stats.failed:
+        raise typer.Exit(1)
+
+
+@cli.command("send-test")
+def send_test(email: str) -> None:
+    """Write the email EMAIL would get now to var/outbox, without sending or recording it."""
+    with Session(get_engine()) as session:
+        user = get_by_email(session, email)
+        if user is None:
+            typer.echo(f"No user {email}.", err=True)
+            raise typer.Exit(1)
+        message = preview(session, user, get_settings(), datetime.now(UTC))
+    OutboxMailer().send(message)
+    typer.echo(f"Wrote '{message.subject}' to {OUTBOX_DIR}.")
 
 
 @cli.command("check-db")

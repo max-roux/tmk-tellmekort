@@ -1,5 +1,5 @@
 # Render Blueprint: all resources in Frankfurt (SPEC.md §3, §16).
-# Cron jobs (weekly ingest, hourly send) are added in milestones 8–9.
+# The weekly ingest cron job is added in milestone 9.
 databases:
   - name: maxfac-db
     region: frankfurt
@@ -37,6 +37,37 @@ services:
       - key: NCBI_API_KEY
         sync: false
       - key: NCBI_EMAIL
+        sync: false
+      - key: POSTMARK_SERVER_TOKEN
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+
+  # Hourly: send each user's weekly email once their local slot has passed (SPEC.md §10.1).
+  - type: cron
+    name: maxfac-send
+    runtime: python
+    region: frankfurt
+    plan: starter
+    schedule: "5 * * * *"
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    startCommand: uv run --no-sync python cli.py send-due
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.13"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maxfac-db
+          property: connectionString
+      # Must equal the web service's key: email buttons are signed with it.
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: maxfac-web
+          envVarKey: SECRET_KEY
+      - key: BASE_URL
         sync: false
       - key: POSTMARK_SERVER_TOKEN
         sync: false

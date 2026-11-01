@@ -2,16 +2,14 @@
 
 import logging
 from collections.abc import Iterator
-from functools import lru_cache
 from typing import Annotated
 
 import anthropic
 from fastapi import Depends
 
 from app.config import Settings, get_settings
+from app.email import mailer_for
 from app.email.base import Mailer
-from app.email.outbox import OutboxMailer
-from app.email.postmark import PostmarkMailer
 from app.embeddings.base import Embedder
 from app.embeddings.voyage import VoyageEmbedder
 from app.profiles.topics import TopicProposer
@@ -22,19 +20,8 @@ log = logging.getLogger(__name__)
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
-@lru_cache
-def _postmark(server_token: str, sender: str) -> PostmarkMailer:
-    # One long-lived client: it must outlive the request, since sign-in emails are sent
-    # from a background task after the response.
-    return PostmarkMailer(server_token=server_token, sender=sender)
-
-
 def get_mailer(settings: SettingsDep) -> Mailer:
-    """Postmark when configured; otherwise the local outbox folder (development)."""
-    if not settings.postmark_server_token:
-        log.warning("POSTMARK_SERVER_TOKEN not set: writing email to the local outbox")
-        return OutboxMailer()
-    return _postmark(settings.postmark_server_token, settings.email_from)
+    return mailer_for(settings)
 
 
 MailerDep = Annotated[Mailer, Depends(get_mailer)]

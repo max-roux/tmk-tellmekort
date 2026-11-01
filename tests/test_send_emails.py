@@ -118,3 +118,12 @@ def test_unexpected_error_releases_the_claim_and_surfaces(db_session: Session, u
     with pytest.raises(RuntimeError):
         send_due(db_session, SETTINGS, Broken(), SUNDAY)
     assert db_session.scalars(select(EmailSend)).all() == []
+
+
+def test_preview_renders_without_recording(db_session: Session, user: User) -> None:
+    from app.jobs.send_due_emails import preview
+
+    grade(db_session, "42963307", 5)
+    message = preview(db_session, user, SETTINGS, SUNDAY)
+    assert "Fresh this week" in message.text
+    assert db_session.scalars(select(EmailSend)).all() == []
