@@ -16,9 +16,10 @@
 
 {% macro meta(paper, grade, source=True) -%}
 <p class="meta">
+  {#- No spaces around separators, so a line never starts or ends on one. -#}
   {{ paper.journal.split(" : ")[0] }}{% if paper.pub_date %}<span class="sep">·</span>{{ paper.pub_date.year }}{% endif %}
   {%- if grade and source %}<span class="sep">·</span>Graded from {{ "full text" if grade.input_source == "full_text" else "abstract" }}{% endif %}
-  {%- if paper.is_open_access %}<span class="sep">·</span><span class="stamp">Open access</span>{% endif %}
+  {%- if paper.is_open_access %}<span class="nowrap"><span class="sep">·</span><span class="stamp">Open access</span></span>{% endif %}
 </p>
 {%- endmacro %}
 
