@@ -340,11 +340,12 @@ def weekly() -> None:
     embedder = _embedder()
     with Session(get_engine()) as session, _pubmed() as pubmed:
         clients = Clients(pubmed, embedder, _grader(), mailer_for(settings))
-        run = run_weekly(session, settings, clients, datetime.now(UTC))
+        # Read inside the session: committing expired the run, so it can't load afterwards.
+        stats = run_weekly(session, settings, clients, datetime.now(UTC)).stats
     embedder.close()
-    grade = run.stats["grade"]
+    grade = stats["grade"]
     typer.echo(
-        f"Done: stored {run.stats['ingest']['stored']} papers, graded {grade['graded']} "
+        f"Done: stored {stats['ingest']['stored']} papers, graded {grade['graded']} "
         f"(dropped by the cap {grade['dropped']}), ${grade['month_usd']:.2f} spent this month."
     )
 
