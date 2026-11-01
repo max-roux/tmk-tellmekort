@@ -69,6 +69,14 @@ def answer_suggestion(
     return RedirectResponse("/", status_code=303)
 
 
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request, user: CurrentUser, settings: SettingsDep) -> HTMLResponse:
+    """The one-page privacy note (SPEC.md §16); public."""
+    return TEMPLATES.TemplateResponse(
+        request, "privacy.html", {"user": user, "contact": settings.admin_email}
+    )
+
+
 @router.get("/paper/{pmid}", response_class=HTMLResponse)
 def paper_page(
     request: Request,

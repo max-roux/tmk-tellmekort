@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Privacy · Maxfac Papers{% endblock %}
+{% block content %}
+<h1>Privacy note</h1>
+<p class="muted small">Maxfac Papers recommends research papers to surgeons. This page says what it keeps about you, who else handles it, and how to remove it.</p>
+
+<h2>What we keep</h2>
+<ul>
+  <li>Your email address and name, to sign you in and send your weekly email.</li>
+  <li>Your research interests: the topics you confirm, seed papers, weights and minimums. The free text you type when setting up is used once to suggest topics and is not stored.</li>
+  <li>Your feedback: likes, papers marked read or not for you, and scores you dispute.</li>
+  <li>When weekly emails were sent and which papers they contained.</li>
+  <li>Sign-in requests (your email and the time), deleted after an hour.</li>
+</ul>
+<p><strong>No patient data</strong> is collected or stored, ever. Please don't put any in a comment or in your interests.</p>
+<p>There are no analytics, advertising or tracking pixels. The only cookie is the one that keeps you signed in.</p>
+
+<h2>Who else handles it</h2>
+<ul>
+  <li><strong>Render</strong> hosts the app and its database in Frankfurt, in the EU.</li>
+  <li><strong>Postmark</strong> delivers our emails, so it receives your email address and the email's contents. Open and click tracking is switched off.</li>
+  <li><strong>Anthropic</strong> grades papers and turns your interests into topic suggestions, so it receives paper text and the interests you type during setup.</li>
+  <li><strong>Voyage AI</strong> turns paper text and your topic descriptions into vectors for matching.</li>
+</ul>
+<p>Anthropic, Voyage AI and Postmark may process this data outside the EU under their own data processing terms. Paper data comes from PubMed (NCBI); nothing about you is sent there.</p>
+
+<h2>How long, and how to remove it</h2>
+<p>We keep your data while you have an account. You can delete your account at any time from <a href="/settings">Settings</a>: that removes everything above straight away. Papers and their grades are shared by all users and stay.</p>
+
+<h2>Questions</h2>
+<p>{% if contact %}Write to <a href="mailto:{{ contact }}">{{ contact }}</a>.{% else %}Contact the operator of this service.{% endif %}</p>
+{% endblock %}
