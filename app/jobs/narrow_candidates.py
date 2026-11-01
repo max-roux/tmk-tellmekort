@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from app.db.models import Candidate, Grade, Paper, PaperEmbedding
+from app.db.models import Candidate, Grade, Paper, PaperEmbedding, ProfileVector, SeedPaper, Topic
 from app.domain.narrowing import narrow_scores, select_for_grading
 from app.embeddings.base import Embedder
 from app.grading.rubric import RUBRIC_VERSION
@@ -37,6 +37,24 @@ def load_anchor(path: Path = ANCHOR_PATH) -> str:
     return " ".join(path.read_text().split())
 
 
+@dataclass(frozen=True)
+class UserReferences:
+    vectors: list[list[float]]  # profile vectors and active topic embeddings
+    seeds: frozenset[str]  # every user's seed papers
+
+
+def user_references(session: Session, model: str) -> UserReferences:
+    """What users add to narrowing: their profile vectors, each active topic (so a niche
+    topic is not diluted by the rest of a profile), and their seed papers.
+    """
+    profiles = session.scalars(select(ProfileVector.vector).where(ProfileVector.model == model))
+    topics = session.scalars(
+        select(Topic.embedding).where(Topic.active, Topic.embedding_model == model)
+    )
+    vectors = [list(v) for v in [*profiles, *topics] if v is not None]
+    return UserReferences(vectors, frozenset(session.scalars(select(SeedPaper.pmid))))
+
+
 def narrow(
     session: Session,
     embedder: Embedder,
@@ -51,8 +69,8 @@ def narrow(
 ) -> NarrowStats:
     """Score papers entered in [start, end] and mark the top `limit` for grading.
 
-    References are the specialty anchor plus active users' profile vectors (none until
-    users exist); `always_include` holds users' seed papers.
+    References are the specialty anchor plus users' profile and topic vectors
+    (`user_references`); `always_include` holds users' seed papers.
     """
     in_window = Paper.entrez_date.between(start, end)
     rows = session.execute(

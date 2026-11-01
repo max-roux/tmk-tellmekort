@@ -37,10 +37,27 @@
       text-decoration: none; cursor: pointer;
     }
     .error { color: var(--warn); font-weight: 600; }
+    .stack > * + * { margin-top: .6rem; }
+    label { display: block; font-weight: 600; }
+    input[type=email], input[type=text], textarea, select {
+      width: 100%; font: inherit; color: var(--ink); background: var(--surface);
+      border: 1px solid var(--line); border-radius: 8px; padding: .6rem .7rem;
+    }
+    textarea { min-height: 8rem; resize: vertical; }
+    .button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+    .linklike { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline; }
+    header.top { max-width: 46rem; margin: 0 auto; padding: .75rem 1rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    header.top .brand { font-weight: 700; color: var(--ink); text-decoration: none; }
   </style>
   {% block head %}{% endblock %}
 </head>
 <body>
+  {% if user %}
+  <header class="top">
+    <a class="brand" href="/">Maxfac Papers</a>
+    <form method="post" action="/logout"><button class="linklike small" type="submit">Sign out</button></form>
+  </header>
+  {% endif %}
   <main>{% block content %}{% endblock %}</main>
 </body>
 </html>

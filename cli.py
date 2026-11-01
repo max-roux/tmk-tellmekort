@@ -10,8 +10,10 @@ import typer
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
+from app.accounts import magic_links
+from app.accounts.users import add_user, get_by_email, is_onboarded
 from app.config import get_settings
-from app.db.models import Grade
+from app.db.models import Grade, ProfileVector, User
 from app.db.session import get_engine
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.embeddings.voyage import VoyageEmbedder
@@ -26,16 +28,26 @@ from app.jobs.calibration import (
 from app.jobs.embed_papers import embed_papers
 from app.jobs.full_text import fetch_full_texts
 from app.jobs.grade_papers import grade_batch, grade_sync
-from app.jobs.narrow_candidates import load_anchor, narrow, selected_ungraded, week_of
+from app.jobs.narrow_candidates import (
+    load_anchor,
+    narrow,
+    selected_ungraded,
+    user_references,
+    week_of,
+)
 from app.jobs.weekly_ingest import ingest as run_ingest
+from app.profiles.service import coefficients, embed_topics, refresh_all_profiles
 from app.sources.pubmed import PubMedClient, load_specialty_query
 from app.web.access import make_link
+from app.web.auth import login_link
 
 cli = typer.Typer(no_args_is_help=True, help="Maxfac Paper Recommender operator CLI.")
 calibrate = typer.Typer(
     no_args_is_help=True, help="Rubric calibration with the surgeon (SPEC §12)."
 )
 cli.add_typer(calibrate, name="calibrate")
+users = typer.Typer(no_args_is_help=True, help="User accounts (no self-serve sign-up).")
+cli.add_typer(users, name="users")
 
 
 def _grader() -> Grader:
@@ -93,12 +105,17 @@ def ingest(days: DaysOpt = 7, backfill: BackfillOpt = False, until: UntilOpt = N
 
 @cli.command()
 def embed() -> None:
-    """Embed every paper that has no embedding from the current model."""
+    """Embed papers and topics lacking a current embedding, then refresh profile vectors."""
     embedder = _embedder()
     with Session(get_engine()) as session:
         stats = embed_papers(session, embedder)
+        topics = embed_topics(session, embedder)
+        profiles = refresh_all_profiles(session, embedder.model, coefficients(get_settings()))
     embedder.close()
-    typer.echo(f"Embedded {stats.embedded} papers ({stats.tokens} tokens).")
+    typer.echo(
+        f"Embedded {stats.embedded} papers ({stats.tokens} tokens) and {topics} topics; "
+        f"{profiles} users have a profile vector."
+    )
 
 
 @cli.command("narrow")
@@ -116,6 +133,7 @@ def narrow_cmd(
     embedder = _embedder()
     week = week_of(datetime.now(UTC).date())
     with Session(get_engine()) as session:
+        refs = user_references(session, embedder.model)
         stats = narrow(
             session,
             embedder,
@@ -124,11 +142,14 @@ def narrow_cmd(
             week=week,
             limit=limit or settings.grade_limit_per_week,
             anchor_text=load_anchor(),
+            profile_vectors=refs.vectors,
+            always_include=refs.seeds,
         )
     embedder.close()
     typer.echo(
         f"Week of {week}: {stats.candidates} candidates ({start} .. {end}), "
-        f"{stats.selected} selected for grading."
+        f"{stats.selected} selected for grading "
+        f"({len(refs.vectors)} user vectors, {len(refs.seeds)} seed papers)."
     )
     if stats.missing_embeddings:
         typer.echo(f"{stats.missing_embeddings} papers in the window have no embedding: run embed.")
@@ -249,6 +270,44 @@ def calibrate_report(
                 )
         if comment := row.surgeon.get("comment"):
             typer.echo(f"  surgeon comment: {comment}")
+
+
+@users.command("add")
+def users_add(
+    email: str,
+    name: Annotated[str, typer.Option(help="Display name.")] = "",
+    admin: Annotated[bool, typer.Option(help="Can open /admin pages.")] = False,
+) -> None:
+    """Create a user, or update the name and admin flag of an existing one."""
+    with Session(get_engine()) as session:
+        try:
+            user = add_user(session, email, name=name, is_admin=admin)
+        except ValueError as e:
+            raise typer.BadParameter(str(e)) from None
+        typer.echo(f"{user.email}{' (admin)' if user.is_admin else ''}: ready to sign in.")
+
+
+@users.command("list")
+def users_list() -> None:
+    """List users with their onboarding state."""
+    with Session(get_engine()) as session:
+        for u in session.scalars(select(User).order_by(User.created_at)):
+            state = "onboarded" if is_onboarded(session, u) else "not onboarded"
+            vector = "profile vector" if session.get(ProfileVector, u.id) else "no profile vector"
+            admin = ", admin" if u.is_admin else ""
+            typer.echo(f"{u.email}  ({state}, {vector}{admin})")
+
+
+@users.command("link")
+def users_link(email: str) -> None:
+    """Print a one-time sign-in link (15 minutes) without sending email."""
+    with Session(get_engine()) as session:
+        user = get_by_email(session, email)
+        if user is None:
+            typer.echo(f"No user {email}. Add one with: cli.py users add {email}", err=True)
+            raise typer.Exit(1)
+        token = magic_links.issue(session, user, datetime.now(UTC))
+    typer.echo(login_link(get_settings(), token))
 
 
 @cli.command("check-db")

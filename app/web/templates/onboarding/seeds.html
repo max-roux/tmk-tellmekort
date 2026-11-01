@@ -1,0 +1,37 @@
+{% extends "onboarding/base.html" %}
+{% block title %}Seed papers · Maxfac Papers{% endblock %}
+{% block step %}
+<h1>Papers you liked <span class="muted small">(optional)</span></h1>
+<p class="muted">Paste PMIDs, DOIs or PubMed links of a few papers that are exactly what you want to read. They sharpen your recommendations.</p>
+
+{% if result %}
+<div class="card" role="status">
+  {% if result.added %}<p>Added {{ result.added|length }} paper{{ "s" if result.added|length != 1 }}.</p>{% endif %}
+  {% if result.not_found %}<p class="error">Not found on PubMed: {{ result.not_found|join(", ") }}</p>{% endif %}
+  {% if result.no_abstract %}<p class="error">No abstract to match on, so not used: {{ result.no_abstract|join(", ") }}</p>{% endif %}
+  {% if unrecognised %}<p class="error">Not a PMID or DOI: {{ unrecognised|join(", ") }}</p>{% endif %}
+</div>
+{% endif %}
+
+<form method="post" action="/onboarding/seeds" class="stack">
+  <label for="refs">PMIDs or DOIs, one per line</label>
+  <textarea id="refs" name="refs" placeholder="34567890&#10;10.1016/j.joms.2024.01.002">{{ refs or "" }}</textarea>
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  <div class="actions">
+    <button class="button secondary" type="submit">Add papers</button>
+    <a class="button" href="/onboarding/weights">{% if seeds %}Next{% else %}Skip{% endif %}</a>
+  </div>
+</form>
+
+{% if seeds %}
+<h2 style="margin-top:2rem">Your seed papers</h2>
+<ul class="seed-list card">
+  {% for p in seeds %}
+  <li>
+    <span><a href="https://pubmed.ncbi.nlm.nih.gov/{{ p.pmid }}/" rel="noopener" target="_blank">{{ p.title }}</a><br><span class="muted small">{{ p.journal }}, {{ p.entrez_date.year }}</span></span>
+    <form method="post" action="/onboarding/seeds/remove"><input type="hidden" name="pmid" value="{{ p.pmid }}"><button class="linklike small" type="submit" aria-label="Remove {{ p.title }}">Remove</button></form>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Signing in · Maxfac Papers{% endblock %}
+{% block content %}
+<form id="enter" method="post" action="/auth">
+  <input type="hidden" name="t" id="t">
+  <p class="muted" id="status">Signing you in…</p>
+  <noscript><p>JavaScript is needed to sign in with this link.</p></noscript>
+</form>
+<script>
+  const t = decodeURIComponent(location.hash.slice(1));
+  history.replaceState(null, "", location.pathname);
+  if (t) { document.getElementById("t").value = t; document.getElementById("enter").submit(); }
+  else { document.getElementById("status").innerHTML = 'This link is incomplete. <a href="/login">Request a new one</a>.'; }
+</script>
+{% endblock %}

@@ -1,4 +1,4 @@
-"""Signed-link access to the calibration pages, until admin login lands (milestone 6).
+"""Signed-link access to the calibration pages, for a surgeon without an admin account.
 
 The token travels in the URL fragment, which browsers never send to the server, so it
 does not end up in access logs. The entry page posts it back; the server then keeps it

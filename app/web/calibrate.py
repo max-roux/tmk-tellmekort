@@ -1,28 +1,32 @@
 """Blind calibration grading for the surgeon (SPEC.md §12 step 2). Model scores are never shown."""
 
 import uuid
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
-from app.db.models import CalibrationItem, Paper
+from app.db.models import CalibrationItem, Paper, User
 from app.db.session import get_session
 from app.domain.criteria import INTRINSIC_CRITERIA
 from app.grading.rubric import criterion_guides
 from app.jobs.calibration import current_items, save_surgeon_scores
 from app.web import access
+from app.web.sessions import CurrentUser
+from app.web.templating import TEMPLATES
 
-TEMPLATES = Jinja2Templates(directory=Path(__file__).parent / "templates")
 router = APIRouter(prefix="/admin/calibrate")
 
 SessionDep = Annotated[Session, Depends(get_session)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
+
+
+def _allowed(settings: Settings, request: Request, user: User | None) -> bool:
+    """Admins signed in, or anyone holding the signed calibration link."""
+    return (user is not None and user.is_admin) or access.has_access(settings, request)
 
 
 def _denied(request: Request) -> HTMLResponse:
@@ -78,8 +82,10 @@ def enter(request: Request, settings: SettingsDep, t: Annotated[str, Form()] = "
 
 
 @router.get("", response_class=HTMLResponse)
-def overview(request: Request, session: SessionDep, settings: SettingsDep) -> Response:
-    if not access.has_access(settings, request):
+def overview(
+    request: Request, session: SessionDep, settings: SettingsDep, user: CurrentUser
+) -> Response:
+    if not _allowed(settings, request, user):
         return _denied(request)
     items = current_items(session)
     pmids = [i.pmid for i in items]
@@ -97,9 +103,13 @@ def overview(request: Request, session: SessionDep, settings: SettingsDep) -> Re
 
 @router.get("/{item_id}", response_class=HTMLResponse)
 def item_page(
-    request: Request, item_id: uuid.UUID, session: SessionDep, settings: SettingsDep
+    request: Request,
+    item_id: uuid.UUID,
+    session: SessionDep,
+    settings: SettingsDep,
+    user: CurrentUser,
 ) -> Response:
-    if not access.has_access(settings, request):
+    if not _allowed(settings, request, user):
         return _denied(request)
     items = current_items(session)
     item = next((i for i in items if i.id == item_id), None)
@@ -110,9 +120,13 @@ def item_page(
 
 @router.post("/{item_id}")
 async def save_item(
-    request: Request, item_id: uuid.UUID, session: SessionDep, settings: SettingsDep
+    request: Request,
+    item_id: uuid.UUID,
+    session: SessionDep,
+    settings: SettingsDep,
+    user: CurrentUser,
 ) -> Response:
-    if not access.has_access(settings, request):
+    if not _allowed(settings, request, user):
         return _denied(request)
     form = await request.form()
     scores: dict[str, int] = {}

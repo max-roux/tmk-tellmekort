@@ -4,17 +4,22 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.accounts.users import add_user
 from app.db.models import Candidate, Grade, Paper, PaperEmbedding
+from app.domain.ranking import ProfileCoefficients
+from app.domain.seeds import SeedRefs
 from app.grading.grader import Grader
 from app.jobs.embed_papers import embed_papers
 from app.jobs.full_text import fetch_full_texts
 from app.jobs.grade_papers import Polling, grade_batch
-from app.jobs.narrow_candidates import narrow, selected_ungraded, week_of
+from app.jobs.narrow_candidates import narrow, selected_ungraded, user_references, week_of
 from app.jobs.weekly_ingest import store_papers
+from app.profiles import service
+from app.profiles.topics import ProposedTopic
 from app.sources.pmc import PmcArticle
 from app.sources.pubmed import parse_pubmed_xml
 from tests.conftest import FIXTURES
-from tests.fakes import FakeAnthropic, FakeEmbedder, batch_lines, message
+from tests.fakes import FakeAnthropic, FakeEmbedder, FakePubMed, batch_lines, message
 
 pytestmark = pytest.mark.db
 
@@ -134,3 +139,31 @@ def test_batch_with_full_text_records_source_and_keeps_depth(session: Session) -
     g = session.scalars(select(Grade)).one()
     assert g.input_source == "full_text"
     assert g.depth == 5  # not clamped: graded from full text
+
+
+def test_user_references_feed_narrowing(session: Session) -> None:
+    e = FakeEmbedder()
+    embed_papers(session, e)
+    user = add_user(session, "surgeon@example.com")
+    service.replace_topics(
+        session, user.id, [ProposedTopic("A", "alpha"), ProposedTopic("B", "beta")], "manual"
+    )
+    service.add_seeds(session, user.id, SeedRefs(pmids=["42949936"]), FakePubMed())  # type: ignore[arg-type]
+    service.sync_embeddings(session, e, user.id, ProfileCoefficients())
+
+    refs = user_references(session, "voyage-4")
+    assert len(refs.vectors) == 3  # profile vector + 2 topics
+    assert refs.seeds == {"42949936"}
+    assert user_references(session, "voyage-5").vectors == []
+
+    stats = narrow(
+        session,
+        e,
+        **OCT,
+        week=WEEK,
+        limit=0,
+        anchor_text="A",
+        profile_vectors=refs.vectors,
+        always_include=refs.seeds,
+    )
+    assert stats.selected == 1  # only the seed paper, with limit 0
