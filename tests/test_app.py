@@ -36,3 +36,11 @@ def test_healthz_db_down() -> None:
     resp = _client_with_session(session).get("/healthz")
     assert resp.status_code == 503
     assert resp.json()["db"] == "unreachable"
+
+
+def test_static_serves_self_hosted_fonts_and_tokens() -> None:
+    client = _client_with_session(MagicMock())
+    css = client.get("/static/tokens.css")
+    assert css.status_code == 200 and "--accent: #d9472b" in css.text
+    font = client.get("/static/fonts/source-serif-4-latin-standard-normal.woff2")
+    assert font.status_code == 200 and font.content[:4] == b"wOF2"

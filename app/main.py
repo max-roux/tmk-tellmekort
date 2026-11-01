@@ -1,7 +1,9 @@
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -11,12 +13,15 @@ from app.db.session import get_session
 from app.web import actions, admin, auth, calibrate, feed, onboarding
 from app.web.sessions import LoginRequiredError
 
+STATIC_DIR = Path(__file__).parent / "web" / "static"
+
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     if problems := settings.production_problems():
         raise RuntimeError("Refusing to start: " + "; ".join(problems))
-    app = FastAPI(title="Maxfac Paper Recommender")
+    app = FastAPI(title="Tell Me Kort")
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     app.include_router(auth.router)
     app.include_router(onboarding.router)
     app.include_router(calibrate.router)
